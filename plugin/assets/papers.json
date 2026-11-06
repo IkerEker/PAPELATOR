@@ -1,0 +1,1347 @@
+[
+ {
+  "id": "rayado",
+  "name": "Rayado",
+  "group": "Patrones",
+  "kind": "pattern",
+  "source": "Papel rayado azul minimalista.png",
+  "periods": [
+   null,
+   55.02487564086914
+  ],
+  "tileMm": [
+   168.65,
+   168.07
+  ],
+  "size": [
+   1160,
+   1156
+  ],
+  "gain": 1841.071,
+  "detailStd": 0.0149,
+  "color": [
+   234,
+   237,
+   246
+  ],
+  "translucency": 0.25,
+  "bytes": 1369582,
+  "seam": [
+   0.87,
+   1.07
+  ]
+ },
+ {
+  "id": "rayado_tenue",
+  "name": "Rayado tenue",
+  "group": "Patrones",
+  "kind": "pattern",
+  "source": "Textura de papel rayado azul tenue.png",
+  "periods": [
+   null,
+   54.05370330810547
+  ],
+  "tileMm": [
+   171.68,
+   136.01
+  ],
+  "size": [
+   1160,
+   919
+  ],
+  "gain": 1731.097,
+  "detailStd": 0.0159,
+  "color": [
+   234,
+   236,
+   240
+  ],
+  "translucency": 0.25,
+  "bytes": 1136393,
+  "seam": [
+   0.85,
+   1.04
+  ]
+ },
+ {
+  "id": "cuadricula",
+  "name": "Cuadriculado grande",
+  "group": "Patrones",
+  "kind": "pattern",
+  "source": "Papel milimetrado azul sobre blanco.png",
+  "periods": [
+   58.838661193847656,
+   58.818634033203125
+  ],
+  "tileMm": [
+   79.99,
+   94.95
+  ],
+  "size": [
+   941,
+   1117
+  ],
+  "gain": 2058.861,
+  "detailStd": 0.0134,
+  "color": [
+   237,
+   238,
+   239
+  ],
+  "translucency": 0.25,
+  "bytes": 1112356,
+  "seam": [
+   0.13,
+   0.11
+  ]
+ },
+ {
+  "id": "cuadricula_clara",
+  "name": "Cuadriculado claro",
+  "group": "Patrones",
+  "kind": "pattern",
+  "source": "Papel cuadriculado azul claro.png",
+  "periods": [
+   39.13738250732422,
+   39.111454010009766
+  ],
+  "tileMm": [
+   135.25,
+   115.06
+  ],
+  "size": [
+   1058,
+   900
+  ],
+  "gain": 2500.0,
+  "detailStd": 0.0058,
+  "color": [
+   248,
+   248,
+   251
+  ],
+  "translucency": 0.25,
+  "bytes": 853319,
+  "seam": [
+   0.19,
+   1.0
+  ]
+ },
+ {
+  "id": "milimetrado",
+  "name": "Milimetrado azul y rojo",
+  "group": "Patrones",
+  "kind": "pattern",
+  "source": "Papel cuadriculado técnico azul y rojo.png",
+  "periods": [
+   9.785317420959473,
+   9.776253700256348
+  ],
+  "tileMm": [
+   112.31,
+   104.23
+  ],
+  "size": [
+   1098,
+   1019
+  ],
+  "gain": 1738.692,
+  "detailStd": 0.0158,
+  "color": [
+   249,
+   251,
+   253
+  ],
+  "translucency": 0.25,
+  "bytes": 1980486,
+  "seam": [
+   1.74,
+   0.85
+  ]
+ },
+ {
+  "id": "milimetrado_naranja",
+  "name": "Milimetrado naranja",
+  "group": "Patrones",
+  "kind": "pattern",
+  "source": "Papel cuadriculado naranja uniforme.png",
+  "periods": [
+   10.402852058410645,
+   10.43066120147705
+  ],
+  "tileMm": [
+   100.09,
+   100.09
+  ],
+  "size": [
+   1044,
+   1044
+  ],
+  "gain": 1752.423,
+  "detailStd": 0.0157,
+  "color": [
+   255,
+   251,
+   244
+  ],
+  "translucency": 0.25,
+  "bytes": 1860269,
+  "seam": [
+   0.25,
+   0.19
+  ]
+ },
+ {
+  "id": "milimetrado_azul",
+  "name": "Milimetrado azul",
+  "group": "Patrones",
+  "kind": "pattern",
+  "source": "Cuadrícula de papel milimetrado azul.png",
+  "periods": [
+   10.345582008361816,
+   10.354161262512207
+  ],
+  "tileMm": [
+   100.83,
+   100.83
+  ],
+  "size": [
+   1044,
+   1044
+  ],
+  "gain": 1723.615,
+  "detailStd": 0.016,
+  "color": [
+   245,
+   252,
+   254
+  ],
+  "translucency": 0.25,
+  "bytes": 1870312,
+  "seam": [
+   0.17,
+   0.1
+  ]
+ },
+ {
+  "id": "punteado",
+  "name": "Punteado",
+  "group": "Patrones",
+  "kind": "pattern",
+  "source": "Textura de papel punteado minimalista.png",
+  "periods": [
+   39.17240524291992,
+   39.14170837402344
+  ],
+  "tileMm": [
+   115.09,
+   145.11
+  ],
+  "size": [
+   901,
+   1136
+  ],
+  "gain": 2280.741,
+  "detailStd": 0.0121,
+  "color": [
+   240,
+   240,
+   240
+  ],
+  "translucency": 0.25,
+  "bytes": 930115,
+  "seam": [
+   0.85,
+   0.96
+  ]
+ },
+ {
+  "id": "punteado_suave",
+  "name": "Punteado suave",
+  "group": "Patrones",
+  "kind": "pattern",
+  "source": "Textura de papel cuadriculado punteado.png",
+  "periods": [
+   47.487857818603516,
+   47.43596649169922
+  ],
+  "tileMm": [
+   105.09,
+   110.04
+  ],
+  "size": [
+   997,
+   1044
+  ],
+  "gain": 2500.0,
+  "detailStd": 0.0106,
+  "color": [
+   241,
+   240,
+   240
+  ],
+  "translucency": 0.25,
+  "bytes": 912681,
+  "seam": [
+   0.88,
+   1.0
+  ]
+ },
+ {
+  "id": "isometrico",
+  "name": "Isométrico",
+  "group": "Patrones",
+  "kind": "pattern",
+  "source": "Papel cuadriculado isométrico azul pálido (1).png",
+  "periods": [
+   44.8447265625,
+   null
+  ],
+  "tileMm": [
+   99.9,
+   124.09
+  ],
+  "size": [
+   896,
+   1113
+  ],
+  "gain": 2500.0,
+  "detailStd": 0.0102,
+  "color": [
+   253,
+   254,
+   254
+  ],
+  "translucency": 0.25,
+  "bytes": 1250123,
+  "seam": [
+   0.17,
+   1.1
+  ]
+ },
+ {
+  "id": "triangular",
+  "name": "Isométrico triangular",
+  "group": "Patrones",
+  "kind": "pattern",
+  "source": "Papel milimetrado triangular azul pálido.png",
+  "periods": [
+   null,
+   38.14019775390625
+  ],
+  "tileMm": [
+   105.9,
+   114.5
+  ],
+  "size": [
+   1059,
+   1145
+  ],
+  "gain": 2500.0,
+  "detailStd": 0.0097,
+  "color": [
+   253,
+   254,
+   254
+  ],
+  "translucency": 0.25,
+  "bytes": 1515293,
+  "seam": [
+   0.63,
+   5.3
+  ]
+ },
+ {
+  "id": "pentagrama",
+  "name": "Pentagrama",
+  "group": "Patrones",
+  "kind": "pattern",
+  "source": "Papel pautado musical minimalista.png",
+  "periods": [
+   null,
+   14.253944396972656
+  ],
+  "tileMm": [
+   162.76,
+   143.68
+  ],
+  "size": [
+   1160,
+   1024
+  ],
+  "gain": 1959.117,
+  "detailStd": 0.014,
+  "color": [
+   239,
+   239,
+   240
+  ],
+  "translucency": 0.25,
+  "bytes": 1083543,
+  "seam": [
+   0.86,
+   0.85
+  ]
+ },
+ {
+  "id": "acuarela_grueso",
+  "name": "Acuarela grano grueso",
+  "group": "Bellas artes",
+  "kind": "neutral",
+  "source": "Textura de papel acuarela blanco rugoso.png",
+  "tileMm": [
+   111.0,
+   111.0
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 473.758,
+  "detailStd": 0.058,
+  "color": [
+   227,
+   227,
+   227
+  ],
+  "translucency": 0.06,
+  "bytes": 960104,
+  "seam": [
+   0.89,
+   0.99
+  ]
+ },
+ {
+  "id": "acuarela_grueso_2",
+  "name": "Acuarela grano grueso II",
+  "group": "Bellas artes",
+  "kind": "neutral",
+  "source": "Textura de papel acuarela blanco.png",
+  "tileMm": [
+   111.0,
+   111.0
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 466.785,
+  "detailStd": 0.0589,
+  "color": [
+   227,
+   225,
+   225
+  ],
+  "translucency": 0.06,
+  "bytes": 1000341,
+  "seam": [
+   0.94,
+   0.98
+  ]
+ },
+ {
+  "id": "acuarela_fino",
+  "name": "Acuarela grano fino",
+  "group": "Bellas artes",
+  "kind": "neutral",
+  "source": "Textura de papel acuarela marfil fina.png",
+  "tileMm": [
+   64.75,
+   64.75
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 894.295,
+  "detailStd": 0.0308,
+  "color": [
+   242,
+   239,
+   236
+  ],
+  "translucency": 0.1,
+  "bytes": 995251,
+  "seam": [
+   0.87,
+   1.06
+  ]
+ },
+ {
+  "id": "acuarela_satinada",
+  "name": "Acuarela satinada",
+  "group": "Bellas artes",
+  "kind": "neutral",
+  "source": "Textura uniforme de papel acuarela blanco cálido.png",
+  "tileMm": [
+   64.75,
+   64.75
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 1220.663,
+  "detailStd": 0.0225,
+  "color": [
+   246,
+   242,
+   238
+  ],
+  "translucency": 0.1,
+  "bytes": 1009217,
+  "seam": [
+   0.98,
+   0.98
+  ]
+ },
+ {
+  "id": "bristol",
+  "name": "Vitela / Bristol",
+  "group": "Bellas artes",
+  "kind": "neutral",
+  "source": "Textura de papel blanco uniforme.png",
+  "tileMm": [
+   55.5,
+   55.5
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 2500.0,
+  "detailStd": 0.0088,
+  "color": [
+   242,
+   241,
+   241
+  ],
+  "translucency": 0.15,
+  "bytes": 1019765,
+  "seam": [
+   0.89,
+   0.88
+  ]
+ },
+ {
+  "id": "folio",
+  "name": "Folio blanco",
+  "group": "Bellas artes",
+  "kind": "neutral",
+  "source": "Textura sutil de papel blanco.png",
+  "tileMm": [
+   55.5,
+   55.5
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 1532.226,
+  "detailStd": 0.0179,
+  "color": [
+   246,
+   246,
+   246
+  ],
+  "translucency": 0.25,
+  "bytes": 968047,
+  "seam": [
+   0.91,
+   0.93
+  ]
+ },
+ {
+  "id": "papel_fino",
+  "name": "Papel blanco fino",
+  "group": "Bellas artes",
+  "kind": "neutral",
+  "source": "Textura de papel blanco fino.png",
+  "tileMm": [
+   55.5,
+   55.5
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 1413.736,
+  "detailStd": 0.0195,
+  "color": [
+   244,
+   244,
+   244
+  ],
+  "translucency": 0.45,
+  "bytes": 1046261,
+  "seam": [
+   0.86,
+   0.92
+  ]
+ },
+ {
+  "id": "verjurado",
+  "name": "Verjurado",
+  "group": "Bellas artes",
+  "kind": "neutral",
+  "source": "Textura de papel verjurado color crema.png",
+  "tileMm": [
+   111.0,
+   111.0
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 954.06,
+  "detailStd": 0.0288,
+  "color": [
+   235,
+   227,
+   217
+  ],
+  "translucency": 0.25,
+  "bytes": 993164,
+  "seam": [
+   0.95,
+   0.9
+  ]
+ },
+ {
+  "id": "verjurado_marfil",
+  "name": "Verjurado marfil",
+  "group": "Bellas artes",
+  "kind": "neutral",
+  "source": "Textura sutil de papel verjurado marfil.png",
+  "tileMm": [
+   101.75,
+   101.75
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 865.837,
+  "detailStd": 0.0318,
+  "color": [
+   232,
+   228,
+   224
+  ],
+  "translucency": 0.25,
+  "bytes": 1025302,
+  "seam": [
+   0.9,
+   1.15
+  ]
+ },
+ {
+  "id": "algodon",
+  "name": "Algodón",
+  "group": "Bellas artes",
+  "kind": "neutral",
+  "source": "Textura de papel marfil artesanal.png",
+  "tileMm": [
+   92.5,
+   92.5
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 963.83,
+  "detailStd": 0.0285,
+  "color": [
+   237,
+   233,
+   227
+  ],
+  "translucency": 0.25,
+  "bytes": 1039253,
+  "seam": [
+   1.03,
+   0.87
+  ]
+ },
+ {
+  "id": "algodon_crema",
+  "name": "Algodón crema",
+  "group": "Bellas artes",
+  "kind": "neutral",
+  "source": "Textura de papel artesanal crema suave.png",
+  "tileMm": [
+   92.5,
+   92.5
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 911.561,
+  "detailStd": 0.0302,
+  "color": [
+   237,
+   233,
+   226
+  ],
+  "translucency": 0.25,
+  "bytes": 1045335,
+  "seam": [
+   0.96,
+   0.94
+  ]
+ },
+ {
+  "id": "arroz",
+  "name": "Papel de arroz",
+  "group": "Bellas artes",
+  "kind": "neutral",
+  "source": "Textura de papel de arroz fibroso.png",
+  "tileMm": [
+   138.76,
+   138.76
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 813.025,
+  "detailStd": 0.0338,
+  "color": [
+   225,
+   223,
+   220
+  ],
+  "translucency": 0.85,
+  "bytes": 1025061,
+  "seam": [
+   0.95,
+   1.01
+  ]
+ },
+ {
+  "id": "arroz_dorado",
+  "name": "Arroz con fibras doradas",
+  "group": "Bellas artes",
+  "kind": "color",
+  "source": "Textura de papel de arroz fibroso (1).png",
+  "tileMm": [
+   138.76,
+   138.76
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 978.442,
+  "detailStd": 0.0281,
+  "color": [
+   233,
+   228,
+   220
+  ],
+  "translucency": 0.8,
+  "bytes": 1163584,
+  "chroma": 2,
+  "seam": [
+   0.91,
+   0.91
+  ]
+ },
+ {
+  "id": "arroz_artesanal",
+  "name": "Arroz artesanal",
+  "group": "Bellas artes",
+  "kind": "neutral",
+  "source": "Textura de papel de arroz artesanal.png",
+  "tileMm": [
+   138.76,
+   138.76
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 825.55,
+  "detailStd": 0.0333,
+  "color": [
+   229,
+   227,
+   225
+  ],
+  "translucency": 0.75,
+  "bytes": 1049291,
+  "seam": [
+   0.89,
+   0.96
+  ]
+ },
+ {
+  "id": "kraft",
+  "name": "Kraft",
+  "group": "Rústicos",
+  "kind": "color",
+  "source": "Textura de papel kraft marrón fibroso.png",
+  "tileMm": [
+   64.75,
+   64.75
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 370.902,
+  "detailStd": 0.0741,
+  "color": [
+   189,
+   142,
+   91
+  ],
+  "translucency": 0.12,
+  "bytes": 1155143,
+  "chroma": 4,
+  "seam": [
+   0.85,
+   0.93
+  ]
+ },
+ {
+  "id": "kraft_claro",
+  "name": "Kraft claro",
+  "group": "Rústicos",
+  "kind": "color",
+  "source": "Textura de papel kraft marrón fibroso (1).png",
+  "tileMm": [
+   64.75,
+   64.75
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 402.737,
+  "detailStd": 0.0683,
+  "color": [
+   195,
+   148,
+   96
+  ],
+  "translucency": 0.12,
+  "bytes": 1153373,
+  "chroma": 4,
+  "seam": [
+   0.91,
+   1.02
+  ]
+ },
+ {
+  "id": "reciclado",
+  "name": "Reciclado",
+  "group": "Rústicos",
+  "kind": "color",
+  "source": "Textura de papel reciclado fibroso (2).png",
+  "tileMm": [
+   74.0,
+   74.0
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 379.02,
+  "detailStd": 0.0726,
+  "color": [
+   208,
+   198,
+   185
+  ],
+  "translucency": 0.25,
+  "bytes": 1137214,
+  "chroma": 4,
+  "seam": [
+   0.9,
+   0.99
+  ]
+ },
+ {
+  "id": "reciclado_motas",
+  "name": "Reciclado con motas",
+  "group": "Rústicos",
+  "kind": "color",
+  "source": "Textura de papel reciclado multicolor.png",
+  "tileMm": [
+   103.27,
+   66.6
+  ],
+  "size": [
+   1442,
+   930
+  ],
+  "gain": 336.266,
+  "detailStd": 0.0818,
+  "color": [
+   216,
+   203,
+   189
+  ],
+  "translucency": 0.25,
+  "bytes": 1203104,
+  "chroma": 2,
+  "seam": [
+   0.92,
+   0.97
+  ]
+ },
+ {
+  "id": "reciclado_gris",
+  "name": "Reciclado gris",
+  "group": "Rústicos",
+  "kind": "neutral",
+  "source": "Textura uniforme de papel gris reciclado.png",
+  "tileMm": [
+   64.75,
+   64.75
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 526.878,
+  "detailStd": 0.0522,
+  "color": [
+   163,
+   163,
+   163
+  ],
+  "translucency": 0.25,
+  "bytes": 1099970,
+  "seam": [
+   0.85,
+   0.91
+  ]
+ },
+ {
+  "id": "hecho_mano",
+  "name": "Hecho a mano",
+  "group": "Rústicos",
+  "kind": "neutral",
+  "source": "Textura de papel artesanal marfil.png",
+  "tileMm": [
+   101.75,
+   101.75
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 369.573,
+  "detailStd": 0.0744,
+  "color": [
+   220,
+   211,
+   196
+  ],
+  "translucency": 0.15,
+  "bytes": 996711,
+  "seam": [
+   1.1,
+   0.91
+  ]
+ },
+ {
+  "id": "hecho_mano_grumos",
+  "name": "Hecho a mano con grumos",
+  "group": "Rústicos",
+  "kind": "neutral",
+  "source": "Textura de papel artesanal marfil-2.png",
+  "tileMm": [
+   101.75,
+   101.75
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 231.996,
+  "detailStd": 0.1185,
+  "color": [
+   215,
+   210,
+   200
+  ],
+  "translucency": 0.12,
+  "bytes": 973671,
+  "seam": [
+   1.01,
+   0.98
+  ]
+ },
+ {
+  "id": "hecho_mano_fibroso",
+  "name": "Hecho a mano fibroso",
+  "group": "Rústicos",
+  "kind": "neutral",
+  "source": "Textura de papel artesanal fibroso.png",
+  "tileMm": [
+   101.75,
+   101.75
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 438.34,
+  "detailStd": 0.0627,
+  "color": [
+   222,
+   215,
+   205
+  ],
+  "translucency": 0.15,
+  "bytes": 1000137,
+  "seam": [
+   0.9,
+   0.95
+  ]
+ },
+ {
+  "id": "pergamino",
+  "name": "Pergamino",
+  "group": "Rústicos",
+  "kind": "color",
+  "source": "Textura de pergamino envejecido-2.png",
+  "tileMm": [
+   222.01,
+   222.01
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 700.7,
+  "detailStd": 0.0392,
+  "color": [
+   226,
+   199,
+   150
+  ],
+  "translucency": 0.35,
+  "bytes": 1010798,
+  "chroma": 4,
+  "seam": [
+   0.97,
+   1.05
+  ]
+ },
+ {
+  "id": "pergamino_oscuro",
+  "name": "Pergamino envejecido",
+  "group": "Rústicos",
+  "kind": "color",
+  "source": "Textura de pergamino envejecido.png",
+  "tileMm": [
+   222.01,
+   222.01
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 633.417,
+  "detailStd": 0.0434,
+  "color": [
+   222,
+   186,
+   126
+  ],
+  "translucency": 0.3,
+  "bytes": 1003632,
+  "chroma": 4,
+  "seam": [
+   0.91,
+   0.9
+  ]
+ },
+ {
+  "id": "pergamino_blanco",
+  "name": "Pergamino blanco",
+  "group": "Rústicos",
+  "kind": "neutral",
+  "source": "Textura de pergamino blanco arrugado.png",
+  "tileMm": [
+   148.01,
+   148.01
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 739.332,
+  "detailStd": 0.0372,
+  "color": [
+   205,
+   204,
+   205
+  ],
+  "translucency": 0.4,
+  "bytes": 937901,
+  "seam": [
+   0.93,
+   0.88
+  ]
+ },
+ {
+  "id": "corrugado",
+  "name": "Cartón corrugado",
+  "group": "Rústicos",
+  "kind": "color",
+  "source": "Textura de cartón corrugado kraft-2.png",
+  "tileMm": [
+   148.08,
+   120.25
+  ],
+  "size": [
+   1160,
+   942
+  ],
+  "gain": 164.928,
+  "detailStd": 0.1667,
+  "color": [
+   161,
+   132,
+   97
+  ],
+  "translucency": 0.0,
+  "bytes": 729780,
+  "chroma": 4,
+  "seam": [
+   0.89,
+   0.68
+  ]
+ },
+ {
+  "id": "corrugado_fino",
+  "name": "Cartón corrugado fino",
+  "group": "Rústicos",
+  "kind": "color",
+  "source": "Textura de cartón corrugado kraft unerquicklich.png",
+  "tileMm": [
+   131.62,
+   130.04
+  ],
+  "size": [
+   1160,
+   1146
+  ],
+  "gain": 145.307,
+  "detailStd": 0.1893,
+  "color": [
+   167,
+   125,
+   81
+  ],
+  "translucency": 0.0,
+  "bytes": 912017,
+  "chroma": 4,
+  "seam": [
+   0.9,
+   0.9
+  ]
+ },
+ {
+  "id": "periodico",
+  "name": "Periódico",
+  "group": "Técnicos",
+  "kind": "neutral",
+  "source": "Textura uniforme de papel de periódico.png",
+  "tileMm": [
+   46.25,
+   46.25
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 756.875,
+  "detailStd": 0.0363,
+  "color": [
+   219,
+   216,
+   213
+  ],
+  "translucency": 0.55,
+  "bytes": 1081714,
+  "seam": [
+   0.82,
+   0.95
+  ]
+ },
+ {
+  "id": "periodico_gris",
+  "name": "Periódico gris",
+  "group": "Técnicos",
+  "kind": "neutral",
+  "source": "Textura uniforme de papel de periódico (2).png",
+  "tileMm": [
+   46.25,
+   46.25
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 438.058,
+  "detailStd": 0.0628,
+  "color": [
+   203,
+   197,
+   190
+  ],
+  "translucency": 0.55,
+  "bytes": 1095498,
+  "seam": [
+   0.87,
+   0.93
+  ]
+ },
+ {
+  "id": "vegetal",
+  "name": "Vegetal / cebolla",
+  "group": "Técnicos",
+  "kind": "neutral",
+  "source": "Papel translúcido texturizado en blanco roto-2.png",
+  "tileMm": [
+   74.0,
+   74.0
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 2500.0,
+  "detailStd": 0.0084,
+  "color": [
+   230,
+   229,
+   226
+  ],
+  "translucency": 0.9,
+  "bytes": 943579,
+  "seam": [
+   1.06,
+   0.88
+  ]
+ },
+ {
+  "id": "vegetal_arrugado",
+  "name": "Vegetal arrugado",
+  "group": "Técnicos",
+  "kind": "neutral",
+  "source": "Textura arrugada de papel translúcido blanco.png",
+  "tileMm": [
+   138.76,
+   138.76
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 841.623,
+  "detailStd": 0.0327,
+  "color": [
+   209,
+   209,
+   209
+  ],
+  "translucency": 0.9,
+  "bytes": 974762,
+  "seam": [
+   0.94,
+   0.83
+  ]
+ },
+ {
+  "id": "encerado",
+  "name": "Encerado",
+  "group": "Técnicos",
+  "kind": "neutral",
+  "source": "Textura de papel encerado arrugado (1).png",
+  "tileMm": [
+   148.01,
+   148.01
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 933.735,
+  "detailStd": 0.0295,
+  "color": [
+   213,
+   213,
+   213
+  ],
+  "translucency": 0.85,
+  "bytes": 896652,
+  "seam": [
+   1.03,
+   0.85
+  ]
+ },
+ {
+  "id": "horno",
+  "name": "Papel de horno",
+  "group": "Técnicos",
+  "kind": "neutral",
+  "source": "Textura de papel de horno arrugado.png",
+  "tileMm": [
+   148.01,
+   148.01
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 887.835,
+  "detailStd": 0.031,
+  "color": [
+   210,
+   209,
+   209
+  ],
+  "translucency": 0.85,
+  "bytes": 957201,
+  "seam": [
+   1.01,
+   0.93
+  ]
+ },
+ {
+  "id": "cartulina_gris",
+  "name": "Cartulina gris",
+  "group": "Técnicos",
+  "kind": "neutral",
+  "source": "Textura de papel gris uniforme.png",
+  "tileMm": [
+   55.5,
+   55.5
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 544.702,
+  "detailStd": 0.0505,
+  "color": [
+   163,
+   163,
+   163
+  ],
+  "translucency": 0.08,
+  "bytes": 1105665,
+  "seam": [
+   0.87,
+   0.92
+  ]
+ }
+]

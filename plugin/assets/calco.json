@@ -1,0 +1,21 @@
+{
+ "periodico": {
+  "ink": "periodico.png"
+ },
+ "folio": {
+  "ink": "folio.png"
+ },
+ "apuntes": {
+  "ink": "apuntes_boli.png",
+  "fluor": "apuntes_fluor.png",
+  "pressure": "apuntes_presion.png"
+ },
+ "rotulador": {
+  "ink": "rotulador.png",
+  "pool": "rotulador_charcos.png"
+ },
+ "_size": [
+  1240,
+  1754
+ ]
+}

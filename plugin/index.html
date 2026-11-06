@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- ===================== PANEL 1 · PRESETS ===================== -->
+  <div id="simple" class="root">
+    <div class="brand">
+      <span class="logo">PAPELATOR</span>
+      <span class="spacer"></span>
+      <div class="iconbtn" id="s-dice" title="Nueva variación">⟳</div>
+    </div>
+
+    <div class="intens">
+      <div class="rl"><span>Intensidad del filtro</span><span class="rv" id="s-intval"></span></div>
+      <sp-slider id="s-intensity" min="0" max="100" step="1" value="50"></sp-slider>
+    </div>
+
+    <div class="thumbwrap"><img id="s-thumb" class="thumb" alt=""><div class="thumbnote" id="s-thumbnote"></div></div>
+
+    <div class="sec">
+      <div class="sechead">1 · Papel</div>
+      <div class="chips small" id="s-groups"></div>
+      <div class="swatches" id="s-swatches"></div>
+      <div class="rl"><span>Escala de la textura</span><span class="rv" id="s-scaleval"></span></div>
+      <sp-slider id="s-scale" min="25" max="400" step="5" value="100"></sp-slider>
+    </div>
+
+    <div class="sec">
+      <div class="sechead">2 · Color del papel</div>
+      <div class="chips" id="s-colors"></div>
+    </div>
+
+    <div class="sec">
+      <div class="sechead">3 · Estado</div>
+      <div class="chips" id="s-estado"></div>
+    </div>
+
+    <div class="sec">
+      <div class="sechead">4 · Calco (lo que hay detrás)</div>
+      <div class="chips" id="s-calco"></div>
+    </div>
+
+    <div class="actions">
+      <sp-button variant="secondary" id="s-paper" class="grow">Papel de fondo</sp-button>
+    </div>
+    <div class="linkrow">
+      <span class="link" id="s-remove">Quitar papel de fondo</span>
+      <span class="spacer"></span>
+      <sp-checkbox id="s-live" checked>En vivo</sp-checkbox>
+    </div>
+
+    <div class="sec photo">
+      <div class="sechead">5 · Fotografía (al aplicar)</div>
+      <div class="sublabel">Luz</div>
+      <div class="chips" id="s-luz"></div>
+      <div class="rl"><span>Más oscura · Más clara</span><span class="rv" id="s-expval"></span></div>
+      <sp-slider id="s-exposure" min="-100" max="100" step="5" value="0"></sp-slider>
+      <div class="sublabel">Calidad</div>
+      <div class="chips" id="s-calidad"></div>
+    </div>
+
+    <div class="actions">
+      <sp-button variant="cta" id="s-apply" class="grow">Aplicar</sp-button>
+    </div>
+    <div class="status" id="s-status">Elige papel y estado, y pulsa «Papel de fondo».</div>
+    <div class="hint">«Papel de fondo» crea el papel en la capa inferior para trabajar encima. «Aplicar» imprime todas las capas en ese papel (tinta, grano, relieve) y le da el aspecto de fotografía elegido.</div>
+  </div>
+
+  <!-- ===================== PANEL 2 · AJUSTES ===================== -->
+  <div id="pro" class="root">
+    <div class="brand">
+      <span class="logo">PAPELATOR</span><span class="sub">ajustes</span>
+      <span class="spacer"></span>
+      <div class="iconbtn" id="p-reset" title="Restablecer ajustes">↺</div>
+    </div>
+    <div class="thumbwrap"><img id="p-thumb" class="thumb" alt=""><div class="thumbnote" id="p-thumbnote"></div></div>
+    <div id="p-sections"></div>
+    <div class="actions">
+      <sp-button variant="secondary" id="p-paper" class="grow">Papel de fondo</sp-button>
+      <sp-button variant="cta" id="p-apply" class="grow">Aplicar</sp-button>
+    </div>
+    <div class="linkrow">
+      <span class="link" id="p-remove">Quitar papel de fondo</span>
+      <span class="spacer"></span>
+      <sp-checkbox id="p-live">En vivo</sp-checkbox>
+    </div>
+    <div class="status" id="p-status"></div>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>
