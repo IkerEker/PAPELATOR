@@ -67,7 +67,7 @@ function byId(id) {
   return el;
 }
 function setStatus(msg, err) {
-  ['s-status', 'p-status'].forEach(id => { const el = byId(id); if (el) { el.textContent = msg || ''; el.className = 'status' + (err ? ' err' : ''); } });
+  ['s-status', 'p-status'].forEach(id => { const el = byId(id); if (el) { el.textContent = msg || ''; el.className = 'status' + (err === true ? ' err' : err === 'busy' ? ' busy' : ''); } });
 }
 const tick = () => new Promise(r => setTimeout(r, 0));
 
@@ -143,8 +143,10 @@ async function readComposite(doc, w, h, targetW) {
 }
 
 async function runModal(name, fn) {
-  if (busy) { pending = { name, fn }; setStatus('En cola…'); return; }
+  if (busy) { pending = { name, fn }; setStatus('En cola…', 'busy'); return; }
   busy = true;
+  setStatus('Empezando…', 'busy');
+  await tick();
   try {
     const doc = activeDoc();
     const d = checkDoc(doc);
@@ -152,7 +154,7 @@ async function runModal(name, fn) {
       let sid = null;
       try { sid = await ctx.hostControl.suspendHistory({ documentID: doc.id, name: name }); } catch (e) { sid = null; }
       const onProgress = async (v, msg) => {
-        setStatus(msg);
+        setStatus(Math.round(v * 100) + '% · ' + msg, 'busy');
         try { ctx.reportProgress({ value: Math.min(0.99, v), commandName: msg }); } catch (e) { /* sin barra */ }
         await tick();
         if (ctx.isCancelled) throw new Error('Cancelado.');
@@ -161,8 +163,9 @@ async function runModal(name, fn) {
       catch (e) { if (sid !== null) { try { await ctx.hostControl.resumeHistory(sid, false); } catch (_) { /* nada */ } } throw e; }
     }, { commandName: name });
   } catch (e) {
-    console.log(e);
-    setStatus((e && e.message) ? e.message : String(e), true);
+    console.log('PAPELATOR error', e);
+    const msg = (e && e.message) ? e.message : String(e);
+    setStatus('Error: ' + msg, true);
     busy = false; pending = null;
     return;
   }
@@ -484,11 +487,29 @@ function init() {
   return ready;
 }
 let builtSimple = false, builtPro = false;
+const shown = [];
+function panelHeight(root) {
+  const p = root.parentNode;
+  const W = typeof window !== 'undefined' ? window : {};
+  const cands = [p && p.clientHeight, p && p.offsetHeight, W.innerHeight, document.documentElement && document.documentElement.clientHeight, document.body && document.body.clientHeight];
+  for (const v of cands) if (v && v > 50) return v;
+  return 0;
+}
+function fitHeights() {
+  for (const root of shown) {
+    const hgt = panelHeight(root);
+    if (hgt && root._h !== hgt) { root._h = hgt; root.style.height = hgt + 'px'; }
+  }
+}
 function attach(root, arg) {
   const node = arg && arg.node ? arg.node : arg;
   if (node && typeof node.appendChild === 'function' && root.parentNode !== node && node !== root) { try { node.appendChild(root); } catch (e) { /* queda en el body */ } }
-  root.style.display = 'block';
+  root.style.display = 'flex';
+  if (shown.indexOf(root) < 0) shown.push(root);
+  fitHeights(); setTimeout(fitHeights, 50); setTimeout(fitHeights, 400);
 }
+try { if (typeof window !== 'undefined') window.addEventListener('resize', fitHeights); } catch (e) { /* sin evento */ }
+setInterval(fitHeights, 400);
 uxp.entrypoints.setup({
   panels: {
     papelator: { show(arg) { attach(simpleRoot, arg); if (!builtSimple) { builtSimple = true; init().then(() => { buildSimple(); updateThumbs(); }).catch(e => setStatus('No se pudieron cargar las texturas: ' + e.message, true)); } } },

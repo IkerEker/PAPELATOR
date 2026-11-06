@@ -442,46 +442,57 @@ async function genCalco(S, st, assets, B, paper, backArt) {
   const amount = clamp(def(st.calcoAmount, 1), 0, 3) * clamp(k, 0, 2);
   if (amount <= 0) return;
   const tr = clamp(def(paper.translucency, 0.25), 0, 1);
-  const T = B.T, tmp = new Float32Array(N);
-  const cov = new Float32Array(N);
-  let colr = null;
+  // el trasluz siempre va desenfocado: se calcula a resolución reducida (rápido y con poca memoria)
+  const blur = ppm * (0.18 + 0.5 * (1 - tr)) * clamp(def(st.calcoBlur, 1), 0.2, 4);
+  const f = clamp(Math.floor(blur / 1.5), 1, 6);
+  const lw = Math.ceil(w / f), lh = Math.ceil(h / f), LN = lw * lh;
+  const cov = new Float32Array(LN), tmpL = new Float32Array(LN);
+  let colB = null;
   if (id === 'documento') {
     if (!backArt) return;
     // tu propio documento visto desde detrás: espejo horizontal
     const a = backArt.data, c = backArt.channels;
-    colr = new Float32Array(N * 3);
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      const s = (y * w + (w - 1 - x)) * c, o = y * w + x;
-      const al = c === 4 ? a[s + 3] / 255 : 1;
-      const R0 = a[s] / 255 * al + (1 - al), G0 = a[s + 1] / 255 * al + (1 - al), B0 = a[s + 2] / 255 * al + (1 - al);
+    colB = [new Float32Array(LN), new Float32Array(LN), new Float32Array(LN)];
+    for (let ly = 0; ly < lh; ly++) for (let lx = 0; lx < lw; lx++) {
+      let sr = 0, sg = 0, sb = 0, n = 0;
+      for (let yy = ly * f; yy < Math.min(h, ly * f + f); yy++) for (let xx = lx * f; xx < Math.min(w, lx * f + f); xx++) {
+        const s0 = (yy * w + (w - 1 - xx)) * c, al = c === 4 ? a[s0 + 3] / 255 : 1;
+        sr += a[s0] / 255 * al + (1 - al); sg += a[s0 + 1] / 255 * al + (1 - al); sb += a[s0 + 2] / 255 * al + (1 - al); n++;
+      }
+      const o = ly * lw + lx, R0 = sr / n, G0 = sg / n, B0 = sb / n;
       cov[o] = 1 - (R0 * 0.2126 + G0 * 0.7152 + B0 * 0.0722);
-      colr[o * 3] = 1 - R0; colr[o * 3 + 1] = 1 - G0; colr[o * 3 + 2] = 1 - B0;
+      colB[0][o] = 1 - R0; colB[1][o] = 1 - G0; colB[2][o] = 1 - B0;
     }
   } else {
-    const info = cache.calco[id];
-    const img = await loadImg(assets, 'calco/' + info.ink);
-    mapBack(img, cov, w, h);
+    const info0 = cache.calco[id];
+    const img = await loadImg(assets, 'calco/' + info0.ink);
+    mapBack(img, cov, lw, lh);
   }
   // 1) trasluz: espejo desenfocado, gris cálido, más visible donde el papel es fino o está engrasado
-  const blur = ppm * (0.18 + 0.5 * (1 - tr)) * clamp(def(st.calcoBlur, 1), 0.2, 4);
-  T.set(cov); gaussBlur(T, w, h, blur, tmp);
-  let colB = null;
-  if (colr) { colB = [new Float32Array(N), new Float32Array(N), new Float32Array(N)]; for (let c = 0; c < 3; c++) { for (let o = 0; o < N; o++) colB[c][o] = colr[o * 3 + c]; gaussBlur(colB[c], w, h, blur, tmp); } }
+  gaussBlur(cov, lw, lh, blur / f, tmpL);
+  if (colB) for (let c = 0; c < 3; c++) gaussBlur(colB[c], lw, lh, blur / f, tmpL);
+  const bil = (arr, x, y) => {
+    const u = clamp(x / f - 0.5, 0, lw - 1.001), v = clamp(y / f - 0.5, 0, lh - 1.001);
+    const iu = u | 0, iv = v | 0, fu = u - iu, fv = v - iv, o = iv * lw + iu;
+    return (arr[o] * (1 - fu) + arr[o + 1] * fu) * (1 - fv) + (arr[o + lw] * (1 - fu) + arr[o + lw + 1] * fu) * fv;
+  };
   const s0 = amount * (0.03 + 0.26 * tr);
   const alb = B.alb, trans = B.trans;
   const tint = [0.86, 0.87, 0.9];
-  for (let o = 0; o < N; o++) {
-    const v = T[o]; if (v < 0.003) continue;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const o = y * w + x;
+    const v = bil(cov, x, y); if (v < 0.003) continue;
     const boost = trans ? 1 + 2.4 * trans[o] / 255 : 1;
     const s = clamp(s0 * boost, 0, 0.9) * v;
     const j = o * 4;
     if (colB) {
       // el color del reverso se ve apagado: mezcla de su tono con gris
-      for (let c = 0; c < 3; c++) { const cv = colB[c][o] / Math.max(v, 1e-3); alb[j + c] *= 1 - s * (0.55 * cv + 0.45 * (1 - tint[c] + 0.12)) ; }
+      for (let c = 0; c < 3; c++) { const cv = bil(colB[c], x, y) / Math.max(v, 1e-3); alb[j + c] *= 1 - s * (0.55 * cv + 0.45 * (1 - tint[c] + 0.12)); }
     } else {
       alb[j] *= 1 - s * (1 - tint[0] + 0.14); alb[j + 1] *= 1 - s * (1 - tint[1] + 0.14); alb[j + 2] *= 1 - s * (1 - tint[2] + 0.14);
     }
   }
+  const tmp = (id === 'apuntes' || id === 'rotulador') ? new Float32Array(N) : null;
   // 2) traspaso de tinta líquida (rotulador: charcos donde se apoyó la punta; fluorescente)
   const bleedK = clamp(def(st.calcoBleed, 1), 0, 3) * amount;
   const info = cache.calco[id] || {};
@@ -563,6 +574,7 @@ async function renderPaper(opts) {
   await prog(0.6, 'Calco del reverso…');
   await genCalco(S, st, assets, B, paper, opts.backArt || null);
   applyRelief(S, B);
+  B.T = null;
   await prog(0.8, 'Listo el papel');
   return { rgba: new Uint8Array(B.alb.buffer), buffers: B, paper, S, st };
 }

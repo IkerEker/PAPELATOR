@@ -7,6 +7,7 @@
 <body>
   <!-- ===================== PANEL 1 · PRESETS ===================== -->
   <div id="simple" class="root">
+   <div class="scroll">
     <div class="brand">
       <span class="logo">PAPELATOR</span>
       <span class="spacer"></span>
@@ -43,15 +44,6 @@
       <div class="chips" id="s-calco"></div>
     </div>
 
-    <div class="actions">
-      <sp-button variant="secondary" id="s-paper" class="grow">Papel de fondo</sp-button>
-    </div>
-    <div class="linkrow">
-      <span class="link" id="s-remove">Quitar papel de fondo</span>
-      <span class="spacer"></span>
-      <sp-checkbox id="s-live" checked>En vivo</sp-checkbox>
-    </div>
-
     <div class="sec photo">
       <div class="sechead">5 · Fotografía (al aplicar)</div>
       <div class="sublabel">Luz</div>
@@ -62,15 +54,25 @@
       <div class="chips" id="s-calidad"></div>
     </div>
 
+    <div class="hint">«Papel de fondo» crea el papel en la capa inferior para trabajar encima. «Aplicar» imprime todas las capas en ese papel (tinta, grano, relieve) y le da el aspecto de fotografía elegido.</div>
+   </div>
+   <div class="footer">
     <div class="actions">
+      <sp-button variant="secondary" id="s-paper" class="grow">Papel de fondo</sp-button>
       <sp-button variant="cta" id="s-apply" class="grow">Aplicar</sp-button>
     </div>
+    <div class="linkrow">
+      <span class="link" id="s-remove">Quitar papel de fondo</span>
+      <span class="spacer"></span>
+      <sp-checkbox id="s-live" checked>En vivo</sp-checkbox>
+    </div>
     <div class="status" id="s-status">Elige papel y estado, y pulsa «Papel de fondo».</div>
-    <div class="hint">«Papel de fondo» crea el papel en la capa inferior para trabajar encima. «Aplicar» imprime todas las capas en ese papel (tinta, grano, relieve) y le da el aspecto de fotografía elegido.</div>
+   </div>
   </div>
 
   <!-- ===================== PANEL 2 · AJUSTES ===================== -->
   <div id="pro" class="root">
+   <div class="scroll">
     <div class="brand">
       <span class="logo">PAPELATOR</span><span class="sub">ajustes</span>
       <span class="spacer"></span>
@@ -78,6 +80,8 @@
     </div>
     <div class="thumbwrap"><img id="p-thumb" class="thumb" alt=""><div class="thumbnote" id="p-thumbnote"></div></div>
     <div id="p-sections"></div>
+   </div>
+   <div class="footer">
     <div class="actions">
       <sp-button variant="secondary" id="p-paper" class="grow">Papel de fondo</sp-button>
       <sp-button variant="cta" id="p-apply" class="grow">Aplicar</sp-button>
@@ -88,6 +92,7 @@
       <sp-checkbox id="p-live">En vivo</sp-checkbox>
     </div>
     <div class="status" id="p-status"></div>
+   </div>
   </div>
 
   <script src="main.js"></script>
