@@ -29,7 +29,11 @@
   "seam": [
    0.87,
    1.07
-  ]
+  ],
+  "rough": 0.01425,
+  "grainMm": 0.1454,
+  "ageK": 1.0,
+  "reliefAdj": 1.0
  },
  {
   "id": "rayado_tenue",
@@ -61,7 +65,11 @@
   "seam": [
    0.85,
    1.04
-  ]
+  ],
+  "rough": 0.0152,
+  "grainMm": 0.148,
+  "ageK": 1.0,
+  "reliefAdj": 1.0
  },
  {
   "id": "cuadricula",
@@ -93,7 +101,11 @@
   "seam": [
    0.13,
    0.11
-  ]
+  ],
+  "rough": 0.01302,
+  "grainMm": 0.085,
+  "ageK": 1.0,
+  "reliefAdj": 1.0
  },
  {
   "id": "cuadricula_clara",
@@ -125,7 +137,11 @@
   "seam": [
    0.19,
    1.0
-  ]
+  ],
+  "rough": 0.00548,
+  "grainMm": 0.1278,
+  "ageK": 1.0,
+  "reliefAdj": 1.0
  },
  {
   "id": "milimetrado",
@@ -157,7 +173,11 @@
   "seam": [
    1.74,
    0.85
-  ]
+  ],
+  "rough": 0.01434,
+  "grainMm": 0.2046,
+  "ageK": 1.0,
+  "reliefAdj": 1.0
  },
  {
   "id": "milimetrado_naranja",
@@ -189,7 +209,11 @@
   "seam": [
    0.25,
    0.19
-  ]
+  ],
+  "rough": 0.01249,
+  "grainMm": 0.1917,
+  "ageK": 1.0,
+  "reliefAdj": 1.0
  },
  {
   "id": "milimetrado_azul",
@@ -221,7 +245,11 @@
   "seam": [
    0.17,
    0.1
-  ]
+  ],
+  "rough": 0.01347,
+  "grainMm": 0.1932,
+  "ageK": 1.0,
+  "reliefAdj": 1.0
  },
  {
   "id": "punteado",
@@ -253,7 +281,11 @@
   "seam": [
    0.85,
    0.96
-  ]
+  ],
+  "rough": 0.01193,
+  "grainMm": 0.1277,
+  "ageK": 1.0,
+  "reliefAdj": 1.0
  },
  {
   "id": "punteado_suave",
@@ -285,7 +317,11 @@
   "seam": [
    0.88,
    1.0
-  ]
+  ],
+  "rough": 0.01049,
+  "grainMm": 0.1054,
+  "ageK": 1.0,
+  "reliefAdj": 1.0
  },
  {
   "id": "isometrico",
@@ -317,7 +353,11 @@
   "seam": [
    0.17,
    1.1
-  ]
+  ],
+  "rough": 0.00775,
+  "grainMm": 0.446,
+  "ageK": 1.0,
+  "reliefAdj": 1.0
  },
  {
   "id": "triangular",
@@ -349,7 +389,11 @@
   "seam": [
    0.63,
    5.3
-  ]
+  ],
+  "rough": 0.00828,
+  "grainMm": 0.4,
+  "ageK": 1.0,
+  "reliefAdj": 1.0
  },
  {
   "id": "pentagrama",
@@ -381,7 +425,11 @@
   "seam": [
    0.86,
    0.85
-  ]
+  ],
+  "rough": 0.01347,
+  "grainMm": 0.1403,
+  "ageK": 1.0,
+  "reliefAdj": 1.0
  },
  {
   "id": "acuarela_grueso",
@@ -409,7 +457,11 @@
   "seam": [
    0.89,
    0.99
-  ]
+  ],
+  "rough": 0.05303,
+  "grainMm": 0.1914,
+  "ageK": 0.7,
+  "reliefAdj": 1.0
  },
  {
   "id": "acuarela_grueso_2",
@@ -437,7 +489,11 @@
   "seam": [
    0.94,
    0.98
-  ]
+  ],
+  "rough": 0.05427,
+  "grainMm": 0.1914,
+  "ageK": 0.7,
+  "reliefAdj": 1.0
  },
  {
   "id": "acuarela_fino",
@@ -465,7 +521,11 @@
   "seam": [
    0.87,
    1.06
-  ]
+  ],
+  "rough": 0.0306,
+  "grainMm": 0.1116,
+  "ageK": 0.7,
+  "reliefAdj": 1.0
  },
  {
   "id": "acuarela_satinada",
@@ -493,7 +553,11 @@
   "seam": [
    0.98,
    0.98
-  ]
+  ],
+  "rough": 0.02236,
+  "grainMm": 0.1116,
+  "ageK": 0.7,
+  "reliefAdj": 1.0
  },
  {
   "id": "bristol",
@@ -521,7 +585,11 @@
   "seam": [
    0.89,
    0.88
-  ]
+  ],
+  "rough": 0.00861,
+  "grainMm": 0.05,
+  "ageK": 0.8,
+  "reliefAdj": 1.0
  },
  {
   "id": "folio",
@@ -549,7 +617,11 @@
   "seam": [
    0.91,
    0.93
-  ]
+  ],
+  "rough": 0.01781,
+  "grainMm": 0.0957,
+  "ageK": 1.0,
+  "reliefAdj": 1.0
  },
  {
   "id": "papel_fino",
@@ -577,7 +649,11 @@
   "seam": [
    0.86,
    0.92
-  ]
+  ],
+  "rough": 0.01932,
+  "grainMm": 0.0957,
+  "ageK": 1.0,
+  "reliefAdj": 1.0
  },
  {
   "id": "verjurado",
@@ -605,7 +681,11 @@
   "seam": [
    0.95,
    0.9
-  ]
+  ],
+  "rough": 0.02858,
+  "grainMm": 0.1914,
+  "ageK": 1.0,
+  "reliefAdj": 1.0
  },
  {
   "id": "verjurado_marfil",
@@ -633,7 +713,11 @@
   "seam": [
    0.9,
    1.15
-  ]
+  ],
+  "rough": 0.03157,
+  "grainMm": 0.1754,
+  "ageK": 1.0,
+  "reliefAdj": 1.0
  },
  {
   "id": "algodon",
@@ -661,7 +745,11 @@
   "seam": [
    1.03,
    0.87
-  ]
+  ],
+  "rough": 0.02766,
+  "grainMm": 0.1595,
+  "ageK": 0.7,
+  "reliefAdj": 1.0
  },
  {
   "id": "algodon_crema",
@@ -689,7 +777,11 @@
   "seam": [
    0.96,
    0.94
-  ]
+  ],
+  "rough": 0.0291,
+  "grainMm": 0.1595,
+  "ageK": 0.7,
+  "reliefAdj": 1.0
  },
  {
   "id": "arroz",
@@ -717,7 +809,11 @@
   "seam": [
    0.95,
    1.01
-  ]
+  ],
+  "rough": 0.03033,
+  "grainMm": 0.2392,
+  "ageK": 1.0,
+  "reliefAdj": 1.0
  },
  {
   "id": "arroz_dorado",
@@ -746,7 +842,11 @@
   "seam": [
    0.91,
    0.91
-  ]
+  ],
+  "rough": 0.02548,
+  "grainMm": 0.2392,
+  "ageK": 1.0,
+  "reliefAdj": 1.0
  },
  {
   "id": "arroz_artesanal",
@@ -774,7 +874,11 @@
   "seam": [
    0.89,
    0.96
-  ]
+  ],
+  "rough": 0.03033,
+  "grainMm": 0.2392,
+  "ageK": 1.0,
+  "reliefAdj": 1.0
  },
  {
   "id": "kraft",
@@ -803,7 +907,11 @@
   "seam": [
    0.85,
    0.93
-  ]
+  ],
+  "rough": 0.07265,
+  "grainMm": 0.1116,
+  "ageK": 1.25,
+  "reliefAdj": 0.55
  },
  {
   "id": "kraft_claro",
@@ -832,7 +940,11 @@
   "seam": [
    0.91,
    1.02
-  ]
+  ],
+  "rough": 0.0672,
+  "grainMm": 0.1116,
+  "ageK": 1.25,
+  "reliefAdj": 0.55
  },
  {
   "id": "reciclado",
@@ -861,7 +973,11 @@
   "seam": [
    0.9,
    0.99
-  ]
+  ],
+  "rough": 0.07119,
+  "grainMm": 0.1276,
+  "ageK": 1.3,
+  "reliefAdj": 0.65
  },
  {
   "id": "reciclado_motas",
@@ -890,7 +1006,11 @@
   "seam": [
    0.92,
    0.97
-  ]
+  ],
+  "rough": 0.0749,
+  "grainMm": 0.1432,
+  "ageK": 1.3,
+  "reliefAdj": 0.6
  },
  {
   "id": "reciclado_gris",
@@ -918,7 +1038,11 @@
   "seam": [
    0.85,
    0.91
-  ]
+  ],
+  "rough": 0.05158,
+  "grainMm": 0.0558,
+  "ageK": 1.3,
+  "reliefAdj": 0.7
  },
  {
   "id": "hecho_mano",
@@ -946,7 +1070,11 @@
   "seam": [
    1.1,
    0.91
-  ]
+  ],
+  "rough": 0.06818,
+  "grainMm": 0.1754,
+  "ageK": 1.0,
+  "reliefAdj": 1.0
  },
  {
   "id": "hecho_mano_grumos",
@@ -974,7 +1102,11 @@
   "seam": [
    1.01,
    0.98
-  ]
+  ],
+  "rough": 0.11494,
+  "grainMm": 0.1754,
+  "ageK": 1.0,
+  "reliefAdj": 1.0
  },
  {
   "id": "hecho_mano_fibroso",
@@ -1002,7 +1134,11 @@
   "seam": [
    0.9,
    0.95
-  ]
+  ],
+  "rough": 0.057,
+  "grainMm": 0.1754,
+  "ageK": 1.0,
+  "reliefAdj": 1.0
  },
  {
   "id": "pergamino",
@@ -1031,7 +1167,11 @@
   "seam": [
    0.97,
    1.05
-  ]
+  ],
+  "rough": 0.02913,
+  "grainMm": 0.3828,
+  "ageK": 0.6,
+  "reliefAdj": 1.0
  },
  {
   "id": "pergamino_oscuro",
@@ -1060,7 +1200,11 @@
   "seam": [
    0.91,
    0.9
-  ]
+  ],
+  "rough": 0.02959,
+  "grainMm": 0.3828,
+  "ageK": 0.6,
+  "reliefAdj": 1.0
  },
  {
   "id": "pergamino_blanco",
@@ -1088,7 +1232,11 @@
   "seam": [
    0.93,
    0.88
-  ]
+  ],
+  "rough": 0.02955,
+  "grainMm": 0.3828,
+  "ageK": 1.0,
+  "reliefAdj": 1.0
  },
  {
   "id": "corrugado",
@@ -1117,7 +1265,11 @@
   "seam": [
    0.89,
    0.68
-  ]
+  ],
+  "rough": 0.09399,
+  "grainMm": 0.8936,
+  "ageK": 1.2,
+  "reliefAdj": 0.7
  },
  {
   "id": "corrugado_fino",
@@ -1146,7 +1298,11 @@
   "seam": [
    0.9,
    0.9
-  ]
+  ],
+  "rough": 0.13986,
+  "grainMm": 0.7943,
+  "ageK": 1.2,
+  "reliefAdj": 0.55
  },
  {
   "id": "periodico",
@@ -1174,7 +1330,11 @@
   "seam": [
    0.82,
    0.95
-  ]
+  ],
+  "rough": 0.03611,
+  "grainMm": 0.0797,
+  "ageK": 1.6,
+  "reliefAdj": 1.0
  },
  {
   "id": "periodico_gris",
@@ -1202,7 +1362,11 @@
   "seam": [
    0.87,
    0.93
-  ]
+  ],
+  "rough": 0.06188,
+  "grainMm": 0.0797,
+  "ageK": 1.6,
+  "reliefAdj": 0.7
  },
  {
   "id": "vegetal",
@@ -1230,7 +1394,11 @@
   "seam": [
    1.06,
    0.88
-  ]
+  ],
+  "rough": 0.00739,
+  "grainMm": 0.1276,
+  "ageK": 0.8,
+  "reliefAdj": 1.0
  },
  {
   "id": "vegetal_arrugado",
@@ -1258,7 +1426,11 @@
   "seam": [
    0.94,
    0.83
-  ]
+  ],
+  "rough": 0.02567,
+  "grainMm": 0.2392,
+  "ageK": 0.8,
+  "reliefAdj": 1.0
  },
  {
   "id": "encerado",
@@ -1286,7 +1458,11 @@
   "seam": [
    1.03,
    0.85
-  ]
+  ],
+  "rough": 0.0223,
+  "grainMm": 0.3828,
+  "ageK": 0.6,
+  "reliefAdj": 1.0
  },
  {
   "id": "horno",
@@ -1314,7 +1490,11 @@
   "seam": [
    1.01,
    0.93
-  ]
+  ],
+  "rough": 0.02398,
+  "grainMm": 0.2552,
+  "ageK": 0.6,
+  "reliefAdj": 1.0
  },
  {
   "id": "cartulina_gris",
@@ -1342,6 +1522,10 @@
   "seam": [
    0.87,
    0.92
-  ]
+  ],
+  "rough": 0.04992,
+  "grainMm": 0.05,
+  "ageK": 1.1,
+  "reliefAdj": 0.6
  }
 ]

@@ -8,7 +8,7 @@
    92
   ],
   "place": "any",
-  "opacity": 0.45,
+  "opacity": 0.2,
   "maxd": 900,
   "items": [
    {
@@ -60,7 +60,12 @@
     "src": 44,
     "mask": false
    }
-  ]
+  ],
+  "erode": 0.35,
+  "cellMm": 6,
+  "absorb": 1,
+  "cockle": 0.15,
+  "aniso": 0.025
  },
  "salp_cafe": {
   "name": "Salpicaduras de café",
@@ -68,7 +73,7 @@
   "mode": "multiply",
   "src_mm": 150,
   "place": "cluster",
-  "opacity": 0.55,
+  "opacity": 0.28,
   "min_area": 10,
   "atlas": "salp_cafe_atlas.png",
   "sprites": [
@@ -4692,7 +4697,8 @@
      11
     ]
    }
-  ]
+  ],
+  "absorb": 0.9
  },
  "salp_tinta": {
   "name": "Salpicaduras de tinta",
@@ -4700,7 +4706,7 @@
   "mode": "multiply",
   "src_mm": 170,
   "place": "cluster",
-  "opacity": 0.7,
+  "opacity": 0.434,
   "min_area": 6,
   "atlas": "salp_tinta_atlas.png",
   "sprites": [
@@ -9324,7 +9330,8 @@
      34
     ]
    }
-  ]
+  ],
+  "absorb": 0.9
  },
  "agua": {
   "name": "Mancha de agua seca",
@@ -9334,8 +9341,8 @@
    45,
    95
   ],
-  "place": "any",
-  "opacity": 0.55,
+  "place": "water",
+  "opacity": 0.341,
   "maxd": 800,
   "items": [
    {
@@ -9394,7 +9401,11 @@
     "src": 37,
     "mask": false
    }
-  ]
+  ],
+  "erode": 0.3,
+  "cellMm": 9,
+  "absorb": 0.8,
+  "cockle": 0.6
  },
  "humedad": {
   "name": "Mancha de humedad",
@@ -9404,8 +9415,8 @@
    60,
    130
   ],
-  "place": "any",
-  "opacity": 0.3,
+  "place": "water",
+  "opacity": 0.186,
   "maxd": 640,
   "items": [
    {
@@ -9450,7 +9461,11 @@
     "src": 33,
     "mask": false
    }
-  ]
+  ],
+  "erode": 0.45,
+  "cellMm": 14,
+  "absorb": 0.9,
+  "cockle": 0.5
  },
  "grasa": {
   "name": "Mancha de grasa",
@@ -9461,7 +9476,7 @@
    55
   ],
   "place": "any",
-  "opacity": 0.5,
+  "opacity": 0.31,
   "maxd": 600,
   "items": [
    {
@@ -9492,7 +9507,11 @@
     "src": 51,
     "mask": false
    }
-  ]
+  ],
+  "erode": 0.3,
+  "cellMm": 5,
+  "absorb": 0.5,
+  "cockle": 0
  },
  "sangrado": {
   "name": "Sangrado de rotulador",
@@ -9503,7 +9522,7 @@
    34
   ],
   "place": "any",
-  "opacity": 0.5,
+  "opacity": 0.31,
   "maxd": 520,
   "items": [
    {
@@ -9548,7 +9567,11 @@
     "src": 63,
     "mask": false
    }
-  ]
+  ],
+  "erode": 0.25,
+  "cellMm": 3,
+  "absorb": 1,
+  "cockle": 0.1
  },
  "barro": {
   "name": "Gotas de barro",
@@ -9556,7 +9579,7 @@
   "mode": "multiply",
   "src_mm": 160,
   "place": "lower",
-  "opacity": 0.6,
+  "opacity": 0.372,
   "min_area": 4,
   "atlas": "barro_atlas.png",
   "sprites": [
@@ -14180,7 +14203,8 @@
      29
     ]
    }
-  ]
+  ],
+  "absorb": 0.9
  },
  "foxing": {
   "name": "Foxing (óxido y moho)",
@@ -14188,7 +14212,7 @@
   "mode": "multiply",
   "src_mm": 110,
   "place": "foxing",
-  "opacity": 0.55,
+  "opacity": 0.341,
   "min_area": 4,
   "max_area": 900,
   "atlas": "foxing_atlas.png",
@@ -18813,7 +18837,8 @@
      9
     ]
    }
-  ]
+  ],
+  "absorb": 0.9
  },
  "uv": {
   "name": "Amarilleo por luz",
@@ -18824,7 +18849,7 @@
    260
   ],
   "place": "any",
-  "opacity": 0.28,
+  "opacity": 0.174,
   "maxd": 420,
   "items": [
    {
@@ -18869,119 +18894,11 @@
     "src": 123,
     "mask": false
    }
-  ]
- },
- "clip": {
-  "name": "Óxido de clip",
-  "kind": "stamp",
-  "mode": "multiply",
-  "size": [
-   44,
-   50
   ],
-  "place": "clip",
-  "opacity": 0.42,
-  "maxd": 700,
-  "items": [
-   {
-    "file": "clip_0.png",
-    "w": 700,
-    "h": 558,
-    "src": 13,
-    "mask": false
-   },
-   {
-    "file": "clip_1.png",
-    "w": 700,
-    "h": 690,
-    "src": 35,
-    "mask": false
-   },
-   {
-    "file": "clip_2.png",
-    "w": 700,
-    "h": 404,
-    "src": 42,
-    "mask": false
-   },
-   {
-    "file": "clip_3.png",
-    "w": 700,
-    "h": 612,
-    "src": 54,
-    "mask": false
-   },
-   {
-    "file": "clip_4.png",
-    "w": 676,
-    "h": 700,
-    "src": 57,
-    "mask": false
-   }
-  ]
- },
- "acida": {
-  "name": "Migración ácida",
-  "kind": "stamp",
-  "mode": "multiply",
-  "size": [
-   70,
-   130
-  ],
-  "place": "acid",
-  "opacity": 0.2,
-  "maxd": 700,
-  "items": [
-   {
-    "file": "acida_0.png",
-    "w": 700,
-    "h": 696,
-    "src": 8,
-    "mask": false
-   },
-   {
-    "file": "acida_1.png",
-    "w": 700,
-    "h": 545,
-    "src": 9,
-    "mask": false
-   },
-   {
-    "file": "acida_2.png",
-    "w": 700,
-    "h": 552,
-    "src": 10,
-    "mask": false
-   },
-   {
-    "file": "acida_3.png",
-    "w": 700,
-    "h": 646,
-    "src": 41,
-    "mask": false
-   },
-   {
-    "file": "acida_4.png",
-    "w": 700,
-    "h": 688,
-    "src": 52,
-    "mask": false
-   },
-   {
-    "file": "acida_5.png",
-    "w": 685,
-    "h": 700,
-    "src": 58,
-    "mask": false
-   },
-   {
-    "file": "acida_6.png",
-    "w": 507,
-    "h": 700,
-    "src": 59,
-    "mask": false
-   }
-  ]
+  "erode": 0.35,
+  "cellMm": 25,
+  "absorb": 0.4,
+  "cockle": 0
  },
  "huella_grasa": {
   "name": "Huellas grasientas",
@@ -18992,7 +18909,7 @@
    24
   ],
   "place": "edge",
-  "opacity": 0.75,
+  "opacity": 0.465,
   "maxd": 400,
   "items": [
    {
@@ -19016,7 +18933,12 @@
     "src": 39,
     "mask": false
    }
-  ]
+  ],
+  "erode": 0.3,
+  "cellMm": 2.5,
+  "absorb": 0.4,
+  "cockle": 0,
+  "aniso": 0.15
  },
  "grafito": {
   "name": "Borrón de grafito",
@@ -19027,7 +18949,7 @@
    90
   ],
   "place": "lower",
-  "opacity": 0.22,
+  "opacity": 0.136,
   "maxd": 640,
   "items": [
    {
@@ -19093,7 +19015,11 @@
     "src": 134,
     "mask": false
    }
-  ]
+  ],
+  "erode": 0.45,
+  "cellMm": 4,
+  "absorb": -0.9,
+  "cockle": 0
  },
  "escritura": {
   "name": "Hendiduras de escritura",
@@ -19101,7 +19027,7 @@
   "mode": "relief",
   "pitch_mm": 9.0,
   "place": "text",
-  "opacity": 0.8,
+  "opacity": 0.64,
   "atlas": "escritura_atlas.png",
   "sprites": [
    {
@@ -19833,7 +19759,7 @@
   "mode": "relief",
   "pitch_mm": 8.5,
   "place": "text",
-  "opacity": 0.8,
+  "opacity": 0.64,
   "atlas": "mecano_atlas.png",
   "sprites": [
    {
@@ -20138,7 +20064,7 @@
    60
   ],
   "place": "tape",
-  "opacity": 0.5,
+  "opacity": 0.31,
   "maxd": 600,
   "items": [
    {
@@ -20204,7 +20130,11 @@
     "src": 118,
     "mask": false
    }
-  ]
+  ],
+  "erode": 0.35,
+  "cellMm": 4,
+  "absorb": 0.6,
+  "cockle": 0
  },
  "quemadura": {
   "name": "Quemadura de ceniza",
@@ -20215,7 +20145,7 @@
    16
   ],
   "place": "any",
-  "opacity": 0.7,
+  "opacity": 0.434,
   "maxd": 420,
   "items": [
    {
@@ -20281,7 +20211,12 @@
     "src": 108,
     "mask": false
    }
-  ]
+  ],
+  "erode": 0.15,
+  "cellMm": 2,
+  "absorb": 0.6,
+  "cockle": 0,
+  "aniso": 0.08
  },
  "goma": {
   "name": "Raspadura de goma",
@@ -20292,7 +20227,7 @@
    38
   ],
   "place": "any",
-  "opacity": 0.8,
+  "opacity": 0.64,
   "maxd": 600,
   "items": [
    {
@@ -20337,7 +20272,11 @@
     "src": 140,
     "mask": true
    }
-  ]
+  ],
+  "erode": 0.2,
+  "cellMm": 3,
+  "absorb": 0,
+  "cockle": 0
  },
  "fibras": {
   "name": "Fibras incrustadas",
@@ -20345,7 +20284,7 @@
   "mode": "multiply",
   "src_mm": 70,
   "place": "uniform",
-  "opacity": 0.7,
+  "opacity": 0.434,
   "min_area": 8,
   "atlas": "fibras_atlas.png",
   "sprites": [
@@ -24969,7 +24908,8 @@
      9
     ]
    }
-  ]
+  ],
+  "absorb": 0
  },
  "nodulos": {
   "name": "Grumos de celulosa",
@@ -24977,7 +24917,7 @@
   "mode": "relief",
   "src_mm": 60,
   "place": "uniform",
-  "opacity": 0.8,
+  "opacity": 0.64,
   "min_area": 10,
   "atlas": "nodulos_atlas.png",
   "sprites": [
@@ -29609,7 +29549,7 @@
   "mode": "relief",
   "src_mm": 70,
   "place": "uniform",
-  "opacity": 0.8,
+  "opacity": 0.64,
   "min_area": 3,
   "atlas": "descamacion_atlas.png",
   "sprites": [
@@ -34241,7 +34181,7 @@
   "mode": "multiply",
   "src_mm": 70,
   "place": "uniform",
-  "opacity": 0.7,
+  "opacity": 0.434,
   "min_area": 2,
   "atlas": "polvo_atlas.png",
   "sprites": [
@@ -38865,7 +38805,8 @@
      10
     ]
    }
-  ]
+  ],
+  "absorb": -0.6
  },
  "sello_seco": {
   "name": "Sello en seco",
@@ -38876,7 +38817,7 @@
    48
   ],
   "place": "seal",
-  "opacity": 0.85,
+  "opacity": 0.68,
   "maxd": 700,
   "items": [
    {
@@ -38900,7 +38841,12 @@
     "src": 121,
     "mask": false
    }
-  ]
+  ],
+  "erode": 0.15,
+  "cellMm": 3,
+  "absorb": 0,
+  "cockle": 0,
+  "aniso": 0
  },
  "cera": {
   "name": "Cera de vela",
@@ -38911,7 +38857,7 @@
    26
   ],
   "place": "any",
-  "opacity": 0.7,
+  "opacity": 0.56,
   "maxd": 420,
   "items": [
    {
@@ -38935,7 +38881,12 @@
     "src": 89,
     "mask": true
    }
-  ]
+  ],
+  "erode": 0.2,
+  "cellMm": 4,
+  "absorb": 0,
+  "cockle": 0,
+  "aniso": 0.12
  },
  "huella_tinta": {
   "name": "Huella de tinta",
@@ -38946,7 +38897,7 @@
    22
   ],
   "place": "edge",
-  "opacity": 0.28,
+  "opacity": 0.174,
   "maxd": 420,
   "items": [
    {
@@ -38998,7 +38949,12 @@
     "src": 71,
     "mask": false
    }
-  ]
+  ],
+  "erode": 0.35,
+  "cellMm": 1.5,
+  "absorb": -0.6,
+  "cockle": 0,
+  "aniso": 0.1
  },
  "matasellos": {
   "name": "Matasellos corrido",
@@ -39009,7 +38965,7 @@
    75
   ],
   "place": "top_right",
-  "opacity": 0.45,
+  "opacity": 0.279,
   "maxd": 640,
   "items": [
    {
@@ -39047,7 +39003,12 @@
     "src": 77,
     "mask": false
    }
-  ]
+  ],
+  "erode": 0.4,
+  "cellMm": 6,
+  "absorb": 0.9,
+  "cockle": 0.1,
+  "aniso": 0.06
  },
  "calor": {
   "name": "Decoloración por calor",
@@ -39058,7 +39019,7 @@
    170
   ],
   "place": "any",
-  "opacity": 0.3,
+  "opacity": 0.186,
   "maxd": 420,
   "items": [
    {
@@ -39088,6 +39049,96 @@
     "h": 420,
     "src": 107,
     "mask": false
+   }
+  ],
+  "erode": 0.35,
+  "cellMm": 25,
+  "absorb": 0.4,
+  "cockle": 0
+ },
+ "manchado": {
+  "name": "Manchado de envejecimiento",
+  "kind": "sheet",
+  "mode": "multiply",
+  "place": "sheet",
+  "opacity": 0.31,
+  "items": [
+   {
+    "file": "sheet_0.png",
+    "w": 768,
+    "h": 1086,
+    "mean": [
+     0.8103,
+     0.5857,
+     0.2629
+    ],
+    "src": 8
+   },
+   {
+    "file": "sheet_1.png",
+    "w": 768,
+    "h": 1086,
+    "mean": [
+     0.8231,
+     0.6828,
+     0.4586
+    ],
+    "src": 9
+   },
+   {
+    "file": "sheet_2.png",
+    "w": 768,
+    "h": 1086,
+    "mean": [
+     0.7758,
+     0.6004,
+     0.3394
+    ],
+    "src": 10
+   },
+   {
+    "file": "sheet_3.png",
+    "w": 768,
+    "h": 1086,
+    "mean": [
+     0.8515,
+     0.6879,
+     0.413
+    ],
+    "src": 41
+   },
+   {
+    "file": "sheet_4.png",
+    "w": 768,
+    "h": 1086,
+    "mean": [
+     0.8167,
+     0.6619,
+     0.4001
+    ],
+    "src": 52
+   },
+   {
+    "file": "sheet_5.png",
+    "w": 768,
+    "h": 1086,
+    "mean": [
+     0.9433,
+     0.814,
+     0.5622
+    ],
+    "src": 58
+   },
+   {
+    "file": "sheet_6.png",
+    "w": 768,
+    "h": 1086,
+    "mean": [
+     0.8732,
+     0.6996,
+     0.3775
+    ],
+    "src": 59
    }
   ]
  }

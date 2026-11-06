@@ -54,6 +54,6 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   $('s-apply').fire('click'); await sleep(3000);
   console.log('status:', $('s-status').textContent);
   console.log('layers:', doc.layers.map(l => l.name + (l.visible ? '' : '(oculta)')).join(' | '));
-  const st = JSON.parse(store['papelator2.state']); console.log('state', st.paper, st.estado, st.calco, st.color, st.luz, st.calidad, !!st.custom);
+  const st = JSON.parse(store['papelator3.state']); console.log('state', st.paper, st.estado, st.calco, st.color, st.luz, st.calidad, !!st.custom);
   process.exit(0); // fin
 })().catch(e => { console.error('FAIL', e); process.exit(1); });

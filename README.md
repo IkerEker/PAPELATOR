@@ -26,6 +26,7 @@ tools/                scripts que procesan las fuentes y generan los assets del 
   build_papers.py     tiles sin costuras (las líneas coinciden), separación tinta/papel, escala física
   build_imperf.py     manchas enteras, relieves, piezas sueltas (gotas, fibras, motas) y renglones de escritura
   build_calco.py      documentos de detrás (periódico, folio, apuntes, rotulador)
+  build_extras.py     rugosidad y tamaño de grano de cada papel, manchas de envejecimiento a hoja completa
 plugin/               el plugin UXP (manifest, interfaz, motor y assets procesados)
   src/engine.js       motor (JavaScript puro, se prueba también en Node)
   src/png.js          decodificador PNG propio (UXP no trae zlib)

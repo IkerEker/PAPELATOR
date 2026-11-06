@@ -39,7 +39,7 @@ function merge(base, o) {
 function loadJSON(key) { try { const s = localStorage.getItem(key); return s ? JSON.parse(s) : null; } catch (e) { return null; } }
 function saveJSON(key, v) { try { localStorage.setItem(key, JSON.stringify(v)); } catch (e) { /* sin almacenamiento */ } }
 
-let state = merge(clone(P.DEFAULT_STATE), loadJSON('papelator2.state'));
+let state = merge(clone(P.DEFAULT_STATE), loadJSON('papelator3.state'));
 const ui = merge({ live: true, group: null, open: { general: true, papel: true } }, loadJSON('papelator2.ui'));
 let papers = [], imperfCats = {};
 
@@ -47,7 +47,7 @@ const refreshers = [];
 let thumbTimer = null, liveTimer = null;
 function changed(opts) {
   opts = opts || {};
-  saveJSON('papelator2.state', state);
+  saveJSON('papelator3.state', state);
   refreshers.forEach(fn => { try { fn(opts.source); } catch (e) { console.log(e); } });
   if (thumbTimer) clearTimeout(thumbTimer);
   thumbTimer = setTimeout(updateThumbs, 250);
@@ -306,13 +306,15 @@ function buildSimple() {
   }
   function renderChips() {
     chipRow(byId('s-colors'), P.COLORS, () => state.color, v => { state.color = v; }, it => it.hex || 'transparent');
-    chipRow(byId('s-estado'), P.ESTADOS, () => (state.custom ? 'custom' : state.estado), v => { state.estado = v; state.custom = null; });
+    chipRow(byId('s-estado'), P.ESTADOS, () => (state.custom ? 'custom' : state.estado), v => { state.estado = v; state.custom = null; const e = P.ESTADOS.filter(x => x.id === v)[0]; if (e) state.edad = e.edad; });
     chipRow(byId('s-calco'), P.CALCOS, () => state.calco, v => { state.calco = v; });
     chipRow(byId('s-luz'), P.LUCES, () => state.luz, v => { state.luz = v; });
     chipRow(byId('s-calidad'), P.CALIDADES, () => state.calidad, v => { state.calidad = v; });
+    chipRow(byId('s-impresion'), P.IMPRESIONES, () => state.impresion, v => { state.impresion = v; });
   }
   function sliders() {
-    const it = byId('s-intensity'), sc = byId('s-scale'), ex = byId('s-exposure');
+    const it = byId('s-intensity'), sc = byId('s-scale'), ex = byId('s-exposure'), ed = byId('s-edad');
+    ed.value = Math.round(state.edad * 100); byId('s-edadval').textContent = Math.round(state.edad * 100) + '%';
     it.value = state.intensity; byId('s-intval').textContent = state.intensity + '%';
     sc.value = Math.round(state.scale * 100); byId('s-scaleval').textContent = Math.round(state.scale * 100) + '%';
     ex.value = Math.round(state.exposure * 100); byId('s-expval').textContent = (state.exposure > 0 ? '+' : '') + Math.round(state.exposure * 100);
@@ -332,6 +334,7 @@ function buildSimple() {
   bindSlider('s-intensity', 's-intval', v => { state.intensity = v; }, v => v + '%');
   bindSlider('s-scale', 's-scaleval', v => { state.scale = v / 100; }, v => v + '%');
   bindSlider('s-exposure', 's-expval', v => { state.exposure = v / 100; }, v => (v > 0 ? '+' : '') + v);
+  bindSlider('s-edad', 's-edadval', v => { state.edad = v / 100; }, v => v + '%');
   byId('s-paper').addEventListener('click', doPaper);
   byId('s-apply').addEventListener('click', doApply);
   byId('s-remove').addEventListener('click', doRemove);
@@ -342,16 +345,18 @@ function buildSimple() {
 // =============================================================== PANEL 2 · AJUSTES
 const pct = v => Math.round(v * 100) + '%';
 // recuentos de imperfecciones: [máximo, paso]
-const CAT_RANGE = { polvo: [600, 10], foxing: [400, 10], fibras: [30, 1], nodulos: [60, 2], descamacion: [200, 5], edad: [1, 0.05], sol: [1, 0.05] };
+const CAT_RANGE = { polvo: [600, 10], foxing: [400, 10], fibras: [30, 1], nodulos: [60, 2], descamacion: [200, 5], sol: [1, 0.05], manoseo: [1.5, 0.05], cockle: [1.5, 0.05], manchado: [1.5, 0.05] };
+const SPECIAL = { manoseo: 'Suciedad de las manos', cockle: 'Ondulación por humedad', sol: 'Un lado expuesto al sol' };
 function buildSections() {
   const estadoItems = [
     { t: 'picker', path: 'estado', label: 'Preset de estado', options: () => P.ESTADOS.map(e => [e.id, e.name]).concat([['custom', 'Personalizado']]),
-      onSet: v => { if (v === 'custom') { state.custom = clone(currentCounts()); } else { state.estado = v; state.custom = null; } return true; } },
+      onSet: v => { if (v === 'custom') { state.custom = clone(currentCounts()); } else { state.estado = v; state.custom = null; const e = P.ESTADOS.filter(x => x.id === v)[0]; if (e) state.edad = e.edad; } return true; } },
+    { t: 'slider', path: 'edad', label: 'Antigüedad', min: 0, max: 1.2, step: 0.01, fmt: pct },
     { t: 'slider', path: 'estadoAmount', label: 'Cantidad general', min: 0, max: 2, step: 0.05, fmt: pct }
   ];
-  const cats = Object.keys(imperfCats).concat(['edad', 'sol']);
+  const cats = Object.keys(imperfCats).concat(['manoseo', 'cockle', 'sol']);
   cats.forEach(cid => {
-    const name = cid === 'edad' ? 'Bordes envejecidos' : cid === 'sol' ? 'Amarilleo por sol (degradado)' : imperfCats[cid].name;
+    const name = SPECIAL[cid] || imperfCats[cid].name;
     const rg = CAT_RANGE[cid] || (imperfCats[cid] && imperfCats[cid].kind === 'stamp' ? [6, 1] : [4, 1]);
     estadoItems.push({ t: 'slider', cat: cid, label: name, min: 0, max: rg[0], step: rg[1], fmt: v => (rg[1] < 1 ? pct(v) : String(v)) });
   });
@@ -377,8 +382,10 @@ function buildSections() {
       { t: 'slider', path: 'calcoBlur', label: 'Desenfoque', min: 0.2, max: 3, step: 0.05, fmt: pct }
     ] },
     { id: 'aplicar', title: 'Aplicar (tinta)', items: [
-      { t: 'picker', path: 'inkMode', label: 'Cómo se imprime', options: () => [['multiply', 'Tinta transparente (offset, inkjet)'], ['normal', 'Tinta opaca (serigrafía, blanco)']] },
-      { t: 'slider', path: 'grain', label: 'Desplazamiento por las fibras', min: 0, max: 4, step: 0.05, fmt: pct },
+      { t: 'picker', path: 'impresion', label: 'Técnica de impresión', options: () => P.IMPRESIONES.map(c => [c.id, c.name]) },
+      { t: 'picker', path: 'inkMode', label: 'Tipo de tinta', options: () => [['multiply', 'Transparente (se suma al papel)'], ['normal', 'Opaca (serigrafía, blanco)']] },
+      { t: 'slider', path: 'grain', label: 'Deformación por el grano del papel', min: 0, max: 4, step: 0.05, fmt: pct },
+      { t: 'slider', path: 'inkAge', label: 'Envejecimiento de la tinta', min: 0, max: 2, step: 0.05, fmt: pct },
       { t: 'slider', path: 'absorb', label: 'Absorción (huecos en el grano)', min: 0, max: 3, step: 0.05, fmt: pct },
       { t: 'check', path: 'hideOriginals', label: 'Ocultar las capas originales al aplicar' }
     ] },
