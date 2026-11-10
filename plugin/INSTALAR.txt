@@ -1,0 +1,10 @@
+PAPELATOR v2 · Plugin de papel para Photoshop (UXP)
+
+INSTALAR
+1. Doble clic en PAPELATOR.ccx. Creative Cloud avisa de que no está verificado: pulsa Instalar.
+   - Mac: si da "Error -2", mueve el .ccx al Escritorio y repite.
+   - Windows: si no pasa nada, clic derecho > Abrir con > UnifiedPluginInstallerAgent.
+2. Reinicia Photoshop.
+3. Plugins > PAPELATOR > "PAPELATOR" y "PAPELATOR · Ajustes".
+
+Requisitos: Photoshop 2023 o posterior, documento RGB de 8 o 16 bits.

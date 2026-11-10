@@ -1,0 +1,5 @@
+tools/test/*.png
+tools/test/*.jpg
+tools/test/*.raw
+__pycache__/
+dist/
