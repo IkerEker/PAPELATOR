@@ -24,18 +24,35 @@ const COLORS = [
 //    manchado (envejecimiento irregular de hoja completa), sol (un lado expuesto a la luz).
 const ESTADOS = [
   { id: 'nuevo', name: 'Nuevo', desc: 'Recién salido del paquete', edad: 0, v: { fibras: 2, nodulos: 6, polvo: 12 } },
-  { id: 'usado', name: 'Usado', desc: 'Manoseado unos meses', edad: 0.08, v: { manoseo: 0.35, huella_grasa: 1, polvo: 35, fibras: 2, cockle: 0.15 } },
-  { id: 'escuela', name: 'Escuela', desc: 'Goma, lápiz y apuntes', edad: 0.1, v: { grafito: 1, goma: 2, escritura: 1, huella_grasa: 1, manoseo: 0.4, polvo: 40, cockle: 0.2 } },
-  { id: 'bar', name: 'Mesa de bar', desc: 'Café, grasa y ceniza', edad: 0.12, v: { cafe: 1, salp_cafe: 1, huella_grasa: 2, grasa: 1, quemadura: 1, manoseo: 0.35, polvo: 35, cockle: 0.25 } },
-  { id: 'oficial', name: 'Documento oficial', desc: 'Sellado y mecanografiado', edad: 0.3, v: { sello_seco: 1, mecano: 1, huella_tinta: 1, manoseo: 0.25, polvo: 40, foxing: 12, manchado: 0.3 } },
-  { id: 'libro', name: 'Libro viejo', desc: 'Cantos tostados y foxing', edad: 0.55, v: { foxing: 45, polvo: 60, manoseo: 0.5, manchado: 0.35, fibras: 3 } },
-  { id: 'correo', name: 'Correo antiguo', desc: 'Matasellos y viaje', edad: 0.45, v: { matasellos: 1, huella_tinta: 1, foxing: 35, manoseo: 0.35, polvo: 70, manchado: 0.4, cockle: 0.3 } },
-  { id: 'archivo', name: 'Archivado años', desc: 'Carpeta, ácido y polvo', edad: 0.65, v: { foxing: 70, polvo: 160, manchado: 0.8, adhesivo: 1, descamacion: 25, fibras: 4, manoseo: 0.2, cockle: 0.3 } },
+  { id: 'usado', name: 'Usado', desc: 'Manoseado unos meses', edad: 0.08, v: { manoseo: 0.35, huella_grasa: 1, polvo: 35, fibras: 2, cockle: 0.15, media_luna: 1 } },
+  { id: 'escuela', name: 'Escuela', desc: 'Goma, lápiz y apuntes', edad: 0.1, v: { grafito: 1, goma: 2, escritura: 1, huella_grasa: 1, manoseo: 0.4, polvo: 40, cockle: 0.2, grapa_agujero: 1, media_luna: 1, arruguita: 1 } },
+  { id: 'bar', name: 'Mesa de bar', desc: 'Café, grasa y ceniza', edad: 0.12, v: { cafe: 1, salp_cafe: 1, huella_grasa: 2, grasa: 1, quemadura: 1, manoseo: 0.35, polvo: 35, cockle: 0.25, arruguita: 1 } },
+  { id: 'oficial', name: 'Documento oficial', desc: 'Sellado y mecanografiado', edad: 0.3, v: { sello_seco: 1, mecano: 1, huella_tinta: 1, manoseo: 0.25, polvo: 40, foxing: 12, manchado: 0.3, grapa_marca: 1, grapa_agujero: 1, clip_huella: 1 } },
+  { id: 'libro', name: 'Libro viejo', desc: 'Cantos tostados y foxing', edad: 0.55, v: { foxing: 45, polvo: 60, manoseo: 0.5, manchado: 0.35, fibras: 3, media_luna: 1 } },
+  { id: 'correo', name: 'Correo antiguo', desc: 'Matasellos y viaje', edad: 0.45, v: { matasellos: 1, huella_tinta: 1, foxing: 35, manoseo: 0.35, polvo: 70, manchado: 0.4, cockle: 0.3, media_luna: 2, arruguita: 1 } },
+  { id: 'archivo', name: 'Archivado años', desc: 'Carpeta, ácido y polvo', edad: 0.65, v: { foxing: 70, polvo: 160, manchado: 0.8, adhesivo: 1, descamacion: 25, fibras: 4, manoseo: 0.2, cockle: 0.3, grapa_agujero: 2, clip_huella: 1, pinza: 1, media_luna: 1 } },
   { id: 'sol', name: 'Expuesto al sol', desc: 'Un lado tostado por la luz', edad: 0.35, v: { sol: 1, polvo: 45, manchado: 0.4, cockle: 0.2 } },
-  { id: 'humedad', name: 'Humedad', desc: 'Agua, moho y ondulación', edad: 0.4, v: { agua: 2, humedad: 1, foxing: 120, polvo: 70, manchado: 0.6, cockle: 0.8 } },
-  { id: 'taller', name: 'Taller', desc: 'Grasa, huellas y barro', edad: 0.15, v: { grasa: 2, huella_tinta: 2, huella_grasa: 3, barro: 1, grafito: 1, manoseo: 0.8, polvo: 130, cockle: 0.35 } },
+  { id: 'humedad', name: 'Humedad', desc: 'Agua, moho y ondulación', edad: 0.4, v: { agua: 2, humedad: 1, foxing: 120, polvo: 70, manchado: 0.6, cockle: 0.8, arruguita: 1 } },
+  { id: 'taller', name: 'Taller', desc: 'Grasa, huellas y barro', edad: 0.15, v: { grasa: 2, huella_tinta: 2, huella_grasa: 3, barro: 1, grafito: 1, manoseo: 0.8, polvo: 130, cockle: 0.35, arruguita: 2, media_luna: 1, grapa_marca: 1 } },
   { id: 'velas', name: 'Velas y ceniza', desc: 'Cera, quemaduras y calor', edad: 0.2, v: { cera: 2, quemadura: 2, calor: 1, polvo: 35, manoseo: 0.2 } },
-  { id: 'abandonado', name: 'Sótano abandonado', desc: 'Inundado y olvidado', edad: 0.9, v: { agua: 3, humedad: 2, foxing: 220, barro: 1, polvo: 320, sangrado: 1, manchado: 1, manoseo: 0.2, cockle: 1 } }
+  { id: 'abandonado', name: 'Sótano abandonado', desc: 'Inundado y olvidado', edad: 0.9, v: { agua: 3, humedad: 2, foxing: 220, barro: 1, polvo: 320, sangrado: 1, manchado: 1, manoseo: 0.2, cockle: 1, grapa_agujero: 1, clip_huella: 1, arruguita: 2, media_luna: 2 } }
+];
+
+// Pliegues y arrugas (texturas reales reconstruidas en relieve). wear = desgaste de aristas típico de ese uso.
+const PLIEGUES = [
+  { id: 'ninguno', name: 'Sin pliegues' },
+  { id: 'mitad', name: 'Por la mitad', desc: 'Un doblez', cat: 'mitad', wear: 0.7 },
+  { id: 'mitad_gastado', name: 'Mitad, muy usado', desc: 'Doblez abierto mil veces', cat: 'mitad_gastado', wear: 1.5 },
+  { id: 'cuatro', name: 'En cuatro', desc: 'Dos dobleces en cruz', cat: 'cuatro', wear: 0.8 },
+  { id: 'cuatro_gastado', name: 'En cuatro, gastado', desc: 'Cartera o bolsillo', cat: 'cuatro_gastado', wear: 1.6 },
+  { id: 'seis', name: 'En seis', desc: 'Carta en tres y por la mitad', cat: 'seis', wear: 0.9 },
+  { id: 'ocho', name: 'En ocho', desc: 'Tres dobleces', cat: 'ocho', wear: 1 },
+  { id: 'cuadricula', name: 'Muchas veces', desc: 'Doblado hasta ser un cuadradito', cat: 'cuadricula', wear: 1.2 },
+  { id: 'acordeon', name: 'Acordeón', desc: 'Dobleces alternos', cat: 'acordeon', wear: 0.9 },
+  { id: 'casual', name: 'Pliegues sueltos', desc: 'Doblado sin cuidado', cat: 'casual', wear: 0.8 },
+  { id: 'arrugado_suave', name: 'Arrugado suave', desc: 'Arrugado y bien alisado', cat: 'arrugado_suave', wear: 0.5 },
+  { id: 'arrugado', name: 'Arrugado', desc: 'Hecho una bola y abierto', cat: 'arrugado', wear: 0.7 },
+  { id: 'arrugado_plegado', name: 'Arrugado y doblado', desc: 'Doblado y además arrugado', cat: 'arrugado_plegado', wear: 1 }
 ];
 
 // Calco: otro documento por la otra cara
@@ -93,6 +110,10 @@ const DEFAULT_STATE = {
   edad: 0,                            // antigüedad 0..1
   estadoAmount: 1,
   custom: null,                       // recuentos por imperfección (panel de ajustes)
+  pliegue: 'ninguno',
+  pliegueAmount: 1,                   // cuánto relieve tienen los pliegues
+  pliegueWear: 1,                     // cuánto se gastan las aristas (tinta levantada)
+  pliegueVar: 0,                      // 0 = según la variación; 1..n = textura concreta
   calco: 'ninguno',
   calcoAmount: 1,
   calcoBleed: 1,
@@ -109,4 +130,4 @@ const DEFAULT_STATE = {
   hideOriginals: true
 };
 
-module.exports = { COLORS, ESTADOS, CALCOS, IMPRESIONES, LUCES, CALIDADES, DEFAULT_STATE };
+module.exports = { COLORS, ESTADOS, PLIEGUES, CALCOS, IMPRESIONES, LUCES, CALIDADES, DEFAULT_STATE };

@@ -85,6 +85,7 @@ async function catalogs(assets) {
     cache.papers = await assets.json('papers.json');
     cache.imperf = await assets.json('imperf.json');
     cache.calco = await assets.json('calco.json');
+    try { cache.folds = await assets.json('folds.json'); } catch (e) { cache.folds = {}; }
   }
   return cache;
 }
@@ -283,7 +284,8 @@ function drawSprite(S, B, src, rect, cx, cy, sx, sy, rot, mode, op, mask, flip, 
 }
 
 // dónde aparece cada cosa (mm). Sigue la causa física de cada daño.
-function place(rule, r, Wm, Hm, sizeMm) {
+function place(rule, r, Wm, Hm, sizeMm, it) {
+  const halfH = it ? sizeMm * it.h / Math.max(it.w, it.h) / 2 : sizeMm / 2;
   const any = () => ({ x: lerp(0.08, 0.92, r()) * Wm, y: lerp(0.08, 0.92, r()) * Hm, rot: r() * Math.PI * 2 });
   switch (rule) {
     case 'edge': {   // dedos: sobre todo la esquina inferior exterior, luego borde derecho y centro del margen inferior
@@ -310,6 +312,31 @@ function place(rule, r, Wm, Hm, sizeMm) {
     case 'seal': return r() < 0.6 ? { x: lerp(0.58, 0.82, r()) * Wm, y: lerp(0.72, 0.9, r()) * Hm, rot: (r() - 0.5) * 0.3 }
       : { x: lerp(0.15, 0.35, r()) * Wm, y: lerp(0.75, 0.9, r()) * Hm, rot: (r() - 0.5) * 0.3 };
     case 'lower': return { x: lerp(0.15, 0.85, r()) * Wm, y: lerp(0.55, 0.92, r()) * Hm, rot: (r() - 0.5) * 0.7 };
+    case 'staple': {  // grapa: casi siempre esquina superior izquierda; en diagonal, horizontal o vertical. Varias grapas acaban en el mismo sitio.
+      const right = r() < 0.1, q = r();
+      let x, y, rot;
+      if (q < 0.55) { x = lerp(8, 13, r()); y = lerp(8, 13, r()); rot = -Math.PI / 4 + (r() - 0.5) * 0.25; }
+      else if (q < 0.88) { x = lerp(12, 22, r()); y = lerp(5.5, 10, r()); rot = (r() - 0.5) * 0.12; }
+      else { x = lerp(5.5, 10, r()); y = lerp(12, 24, r()); rot = Math.PI / 2 + (r() - 0.5) * 0.12; }
+      if (right) { x = Wm - x; rot = -rot; }
+      return { x, y, rot };
+    }
+    case 'clip': {    // clip: abraza el canto superior, su huella baja perpendicular al borde
+      const x = (r() < 0.75 ? lerp(0.1, 0.42, r()) : lerp(0.6, 0.88, r())) * Wm;
+      return { x, y: halfH + lerp(-3, 1.5, r()), rot: (r() - 0.5) * 0.22 + (r() < 0.5 ? Math.PI : 0) };
+    }
+    case 'binder': {  // pinza: centrada en el canto superior (o en el izquierdo si se archivó de lado)
+      if (r() < 0.8) return { x: lerp(0.38, 0.62, r()) * Wm, y: halfH + lerp(1, 5, r()), rot: (r() - 0.5) * 0.08 };
+      return { x: halfH + lerp(1, 5, r()), y: lerp(0.38, 0.62, r()) * Hm, rot: -Math.PI / 2 + (r() - 0.5) * 0.08 };
+    }
+    case 'handled': { // golpes de uña y arruguitas: donde se coge el papel (esquinas y bordes, sobre todo abajo a la derecha)
+      const q = r(), d = () => lerp(4, 30, Math.pow(r(), 1.4));
+      if (q < 0.4) return { x: Wm - d(), y: Hm - d(), rot: r() * 6.28 };
+      if (q < 0.58) return { x: Wm - d(), y: lerp(0.2, 0.85, r()) * Hm, rot: r() * 6.28 };
+      if (q < 0.72) return { x: Wm - d(), y: d(), rot: r() * 6.28 };
+      if (q < 0.86) return { x: d(), y: lerp(0.15, 0.95, r()) * Hm, rot: r() * 6.28 };
+      return { x: lerp(0.2, 0.8, r()) * Wm, y: Hm - d(), rot: r() * 6.28 };
+    }
     default: return any();
   }
 }
@@ -410,6 +437,122 @@ function genShape(S, st, B, counts) {
   }
 }
 
+// ================================================================ PLIEGUES Y ARRUGAS
+// Cada textura de pliegue viene de una hoja real fotografiada con luz rasante: se reconstruyó su relieve
+// (pendientes = normales, y altura). Aquí se coloca sobre el documento (se gira si es apaisado, se voltea al azar),
+// y se derivan las aristas: crestas (el exterior del doblez, lo que roza y pierde tinta) y valles (el interior).
+// Devuelve un muestreador que el render final usa para: sombreado con la luz elegida, desplazamiento de la tinta,
+// desgaste de las aristas y grietas en las zonas impresas.
+async function genFolds(S, st, assets, B) {
+  const pid = st.pliegue || 'ninguno';
+  const pre = (P.PLIEGUES || []).filter(p => p.id === pid)[0];
+  const cat = cache.folds && pre && cache.folds[pre.cat || pid];
+  const amt = clamp(def(st.pliegueAmount, 1), 0, 3) * clamp(S.k, 0, 2);
+  if (!cat || !cat.items.length || amt <= 0) return null;
+  const r = rng(S.seed * 13 + 101);
+  const nv = cat.items.length;
+  const vi = (def(st.pliegueVar, 0) | 0) > 0 ? ((st.pliegueVar | 0) - 1) % nv : (r() * nv) | 0;
+  const it = cat.items[vi];
+  const img = await loadImg(assets, 'folds/' + it.file);
+  const himg = await loadImg(assets, 'folds/' + it.hfile);
+  const { w, h, ppm } = S;
+  const tw = img.width, th = img.height;
+  // ---- colocación: el lado largo de la textura sigue al lado largo del documento; volteos al azar
+  const rot = w > h;
+  const fx = r() < 0.5, fy = r() < 0.5;
+  // coordenadas de textura: u = a*x + b*y + c ; v = d*x + e*y + f
+  let a, b, c, d, e, f;
+  if (!rot) { a = (tw - 1) / (w - 1); b = 0; d = 0; e = (th - 1) / (h - 1); c = 0; f = 0; }
+  else { a = 0; b = (tw - 1) / (h - 1); d = (th - 1) / (w - 1); e = 0; c = 0; f = 0; }
+  if (fx) { a = -a; b = -b; c = tw - 1; }
+  if (fy) { d = -d; e = -e; f = th - 1; }
+  // escala física: la textura cubre una hoja de 210 mm de ancho; el documento mide (w,h)/ppm mm
+  const docW = (rot ? h : w) / ppm, docH = (rot ? w : h) / ppm;
+  const ax = docW / (tw * it.mmpp), ay = docH / (th * it.mmpp), sbar = Math.sqrt(ax * ay);
+  const hK = it.mmpp * sbar;            // px de altura de la textura → mm en el documento
+  // ---- campos a resolución de textura: pendiente (en px de altura por px), curvatura → crestas, valles, cruces
+  const TN = tw * th, sd = img.data, ch = img.channels;
+  const GX = new Float32Array(TN), GY = new Float32Array(TN);
+  const gm = it.gmax / 127;
+  for (let o = 0; o < TN; o++) { GX[o] = (sd[o * ch] - 128) * gm; GY[o] = (sd[o * ch + 1] - 128) * gm; }
+  const kN = 1 / (it.kmax * it.gmax || 1e-3);
+  const RID = new Float32Array(TN), VAL = new Float32Array(TN), JN = new Float32Array(TN), tmp = new Float32Array(TN);
+  for (let y = 1; y < th - 1; y++) for (let x = 1; x < tw - 1; x++) {
+    const o = y * tw + x;
+    const kxx = (GX[o + 1] - GX[o - 1]) * 0.5 * kN, kyy = (GY[o + tw] - GY[o - tw]) * 0.5 * kN;
+    const div = kxx + kyy;
+    RID[o] = -div; VAL[o] = div;
+    JN[o] = Math.min(Math.abs(kxx), Math.abs(kyy));
+  }
+  gaussBlur(RID, tw, th, 0.7, tmp); gaussBlur(VAL, tw, th, 0.7, tmp);
+  gaussBlur(JN, tw, th, 5, tmp);
+  let jm = 0; for (let o = 0; o < TN; o += 3) if (JN[o] > jm) jm = JN[o];
+  const jinv = 1 / (jm * 0.55 || 1);
+  for (let o = 0; o < TN; o++) {
+    RID[o] = smooth(0.12, 0.75, RID[o]);
+    VAL[o] = smooth(0.12, 0.75, VAL[o]);
+    JN[o] = smooth(0.15, 1, JN[o] * jinv);
+  }
+  const hd = himg.data, hw = himg.width, hh = himg.height, hch = himg.channels;
+  const hsx = (hw - 1) / (tw - 1), hsy = (hh - 1) / (th - 1), hm = it.hmax / 127;
+  const bil = (A, W, H, u, v) => {
+    u = u < 0 ? 0 : u > W - 1.001 ? W - 1.001 : u; v = v < 0 ? 0 : v > H - 1.001 ? H - 1.001 : v;
+    const iu = u | 0, iv = v | 0, du = u - iu, dv = v - iv, o = iv * W + iu;
+    return (A[o] * (1 - du) + A[o + 1] * du) * (1 - dv) + (A[o + W] * (1 - du) + A[o + W + 1] * du) * dv;
+  };
+  const bilH = (u, v) => {
+    u *= hsx; v *= hsy;
+    u = u < 0 ? 0 : u > hw - 1.001 ? hw - 1.001 : u; v = v < 0 ? 0 : v > hh - 1.001 ? hh - 1.001 : v;
+    const iu = u | 0, iv = v | 0, du = u - iu, dv = v - iv, o = iv * hw + iu;
+    return ((hd[o * hch] * (1 - du) + hd[(o + 1) * hch] * du) * (1 - dv) + (hd[(o + hw) * hch] * (1 - du) + hd[(o + hw + 1) * hch] * du) * dv - 128) * hm;
+  };
+  // pendiente en el documento (adimensional, mm de altura por mm) a partir de la de la textura
+  const jx = a * ppm * it.mmpp * sbar, jy = e * ppm * it.mmpp * sbar, jxy = b * ppm * it.mmpp * sbar, jyx = d * ppm * it.mmpp * sbar;
+  const wearBase = def(pre.wear, 1);
+  const F = {
+    amt, it, pre,
+    wear: clamp(def(st.pliegueWear, 1), 0, 3) * wearBase * (1 + 0.8 * clamp(def(st.edad, 0), 0, 1.2)) * Math.min(1.4, clamp(S.k, 0, 2)),
+    dirt: clamp(def(st.edad, 0), 0, 1.2),
+    // muestra en el píxel (x, y) del documento: out = [pendiente x, pendiente y, altura mm, cresta, valle, cruce]
+    sample(x, y, out) {
+      const u = a * x + b * y + c, v = d * x + e * y + f;
+      const gu = bil(GX, tw, th, u, v), gv = bil(GY, tw, th, u, v);
+      out[0] = (gu * jx + gv * jyx) * amt; out[1] = (gu * jxy + gv * jy) * amt;
+      out[2] = bilH(u, v) * hK * amt * 5;     // la reconstrucción pierde la forma amplia: altura realista de una hoja desplegada
+      out[3] = bil(RID, tw, th, u, v); out[4] = bil(VAL, tw, th, u, v); out[5] = bil(JN, tw, th, u, v);
+      return out;
+    }
+  };
+  // ---- color del papel en las aristas: fibras rotas (algo más claras) y, con los años, suciedad en las crestas
+  const alb = B.alb, q = [0, 0, 0, 0, 0, 0];
+  const ds = (S.seed * 5 + 3) | 0, cell = 4 * ppm;
+  const shadeIt = !st._final;     // en «Papel de fondo» se ve el pliegue con una luz suave fija; al aplicar, con la luz elegida
+  const Lx = -0.55, Ly = -0.83, shK = FOLD_LIGHT.ninguna;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    F.sample(x, y, q);
+    const o = y * w + x, j = o * 4;
+    const rr = q[3] * Math.min(1, amt), vv = q[4] * Math.min(1, amt);
+    let m = 1;
+    if (rr > 0.01 || vv > 0.01) {
+      const n = fbm2(x / cell, y / cell, ds);
+      m += rr * 0.025 * (1 - F.dirt) - (rr * (0.03 + 0.09 * smooth(0.35, 0.75, n)) * F.dirt) - vv * 0.012;
+    }
+    if (shadeIt) m *= foldShade(q, Lx, Ly, shK);
+    if (m !== 1) {
+      alb[j] *= m; alb[j + 1] *= m; alb[j + 2] *= m * (m < 1 ? 0.995 : 1);
+    }
+  }
+  return F;
+}
+// luz que revela el relieve del pliegue según la toma (el escáner lo marca mucho: su luz entra rasante por un lado)
+const FOLD_LIGHT = { ninguna: 0.62, escaner: 0.9, dia: 0.85, ventana: 1.35, foco: 0.95, flash: 0.55, sombra: 0.9, lampara: 1.25 };
+function foldShade(q, Lx, Ly, k) {
+  // Lambert linealizado con la luz a ~35° de elevación + oclusión suave en el interior de los valles
+  const s = -(q[0] * Lx + q[1] * Ly) * 1.4 * k;
+  const ao = q[4] * 0.03 * k;
+  return 1 + clamp(s, -0.28, 0.22) - ao;
+}
+
 async function genEstado(S, st, assets, B) {
   const counts = estadoCounts(st);
   const amt = clamp(def(st.estadoAmount, 1), 0, 3);
@@ -422,7 +565,7 @@ async function genEstado(S, st, assets, B) {
   const opK = clamp(k, 0, 2) * Math.min(1.5, amt);
   const order = ['nodulos', 'fibras', 'descamacion', 'polvo', 'uv', 'calor', 'humedad', 'agua', 'foxing', 'cafe', 'salp_cafe',
     'barro', 'grasa', 'cera', 'adhesivo', 'matasellos', 'quemadura', 'sangrado', 'salp_tinta', 'grafito', 'huella_tinta',
-    'huella_grasa', 'goma', 'escritura', 'mecano', 'sello_seco'];
+    'huella_grasa', 'goma', 'escritura', 'mecano', 'sello_seco', 'arruguita', 'media_luna', 'pinza', 'clip_huella', 'grapa_marca', 'grapa_agujero'];
   for (const cid of order) {
     let n = counts[cid]; const C = cats[cid];
     if (!n || !C) continue;
@@ -437,7 +580,7 @@ async function genEstado(S, st, assets, B) {
         const sizeMm = lerp(C.size[0], C.size[1], r());
         const sc = sizeMm * ppm / Math.max(it.w, it.h);
         const an = 1 + (r() - 0.5) * 2 * def(C.aniso, 0.12);    // ninguna mancha tiene las mismas proporciones (las de taza siguen siendo redondas)
-        const pl = place(C.place, r, Wm, Hm, sizeMm);
+        const pl = place(C.place, r, Wm, Hm, sizeMm, it);
         drawSprite(S, B, img, null, pl.x * ppm, pl.y * ppm, sc * an, sc / an, pl.rot, C.mode, op0 * lerp(0.7, 1.05, r()), mask, r() < 0.5,
           Object.assign({ eseed: (r() * 1e6) | 0 }, base));
       }
@@ -642,6 +785,8 @@ async function renderPaper(opts) {
   applyRelief(S, B);
   B.R = null;
   genShape(S, st, B, counts);
+  await prog(0.68, 'Pliegues…');
+  B.fold = await genFolds(S, st, assets, B);
   await prog(0.8, 'Listo el papel');
   return { rgba: new Uint8Array(B.alb.buffer), buffers: B, paper, S, st };
 }
@@ -670,7 +815,8 @@ async function renderFinal(opts) {
   const kk0 = clamp(clamp(def(st0.intensity, 50), 0, 100) / 50, 0, 2);
   const stF = Object.assign({}, st0, {
     _texLight: lerp(1, Lsel.tex, Math.min(1, kk0)),
-    _calcoBoost: st0.luz === 'escaner' ? 1.45 : 1
+    _calcoBoost: st0.luz === 'escaner' ? 1.45 : 1,
+    _final: true
   });
   const base = await renderPaper(Object.assign({}, opts, { state: stF, onProgress: async (v, m) => prog(v * 0.45, m) }));
   const { buffers: B, paper, S, st } = base;
@@ -734,6 +880,19 @@ async function renderFinal(opts) {
   };
   const cA = [0, 0, 0, 0], cB2 = [0, 0, 0, 0];
   const dinv = 1 / (S.dstd || 0.01);
+  // ---- pliegues: normales (sombreado con la luz de la toma), desplazamiento de la tinta y desgaste de las aristas
+  const FD = B.fold, fq = [0, 0, 0, 0, 0, 0];
+  const isPhoto = st.luz !== 'ninguna' && st.luz !== 'escaner';
+  const fShK = FOLD_LIGHT[st.luz] || FOLD_LIGHT.ninguna;
+  // la hoja desplegada no queda plana: lo alto se ve desplazado (inclinación de la toma + perspectiva) y la tinta
+  // cruza la arista con un pequeño quiebro (pendiente)
+  const fTilt = (st.luz === 'escaner' ? 0.04 : isPhoto ? 0.18 : 0.08) * ppm, fTiltX = 0.35, fTiltY = 1;
+  const fPersp = isPhoto ? ppm / (Math.hypot(w, h) * 1.3) : 0;
+  const fSlope = ppm * 0.33;
+  const methW = { offset: 1, tipografia: 0.85, inkjet: 0.7, laser: 1.5 }[method] || 1;
+  const fWear = FD ? FD.wear * methW * 0.45 : 0;
+  const fCell = 2.6 * ppm, fFine = Math.max(1.2, 0.35 * ppm), fSeed = (S.seed * 7 + 5) | 0;
+  const edgeMm = 28 * ppm;
   const mot = 0.8 * ppm, sMot = (S.seed * 3) | 0;
   await prog(0.55, 'Imprimiendo en el papel…');
   for (let y = 1; y < h - 1; y++) {
@@ -744,6 +903,12 @@ async function renderFinal(opts) {
       const gx = (Hs[o + 1] - Hs[o - 1]) * ginv, gy = (Hs[o + w] - Hs[o - w]) * ginv;
       let sx = x - gx * disp, sy = y - gy * disp;
       if (camK) { const f = F[o]; sx -= f * (x - cxp) * camK / ppm; sy -= f * (y - cyp) * camK / ppm; }
+      if (FD) {
+        FD.sample(x, y, fq);
+        const hz = fq[2];
+        sx -= hz * (fTilt * fTiltX + (x - cxp) * fPersp) + fq[0] * fSlope;
+        sy -= hz * (fTilt * fTiltY + (y - cyp) * fPersp) + fq[1] * fSlope;
+      }
       sampleArt(sx, sy, cA);
       if (feather > 0) {
         // la tinta líquida se abre siguiendo las fibras
@@ -787,6 +952,19 @@ async function renderFinal(opts) {
         const gv = gloss[o] + am * 90; gloss[o] = gv > 255 ? 255 : gv;
       }
       if (B.damage) cover *= 1 - B.damage[o] / 255 * 0.85;
+      if (fWear > 0 && (fq[3] > 0.02 || fq[4] > 0.05)) {
+        // la arista exterior del doblez roza y se lleva la tinta: a tramos, primero en las crestas del grano,
+        // más en los cruces de pliegues y cerca de los bordes de la hoja (las esquinas del paquete doblado)
+        const ed = Math.min(x, y, w - 1 - x, h - 1 - y);
+        const edgeK = 1 + 0.7 * smooth(edgeMm, 0, ed);
+        const patch = smooth(0.28, 0.68, fbm2(x / fCell, y / fCell, fSeed));
+        const fine = fbm2(x / fFine, y / fFine, fSeed + 9) - 0.5;
+        const sharp = method === 'laser' ? 0.08 : 0.22;
+        const rg = fq[3] * fq[3], vl = fq[4] * fq[4];      // sólo el filo de la arista, no todo el doblez
+        let wv = fWear * (rg * (0.45 + 1.1 * fq[5]) * edgeK * (0.25 + 0.75 * patch) + vl * 0.12 * (method === 'laser' ? 1 : 0.3));
+        wv = smooth(0.42 - sharp, 0.42 + sharp, wv * (0.7 + 0.6 * smooth(-1.5, 1.5, hn + fine * 2.2)));
+        cover *= 1 - 0.9 * wv;
+      }
       if (gloss && method !== 'laser') cover *= 1 - gloss[o] / 255 * 0.1;
       let r, g, b;
       if (inkMode === 'multiply') { r = pr * (1 - a0 * cover); g = pg * (1 - a1 * cover); b = pb * (1 - a2 * cover); }
@@ -800,6 +978,7 @@ async function renderFinal(opts) {
       if (rk) shade += clamp(-(gx * Lx + gy * Ly) * rk, -0.12, 0.12);
       if (fk) shade += clamp(-((F[o + 1] - F[o - 1]) * Lx + (F[o + w] - F[o - w]) * Ly) * 0.5 * ppm * fk * 0.06, -0.14, 0.14);
       if (Cb && rk) shade += clamp(((Cb[o + 1] - Cb[o - 1]) * Lx + (Cb[o + w] - Cb[o - w]) * Ly) * 0.06 * kk, -0.05, 0.05);
+      if (FD) shade *= foldShade(fq, Lx, Ly, fShK);
       out[j] = r * shade; out[j + 1] = g * shade; out[j + 2] = b * shade; out[j + 3] = 255;
     }
   }

@@ -39141,5 +39141,352 @@
     "src": 59
    }
   ]
+ },
+ "grapa_marca": {
+  "name": "Marca de grapa",
+  "kind": "stamp",
+  "mode": "relief",
+  "size": [
+   13,
+   15
+  ],
+  "place": "staple",
+  "opacity": 0.55,
+  "maxd": 640,
+  "aniso": 0.03,
+  "group": "grapa",
+  "items": [
+   {
+    "file": "grapa_marca_0.png",
+    "w": 479,
+    "h": 112,
+    "src": 0,
+    "mask": false
+   },
+   {
+    "file": "grapa_marca_1.png",
+    "w": 640,
+    "h": 114,
+    "src": 1,
+    "mask": false
+   },
+   {
+    "file": "grapa_marca_2.png",
+    "w": 604,
+    "h": 111,
+    "src": 13,
+    "mask": false
+   },
+   {
+    "file": "grapa_marca_3.png",
+    "w": 640,
+    "h": 108,
+    "src": 30,
+    "mask": false
+   },
+   {
+    "file": "grapa_marca_4.png",
+    "w": 632,
+    "h": 113,
+    "src": 31,
+    "mask": false
+   }
+  ],
+  "erode": 0.1,
+  "cellMm": 2,
+  "absorb": 0,
+  "cockle": 0
+ },
+ "grapa_agujero": {
+  "name": "Agujeros de grapa",
+  "kind": "stamp",
+  "mode": "multiply",
+  "size": [
+   13,
+   16
+  ],
+  "place": "staple",
+  "opacity": 0.6,
+  "maxd": 640,
+  "aniso": 0.03,
+  "group": "grapa",
+  "items": [
+   {
+    "file": "grapa_agujero_0.png",
+    "w": 485,
+    "h": 160,
+    "src": 2,
+    "mask": false
+   },
+   {
+    "file": "grapa_agujero_1.png",
+    "w": 471,
+    "h": 129,
+    "src": 3,
+    "mask": false
+   },
+   {
+    "file": "grapa_agujero_2.png",
+    "w": 613,
+    "h": 140,
+    "src": 4,
+    "mask": false
+   },
+   {
+    "file": "grapa_agujero_3.png",
+    "w": 440,
+    "h": 130,
+    "src": 5,
+    "mask": false
+   },
+   {
+    "file": "grapa_agujero_4.png",
+    "w": 430,
+    "h": 151,
+    "src": 14,
+    "mask": false
+   },
+   {
+    "file": "grapa_agujero_5.png",
+    "w": 520,
+    "h": 165,
+    "src": 15,
+    "mask": false
+   },
+   {
+    "file": "grapa_agujero_6.png",
+    "w": 219,
+    "h": 69,
+    "src": 6,
+    "mask": false
+   },
+   {
+    "file": "grapa_agujero_7.png",
+    "w": 268,
+    "h": 444,
+    "src": 7,
+    "mask": false
+   }
+  ],
+  "erode": 0.1,
+  "cellMm": 2,
+  "absorb": 0,
+  "cockle": 0
+ },
+ "clip_huella": {
+  "name": "Huella de clip",
+  "kind": "stamp",
+  "mode": "relief",
+  "size": [
+   34,
+   40
+  ],
+  "place": "clip",
+  "opacity": 0.5,
+  "maxd": 640,
+  "aniso": 0.04,
+  "items": [
+   {
+    "file": "clip_huella_0.png",
+    "w": 333,
+    "h": 640,
+    "src": 8,
+    "mask": false
+   },
+   {
+    "file": "clip_huella_1.png",
+    "w": 335,
+    "h": 640,
+    "src": 9,
+    "mask": false
+   },
+   {
+    "file": "clip_huella_2.png",
+    "w": 320,
+    "h": 640,
+    "src": 11,
+    "mask": false
+   },
+   {
+    "file": "clip_huella_3.png",
+    "w": 348,
+    "h": 498,
+    "src": 21,
+    "mask": false
+   },
+   {
+    "file": "clip_huella_4.png",
+    "w": 331,
+    "h": 438,
+    "src": 33,
+    "mask": false
+   },
+   {
+    "file": "clip_huella_5.png",
+    "w": 484,
+    "h": 580,
+    "src": 16,
+    "mask": false
+   }
+  ],
+  "erode": 0.1,
+  "cellMm": 2,
+  "absorb": 0,
+  "cockle": 0
+ },
+ "pinza": {
+  "name": "Marcas de pinza",
+  "kind": "stamp",
+  "mode": "relief",
+  "size": [
+   22,
+   32
+  ],
+  "place": "binder",
+  "opacity": 0.5,
+  "maxd": 640,
+  "aniso": 0.04,
+  "items": [
+   {
+    "file": "pinza_0.png",
+    "w": 490,
+    "h": 368,
+    "src": 10,
+    "mask": false
+   },
+   {
+    "file": "pinza_1.png",
+    "w": 605,
+    "h": 141,
+    "src": 12,
+    "mask": false
+   },
+   {
+    "file": "pinza_2.png",
+    "w": 552,
+    "h": 360,
+    "src": 22,
+    "mask": false
+   },
+   {
+    "file": "pinza_3.png",
+    "w": 640,
+    "h": 161,
+    "src": 27,
+    "mask": false
+   },
+   {
+    "file": "pinza_4.png",
+    "w": 636,
+    "h": 146,
+    "src": 28,
+    "mask": false
+   }
+  ],
+  "erode": 0.1,
+  "cellMm": 2,
+  "absorb": 0,
+  "cockle": 0
+ },
+ "media_luna": {
+  "name": "Media luna (golpe de uña)",
+  "kind": "stamp",
+  "mode": "relief",
+  "size": [
+   7,
+   20
+  ],
+  "place": "handled",
+  "opacity": 0.5,
+  "maxd": 640,
+  "aniso": 0.15,
+  "items": [
+   {
+    "file": "media_luna_0.png",
+    "w": 640,
+    "h": 112,
+    "src": 17,
+    "mask": false
+   },
+   {
+    "file": "media_luna_1.png",
+    "w": 236,
+    "h": 152,
+    "src": 18,
+    "mask": false
+   },
+   {
+    "file": "media_luna_2.png",
+    "w": 560,
+    "h": 133,
+    "src": 19,
+    "mask": false
+   },
+   {
+    "file": "media_luna_3.png",
+    "w": 309,
+    "h": 208,
+    "src": 24,
+    "mask": false
+   },
+   {
+    "file": "media_luna_4.png",
+    "w": 441,
+    "h": 207,
+    "src": 25,
+    "mask": false
+   },
+   {
+    "file": "media_luna_5.png",
+    "w": 272,
+    "h": 159,
+    "src": 26,
+    "mask": false
+   }
+  ],
+  "erode": 0.1,
+  "cellMm": 2,
+  "absorb": 0,
+  "cockle": 0
+ },
+ "arruguita": {
+  "name": "Arruguita de manipulación",
+  "kind": "stamp",
+  "mode": "relief",
+  "size": [
+   16,
+   30
+  ],
+  "place": "handled",
+  "opacity": 0.5,
+  "maxd": 640,
+  "aniso": 0.15,
+  "items": [
+   {
+    "file": "arruguita_0.png",
+    "w": 343,
+    "h": 280,
+    "src": 20,
+    "mask": false
+   },
+   {
+    "file": "arruguita_1.png",
+    "w": 337,
+    "h": 476,
+    "src": 29,
+    "mask": false
+   },
+   {
+    "file": "arruguita_2.png",
+    "w": 469,
+    "h": 341,
+    "src": 34,
+    "mask": false
+   }
+  ],
+  "erode": 0.1,
+  "cellMm": 2,
+  "absorb": 0,
+  "cockle": 0
  }
 }

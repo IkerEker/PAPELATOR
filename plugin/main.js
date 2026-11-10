@@ -41,7 +41,7 @@ function saveJSON(key, v) { try { localStorage.setItem(key, JSON.stringify(v)); 
 
 let state = merge(clone(P.DEFAULT_STATE), loadJSON('papelator3.state'));
 const ui = merge({ live: true, group: null, open: { general: true, papel: true } }, loadJSON('papelator2.ui'));
-let papers = [], imperfCats = {};
+let papers = [], imperfCats = {}, foldCats = {};
 
 const refreshers = [];
 let thumbTimer = null, liveTimer = null;
@@ -307,6 +307,7 @@ function buildSimple() {
   function renderChips() {
     chipRow(byId('s-colors'), P.COLORS, () => state.color, v => { state.color = v; }, it => it.hex || 'transparent');
     chipRow(byId('s-estado'), P.ESTADOS, () => (state.custom ? 'custom' : state.estado), v => { state.estado = v; state.custom = null; const e = P.ESTADOS.filter(x => x.id === v)[0]; if (e) state.edad = e.edad; });
+    chipRow(byId('s-pliegue'), P.PLIEGUES, () => state.pliegue, v => { state.pliegue = v; state.pliegueVar = 0; });
     chipRow(byId('s-calco'), P.CALCOS, () => state.calco, v => { state.calco = v; });
     chipRow(byId('s-luz'), P.LUCES, () => state.luz, v => { state.luz = v; });
     chipRow(byId('s-calidad'), P.CALIDADES, () => state.calidad, v => { state.calidad = v; });
@@ -314,6 +315,10 @@ function buildSimple() {
   }
   function sliders() {
     const it = byId('s-intensity'), sc = byId('s-scale'), ex = byId('s-exposure'), ed = byId('s-edad');
+    const pa = byId('s-plamt'), pw = byId('s-plwear');
+    pa.value = Math.round(state.pliegueAmount * 100); byId('s-plamtval').textContent = Math.round(state.pliegueAmount * 100) + '%';
+    pw.value = Math.round(state.pliegueWear * 100); byId('s-plwearval').textContent = Math.round(state.pliegueWear * 100) + '%';
+    byId('s-plopts').style.display = state.pliegue && state.pliegue !== 'ninguno' ? 'block' : 'none';
     ed.value = Math.round(state.edad * 100); byId('s-edadval').textContent = Math.round(state.edad * 100) + '%';
     it.value = state.intensity; byId('s-intval').textContent = state.intensity + '%';
     sc.value = Math.round(state.scale * 100); byId('s-scaleval').textContent = Math.round(state.scale * 100) + '%';
@@ -335,6 +340,15 @@ function buildSimple() {
   bindSlider('s-scale', 's-scaleval', v => { state.scale = v / 100; }, v => v + '%');
   bindSlider('s-exposure', 's-expval', v => { state.exposure = v / 100; }, v => (v > 0 ? '+' : '') + v);
   bindSlider('s-edad', 's-edadval', v => { state.edad = v / 100; }, v => v + '%');
+  bindSlider('s-plamt', 's-plamtval', v => { state.pliegueAmount = v / 100; }, v => v + '%');
+  bindSlider('s-plwear', 's-plwearval', v => { state.pliegueWear = v / 100; }, v => v + '%');
+  byId('s-plvar').addEventListener('click', () => {
+    const pre = P.PLIEGUES.filter(p => p.id === state.pliegue)[0];
+    const cat = pre && foldCats[pre.cat];
+    const n = cat ? cat.items.length : 1;
+    state.pliegueVar = (((state.pliegueVar | 0) || 0) % n) + 1;
+    changed({ source: 'simple' });
+  });
   byId('s-paper').addEventListener('click', doPaper);
   byId('s-apply').addEventListener('click', doApply);
   byId('s-remove').addEventListener('click', doRemove);
@@ -374,6 +388,12 @@ function buildSections() {
       { t: 'slider', path: 'patternOpacity', label: 'Intensidad de las líneas', min: 0, max: 1.5, step: 0.05, fmt: pct }
     ] },
     { id: 'estado', title: 'Estado e imperfecciones', items: estadoItems },
+    { id: 'pliegues', title: 'Pliegues y arrugas', items: [
+      { t: 'picker', path: 'pliegue', label: 'Cómo se dobló', options: () => P.PLIEGUES.map(c => [c.id, c.name]) },
+      { t: 'slider', path: 'pliegueAmount', label: 'Relieve de los pliegues', min: 0, max: 2.5, step: 0.05, fmt: pct },
+      { t: 'slider', path: 'pliegueWear', label: 'Desgaste de las aristas (tinta levantada)', min: 0, max: 3, step: 0.05, fmt: pct },
+      { t: 'slider', path: 'pliegueVar', label: 'Hoja concreta (0 = según la variación)', min: 0, max: 14, step: 1, fmt: v => (v ? '#' + v : 'auto') }
+    ] },
     { id: 'calco', title: 'Calco', items: [
       { t: 'picker', path: 'calco', label: 'Documento de detrás', options: () => P.CALCOS.map(c => [c.id, c.name]) },
       { t: 'slider', path: 'calcoAmount', label: 'Trasluz', min: 0, max: 3, step: 0.05, fmt: pct },
@@ -488,7 +508,7 @@ let ready = null;
 function init() {
   if (!ready) ready = (async () => {
     const cat = await engine.catalogs(assets);
-    papers = cat.papers; imperfCats = cat.imperf;
+    papers = cat.papers; imperfCats = cat.imperf; foldCats = cat.folds || {};
     if (!papers.filter(p => p.id === state.paper).length) state.paper = papers[0].id;
   })();
   return ready;
