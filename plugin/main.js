@@ -323,7 +323,7 @@ function buildSimple() {
     chipRow(byId('s-calco'), P.CALCO_FAMILIAS, it => it.items.indexOf(state.calco) >= 0, it => pickFam('calco', it));
     chipRow(byId('s-luz'), P.LUZ_FAMILIAS, it => it.items.indexOf(state.luz) >= 0, it => pickFam('luz', it));
     chipRow(byId('s-calidad'), P.CALIDAD_FAMILIAS, it => it.items.indexOf(state.calidad) >= 0, it => pickFam('calidad', it));
-    chipRow(byId('s-impresion'), P.IMPRESIONES, it => state.impresion === it.id, it => { state.impresion = it.id; });
+    if (byId('s-impresion')) chipRow(byId('s-impresion'), P.IMPRESIONES, it => state.impresion === it.id, it => { state.impresion = it.id; });
   }
   function sliders() {
     const it = byId('s-intensity'), sc = byId('s-scale'), ex = byId('s-exposure'), ed = byId('s-edad');
