@@ -40,7 +40,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   panels.papelatorAjustes.show({ node: new El('uxp-panel') });
   await sleep(2500);
   const $ = id => document.getElementById(id);
-  console.log('swatches', $('s-swatches').querySelectorAll('.sw').length, 'thumb', String($('s-thumb').src).slice(0, 25));
+  console.log('swatches', $('s-swatches').querySelectorAll('.sw').length, 'thumb', String(($('p-thumb') || {}).src).slice(0, 25));
   console.log('chips color/estado/calco/luz/calidad', ['s-colors', 's-estado', 's-calco', 's-luz', 's-calidad'].map(i => $(i).querySelectorAll('.chip').length).join('/'));
   $('s-estado').querySelectorAll('.chip')[3].fire('click');
   $('s-calco').querySelectorAll('.chip')[3].fire('click'); $('s-pliegue').querySelectorAll('.chip')[2].fire('click'); $('s-r-pliegue').fire('click'); $('s-r-estado').fire('click'); $('s-r-papel').fire('click');
