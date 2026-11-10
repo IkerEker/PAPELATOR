@@ -33,7 +33,10 @@ body {
 .thumbnote { font-size: 10px; opacity: 0.6; margin-top: 4px; }
 
 .sec { margin-top: 10px; }
-.sechead { font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; opacity: 0.75; margin-bottom: 6px; }
+.sechead { font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; opacity: 0.75; margin-bottom: 6px; display: flex; flex-direction: row; align-items: center; }
+.sublabel { display: flex; flex-direction: row; align-items: center; }
+.mini { font-size: 13px; line-height: 13px; padding: 2px 5px; border-radius: 4px; cursor: pointer; opacity: 0.85; letter-spacing: 0; text-transform: none; }
+.mini:hover { background-color: rgba(128,128,128,0.3); opacity: 1; }
 
 .chips { display: flex; flex-direction: row; flex-wrap: wrap; }
 .chip {

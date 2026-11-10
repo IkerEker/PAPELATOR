@@ -40,6 +40,8 @@ function loadJSON(key) { try { const s = localStorage.getItem(key); return s ? J
 function saveJSON(key, v) { try { localStorage.setItem(key, JSON.stringify(v)); } catch (e) { /* sin almacenamiento */ } }
 
 let state = merge(clone(P.DEFAULT_STATE), loadJSON('papelator3.state'));
+if (P.PLIEGUE_ALIAS[state.pliegue]) { state.pliegue = P.PLIEGUE_ALIAS[state.pliegue]; state.pliegueVar = 0; }
+if (!P.PLIEGUES.some(x => x.id === state.pliegue)) state.pliegue = 'ninguno';
 const ui = merge({ live: true, group: null, open: { general: true, papel: true } }, loadJSON('papelator2.ui'));
 let papers = [], imperfCats = {}, foldCats = {};
 
@@ -278,40 +280,50 @@ function chip(label, on, onClick, dot) {
   c.addEventListener('click', onClick);
   return c;
 }
-const GROUPS = ['Patrones', 'Bellas artes', 'Rústicos', 'Técnicos'];
-function paperGroup(id) { const p = papers.filter(x => x.id === id)[0]; return p ? p.group : GROUPS[0]; }
+// familias: el panel muestra pocas opciones; cada una agrupa variantes reales y ⟳ pasa a la siguiente
+const GROUPS = ['Lisos', 'Impresos', 'Rústicos', 'Translúcidos'];
+function typeOf(paperId) { return P.PAPER_TYPES.filter(t => t.papers.indexOf(paperId) >= 0)[0] || P.PAPER_TYPES[0]; }
+function famOf(list, id) { return list.filter(f => f.items.indexOf(id) >= 0)[0] || null; }
+function nextIn(arr, cur) { const i = arr.indexOf(cur); return arr[(i + 1) % arr.length]; }
 
 // =============================================================== PANEL 1 · PRESETS
 function buildSimple() {
   const groupsEl = byId('s-groups'), swEl = byId('s-swatches');
-  if (!ui.group) ui.group = paperGroup(state.paper);
+  if (!ui.group || GROUPS.indexOf(ui.group) < 0) ui.group = typeOf(state.paper).group;
   function renderGroups() {
     groupsEl.innerHTML = '';
     GROUPS.forEach(g => groupsEl.appendChild(chip(g, g === ui.group, () => { ui.group = g; saveJSON('papelator2.ui', ui); renderGroups(); renderSwatches(); })));
   }
   function renderSwatches() {
     swEl.innerHTML = '';
-    papers.filter(p => p.group === ui.group).forEach(p => {
-      const d = h('div', 'sw' + (p.id === state.paper ? ' on' : ''));
-      const img = h('img', 'img'); img.src = 'assets/swatches/' + p.id + '.png';
-      d.appendChild(img); d.appendChild(h('div', 'lbl', p.name));
-      d.dataset.id = p.id;
-      d.addEventListener('click', () => { state.paper = p.id; changed({ source: 'simple' }); });
+    const cur = typeOf(state.paper);
+    P.PAPER_TYPES.filter(t => t.group === ui.group).forEach(t => {
+      const on = t.id === cur.id;
+      const shown = on ? state.paper : t.papers[0];
+      const d = h('div', 'sw' + (on ? ' on' : ''));
+      const img = h('img', 'img'); img.src = 'assets/swatches/' + shown + '.png';
+      d.appendChild(img); d.appendChild(h('div', 'lbl', t.name + (t.papers.length > 1 && on ? ' · ' + (t.papers.indexOf(state.paper) + 1) + '/' + t.papers.length : '')));
+      d.addEventListener('click', () => { if (!on) state.paper = t.papers[0]; changed({ source: 'simple' }); });
       swEl.appendChild(d);
     });
   }
-  function chipRow(el, list, get, set, dotFn) {
+  function chipRow(el, list, isOn, set, dotFn) {
     el.innerHTML = '';
-    list.forEach(it => el.appendChild(chip(it.name, get() === it.id, () => { set(it.id); changed({ source: 'simple' }); }, dotFn ? dotFn(it) : null)));
+    list.forEach(it => el.appendChild(chip(it.name, isOn(it), () => { set(it); changed({ source: 'simple' }); }, dotFn ? dotFn(it) : null)));
   }
+  // familia elegida: si ya estás en ella se conserva la variante; si no, la primera
+  const pickFam = (key, it) => { if (it.items.indexOf(state[key]) < 0) state[key] = it.items[0]; };
   function renderChips() {
-    chipRow(byId('s-colors'), P.COLORS, () => state.color, v => { state.color = v; }, it => it.hex || 'transparent');
-    chipRow(byId('s-estado'), P.ESTADOS, () => (state.custom ? 'custom' : state.estado), v => { state.estado = v; state.custom = null; const e = P.ESTADOS.filter(x => x.id === v)[0]; if (e) state.edad = e.edad; });
-    chipRow(byId('s-pliegue'), P.PLIEGUES, () => state.pliegue, v => { state.pliegue = v; state.pliegueVar = 0; });
-    chipRow(byId('s-calco'), P.CALCOS, () => state.calco, v => { state.calco = v; });
-    chipRow(byId('s-luz'), P.LUCES, () => state.luz, v => { state.luz = v; });
-    chipRow(byId('s-calidad'), P.CALIDADES, () => state.calidad, v => { state.calidad = v; });
-    chipRow(byId('s-impresion'), P.IMPRESIONES, () => state.impresion, v => { state.impresion = v; });
+    chipRow(byId('s-colors'), P.COLORS, it => state.color === it.id, it => { state.color = it.id; }, it => it.hex || 'transparent');
+    chipRow(byId('s-estado'), P.ESTADO_FAMILIAS, it => !state.custom && it.items.indexOf(state.estado) >= 0, it => {
+      state.custom = null; pickFam('estado', it);
+      const e = P.ESTADOS.filter(x => x.id === state.estado)[0]; if (e) state.edad = e.edad;
+    });
+    chipRow(byId('s-pliegue'), P.PLIEGUES, it => state.pliegue === it.id, it => { if (state.pliegue !== it.id) { state.pliegue = it.id; state.pliegueVar = 0; } });
+    chipRow(byId('s-calco'), P.CALCO_FAMILIAS, it => it.items.indexOf(state.calco) >= 0, it => pickFam('calco', it));
+    chipRow(byId('s-luz'), P.LUZ_FAMILIAS, it => it.items.indexOf(state.luz) >= 0, it => pickFam('luz', it));
+    chipRow(byId('s-calidad'), P.CALIDAD_FAMILIAS, it => it.items.indexOf(state.calidad) >= 0, it => pickFam('calidad', it));
+    chipRow(byId('s-impresion'), P.IMPRESIONES, it => state.impresion === it.id, it => { state.impresion = it.id; });
   }
   function sliders() {
     const it = byId('s-intensity'), sc = byId('s-scale'), ex = byId('s-exposure'), ed = byId('s-edad');
@@ -327,7 +339,7 @@ function buildSimple() {
   renderGroups(); renderSwatches(); renderChips(); sliders();
   const live = byId('s-live'); live.checked = !!ui.live;
   refreshers.push(src => {
-    if (src !== 'simple') { const g = paperGroup(state.paper); if (g !== ui.group) { ui.group = g; renderGroups(); } }
+    if (src !== 'simple') { const g = typeOf(state.paper).group; if (g !== ui.group) { ui.group = g; renderGroups(); } }
     renderSwatches(); renderChips(); sliders();
     live.checked = !!ui.live;
   });
@@ -342,13 +354,19 @@ function buildSimple() {
   bindSlider('s-edad', 's-edadval', v => { state.edad = v / 100; }, v => v + '%');
   bindSlider('s-plamt', 's-plamtval', v => { state.pliegueAmount = v / 100; }, v => v + '%');
   bindSlider('s-plwear', 's-plwearval', v => { state.pliegueWear = v / 100; }, v => v + '%');
-  byId('s-plvar').addEventListener('click', () => {
+  // ⟳ de cada sección: otra versión de eso, sin tocar lo demás
+  const dice = (id, fn) => { const el = byId(id); if (el) el.addEventListener('click', () => { fn(); changed({ source: 'simple' }); }); };
+  dice('s-r-papel', () => { state.paper = nextIn(typeOf(state.paper).papers, state.paper); state.seedPaper = (state.seedPaper | 0) + 1; });
+  dice('s-r-estado', () => { const f = famOf(P.ESTADO_FAMILIAS, state.estado); if (f && !state.custom) state.estado = nextIn(f.items, state.estado); state.seedEstado = (state.seedEstado | 0) + 1; });
+  dice('s-r-pliegue', () => {
     const pre = P.PLIEGUES.filter(p => p.id === state.pliegue)[0];
-    const cat = pre && foldCats[pre.cat];
+    const cat = pre && foldCats[pre.group];
     const n = cat ? cat.items.length : 1;
-    state.pliegueVar = (((state.pliegueVar | 0) || 0) % n) + 1;
-    changed({ source: 'simple' });
+    state.pliegueVar = ((state.pliegueVar | 0) + 1) % n;
   });
+  dice('s-r-calco', () => { const f = famOf(P.CALCO_FAMILIAS, state.calco); if (f) state.calco = nextIn(f.items, state.calco); });
+  dice('s-r-luz', () => { const f = famOf(P.LUZ_FAMILIAS, state.luz); if (f) state.luz = nextIn(f.items, state.luz); });
+  dice('s-r-calidad', () => { const f = famOf(P.CALIDAD_FAMILIAS, state.calidad); if (f) state.calidad = nextIn(f.items, state.calidad); state.seed = (state.seed | 0) + 1; });
   byId('s-paper').addEventListener('click', doPaper);
   byId('s-apply').addEventListener('click', doApply);
   byId('s-remove').addEventListener('click', doRemove);
@@ -392,7 +410,7 @@ function buildSections() {
       { t: 'picker', path: 'pliegue', label: 'Cómo se dobló', options: () => P.PLIEGUES.map(c => [c.id, c.name]) },
       { t: 'slider', path: 'pliegueAmount', label: 'Relieve de los pliegues', min: 0, max: 2.5, step: 0.05, fmt: pct },
       { t: 'slider', path: 'pliegueWear', label: 'Desgaste de las aristas (tinta levantada)', min: 0, max: 3, step: 0.05, fmt: pct },
-      { t: 'slider', path: 'pliegueVar', label: 'Hoja concreta (0 = según la variación)', min: 0, max: 14, step: 1, fmt: v => (v ? '#' + v : 'auto') }
+      { t: 'slider', path: 'pliegueVar', label: 'Hoja real del grupo', min: 0, max: 28, step: 1, fmt: v => '#' + (v + 1) }
     ] },
     { id: 'calco', title: 'Calco', items: [
       { t: 'picker', path: 'calco', label: 'Documento de detrás', options: () => P.CALCOS.map(c => [c.id, c.name]) },

@@ -7,14 +7,35 @@ const COLORS = [
   { id: 'blanco', name: 'Blanco', hex: '#f6f5f1' },
   { id: 'marfil', name: 'Marfil', hex: '#f2ead8' },
   { id: 'crema', name: 'Crema', hex: '#eee1c3' },
-  { id: 'hueso', name: 'Hueso', hex: '#e7e1d3' },
   { id: 'gris', name: 'Gris', hex: '#d8d8d4' },
-  { id: 'amarillo', name: 'Amarillo', hex: '#f4e9b0' },
   { id: 'rosa', name: 'Rosa', hex: '#f2ddd6' },
   { id: 'azul', name: 'Azul', hex: '#dce6ee' },
-  { id: 'verde', name: 'Verde', hex: '#e0e9d9' },
-  { id: 'kraft', name: 'Kraft', hex: '#b88d62' },
   { id: 'negro', name: 'Negro', hex: '#2c2b2a' }
+];
+
+// Tipos de papel (lo que se elige). Cada tipo agrupa sus variantes reales; ⟳ pasa a la siguiente.
+const PAPER_TYPES = [
+  { id: 'folio', name: 'Folio', group: 'Lisos', papers: ['folio', 'papel_fino', 'bristol'] },
+  { id: 'acuarela_fina', name: 'Acuarela fina', group: 'Lisos', papers: ['acuarela_fino', 'acuarela_satinada'] },
+  { id: 'acuarela_gruesa', name: 'Acuarela gruesa', group: 'Lisos', papers: ['acuarela_grueso', 'acuarela_grueso_2'] },
+  { id: 'algodon', name: 'Algodón', group: 'Lisos', papers: ['algodon', 'algodon_crema'] },
+  { id: 'verjurado', name: 'Verjurado', group: 'Lisos', papers: ['verjurado', 'verjurado_marfil'] },
+  { id: 'periodico', name: 'Periódico', group: 'Lisos', papers: ['periodico', 'periodico_gris'] },
+  { id: 'rayado', name: 'Rayado', group: 'Impresos', papers: ['rayado', 'rayado_tenue'] },
+  { id: 'cuadriculado', name: 'Cuadriculado', group: 'Impresos', papers: ['cuadricula', 'cuadricula_clara'] },
+  { id: 'milimetrado', name: 'Milimetrado', group: 'Impresos', papers: ['milimetrado_azul', 'milimetrado_naranja', 'milimetrado'] },
+  { id: 'punteado', name: 'Punteado', group: 'Impresos', papers: ['punteado', 'punteado_suave'] },
+  { id: 'isometrico', name: 'Isométrico', group: 'Impresos', papers: ['isometrico', 'triangular'] },
+  { id: 'pentagrama', name: 'Pentagrama', group: 'Impresos', papers: ['pentagrama'] },
+  { id: 'kraft', name: 'Kraft', group: 'Rústicos', papers: ['kraft', 'kraft_claro'] },
+  { id: 'reciclado', name: 'Reciclado', group: 'Rústicos', papers: ['reciclado', 'reciclado_motas'] },
+  { id: 'hecho_mano', name: 'Hecho a mano', group: 'Rústicos', papers: ['hecho_mano', 'hecho_mano_fibroso', 'hecho_mano_grumos'] },
+  { id: 'arroz', name: 'Arroz', group: 'Rústicos', papers: ['arroz', 'arroz_artesanal', 'arroz_dorado'] },
+  { id: 'pergamino', name: 'Pergamino', group: 'Rústicos', papers: ['pergamino', 'pergamino_oscuro', 'pergamino_blanco'] },
+  { id: 'carton', name: 'Cartón', group: 'Rústicos', papers: ['corrugado', 'corrugado_fino'] },
+  { id: 'cartulina', name: 'Cartulina gris', group: 'Rústicos', papers: ['cartulina_gris', 'reciclado_gris'] },
+  { id: 'vegetal', name: 'Vegetal', group: 'Translúcidos', papers: ['vegetal', 'vegetal_arrugado'] },
+  { id: 'encerado', name: 'Encerado', group: 'Translúcidos', papers: ['encerado', 'horno'] }
 ];
 
 // Estado del papel: cada preset cuenta una historia distinta.
@@ -38,23 +59,21 @@ const ESTADOS = [
   { id: 'abandonado', name: 'Sótano abandonado', desc: 'Inundado y olvidado', edad: 0.9, v: { agua: 3, humedad: 2, foxing: 220, barro: 1, polvo: 320, sangrado: 1, manchado: 1, manoseo: 0.2, cockle: 1, grapa_agujero: 1, clip_huella: 1, arruguita: 2, media_luna: 2 } }
 ];
 
-// Pliegues y arrugas (texturas reales reconstruidas en relieve). wear = desgaste de aristas típico de ese uso.
+// Pliegues: número de veces que se dobló (líneas de pliegue que se ven) o arrugado. ⟳ recorre las hojas reales
+// de ese grupo; el relieve y el desgaste de las aristas son sliders.
 const PLIEGUES = [
   { id: 'ninguno', name: 'Sin pliegues' },
-  { id: 'mitad', name: 'Por la mitad', desc: 'Un doblez', cat: 'mitad', wear: 0.7 },
-  { id: 'mitad_gastado', name: 'Mitad, muy usado', desc: 'Doblez abierto mil veces', cat: 'mitad_gastado', wear: 1.5 },
-  { id: 'cuatro', name: 'En cuatro', desc: 'Dos dobleces en cruz', cat: 'cuatro', wear: 0.8 },
-  { id: 'cuatro_gastado', name: 'En cuatro, gastado', desc: 'Cartera o bolsillo', cat: 'cuatro_gastado', wear: 1.6 },
-  { id: 'seis', name: 'En seis', desc: 'Carta en tres y por la mitad', cat: 'seis', wear: 0.9 },
-  { id: 'ocho', name: 'En ocho', desc: 'Tres dobleces', cat: 'ocho', wear: 1 },
-  { id: 'nueve', name: 'En nueve', desc: 'Tres por tres', cat: 'nueve', wear: 1 },
-  { id: 'cuadricula', name: 'Muchas veces', desc: 'Doblado hasta ser un cuadradito', cat: 'cuadricula', wear: 1.2 },
-  { id: 'acordeon', name: 'Acordeón', desc: 'Dobleces alternos', cat: 'acordeon', wear: 0.9 },
-  { id: 'casual', name: 'Pliegues sueltos', desc: 'Doblado sin cuidado', cat: 'casual', wear: 0.8 },
-  { id: 'arrugado_suave', name: 'Arrugado suave', desc: 'Arrugado y bien alisado', cat: 'arrugado_suave', wear: 0.5 },
-  { id: 'arrugado', name: 'Arrugado', desc: 'Hecho una bola y abierto', cat: 'arrugado', wear: 0.7 },
-  { id: 'arrugado_plegado', name: 'Arrugado y doblado', desc: 'Doblado y además arrugado', cat: 'arrugado_plegado', wear: 1 }
+  { id: '1', name: '1 vez', group: '1' },
+  { id: '2', name: '2 veces', group: '2' },
+  { id: '3', name: '3 veces', group: '3' },
+  { id: '4', name: '4 veces', group: '4' },
+  { id: '5', name: '5 veces', group: '5' },
+  { id: '6', name: '6 veces', group: '6' },
+  { id: 'arrugado', name: 'Arrugado', group: 'arrugado' }
 ];
+// estados antiguos guardados -> nuevos
+const PLIEGUE_ALIAS = { mitad: '1', mitad_gastado: '1', cuatro: '2', cuatro_gastado: '2', seis: '3', ocho: '4', nueve: '4', acordeon: '4',
+  cuadricula: '5', casual: 'arrugado', arrugado_suave: 'arrugado', arrugado_plegado: 'arrugado' };
 
 // Calco: otro documento por la otra cara
 const CALCOS = [
@@ -97,9 +116,42 @@ const CALIDADES = [
   { id: 'analogica', name: 'Cámara analógica' }
 ];
 
+// Familias: lo que se ve en el panel principal. Cada una agrupa variantes concretas; ⟳ pasa a la siguiente.
+const ESTADO_FAMILIAS = [
+  { id: 'nuevo', name: 'Nuevo', items: ['nuevo'] },
+  { id: 'usado', name: 'Usado', items: ['usado'] },
+  { id: 'escuela', name: 'Escuela', items: ['escuela'] },
+  { id: 'oficina', name: 'Oficina', items: ['oficial', 'archivo'] },
+  { id: 'manchas', name: 'Con manchas', items: ['bar', 'taller', 'velas'] },
+  { id: 'antiguo', name: 'Antiguo', items: ['libro', 'correo', 'sol'] },
+  { id: 'humedad', name: 'Humedad', items: ['humedad', 'abandonado'] }
+];
+const CALCO_FAMILIAS = [
+  { id: 'ninguno', name: 'Sin calco', items: ['ninguno'] },
+  { id: 'documento', name: 'Tu documento', items: ['documento'] },
+  { id: 'impreso', name: 'Texto impreso', items: ['periodico', 'folio'] },
+  { id: 'manuscrito', name: 'A mano', items: ['apuntes', 'rotulador'] }
+];
+const LUZ_FAMILIAS = [
+  { id: 'ninguna', name: 'Sin foto', items: ['ninguna'] },
+  { id: 'escaner', name: 'Escáner', items: ['escaner'] },
+  { id: 'natural', name: 'Luz natural', items: ['dia', 'ventana'] },
+  { id: 'lampara', name: 'Lámpara', items: ['lampara', 'foco'] },
+  { id: 'movil', name: 'Flash', items: ['flash', 'sombra'] }
+];
+const CALIDAD_FAMILIAS = [
+  { id: 'perfecta', name: 'Perfecta', items: ['perfecta'] },
+  { id: 'escaner', name: 'Escáner', items: ['escaner_pro', 'escaner_oficina'] },
+  { id: 'movil', name: 'Móvil', items: ['movil', 'movil_antiguo'] },
+  { id: 'fotocopia', name: 'Fotocopia', items: ['fotocopia'] },
+  { id: 'analogica', name: 'Analógica', items: ['analogica'] }
+];
+
 const DEFAULT_STATE = {
   version: 3,
   seed: 11,
+  seedPaper: 0,                       // ⟳ de cada sección
+  seedEstado: 0,
   intensity: 50,                      // 0 = casi sin cambio · 50 = sutil (por defecto) · 100 = muy marcado
   paper: 'folio',
   color: 'original',                  // id de COLORS o '#rrggbb'
@@ -114,7 +166,7 @@ const DEFAULT_STATE = {
   pliegue: 'ninguno',
   pliegueAmount: 1,                   // cuánto relieve tienen los pliegues
   pliegueWear: 1,                     // cuánto se gastan las aristas (tinta levantada)
-  pliegueVar: 0,                      // 0 = según la variación; 1..n = textura concreta
+  pliegueVar: 0,                      // hoja real dentro del grupo (⟳)
   calco: 'ninguno',
   calcoAmount: 1,
   calcoBleed: 1,
@@ -131,4 +183,4 @@ const DEFAULT_STATE = {
   hideOriginals: true
 };
 
-module.exports = { COLORS, ESTADOS, PLIEGUES, CALCOS, IMPRESIONES, LUCES, CALIDADES, DEFAULT_STATE };
+module.exports = { COLORS, PAPER_TYPES, ESTADO_FAMILIAS, CALCO_FAMILIAS, LUZ_FAMILIAS, CALIDAD_FAMILIAS, PLIEGUE_ALIAS, ESTADOS, PLIEGUES, CALCOS, IMPRESIONES, LUCES, CALIDADES, DEFAULT_STATE };

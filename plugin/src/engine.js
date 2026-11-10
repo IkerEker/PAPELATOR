@@ -146,12 +146,12 @@ async function genPaper(S, st, assets, B) {
   // anti-repetición: dos lecturas desplazadas mezcladas por un ruido suave (no en papeles con patrón)
   // (cartón ondulado: sólo a lo largo de la onda; verjurado: nada, sus líneas son regulares)
   const mix = paper.kind !== 'pattern' && paper.mix !== 'none';
-  const r = rng(S.seed + 77);
+  const r = rng(S.seedP + 77);
   const o1x = r() * mw, o2x = r() * mw;
   let o1y = r() * mh, o2y = r() * mh;
   if (paper.mix === 'x') { o1y = 0; o2y = 0; }
   const M = B.T; M.fill(0);
-  if (mix) addValueNoise(M, w, h, (mw / ux) * 0.7, (mh / uy) * 0.7, 1, S.seed + 78);
+  if (mix) addValueNoise(M, w, h, (mw / ux) * 0.7, (mh / uy) * 0.7, 1, S.seedP + 78);
   // tinte de color propio
   const cw = cimg ? cimg.width : 0, chh = cimg ? cimg.height : 0;
   let mt = [1, 1, 1];
@@ -374,7 +374,7 @@ async function genAging(S, st, assets, B, paper, counts) {
   const sol = def(counts.sol, 0) * kk * amt, manoseo = def(counts.manoseo, 0) * kk * amt;
   const manchado = def(counts.manchado, 0) * amt;
   if (edad <= 0.001 && sol <= 0 && manoseo <= 0) return;
-  const r = rng(S.seed * 13 + 5);
+  const r = rng(S.seedE * 13 + 5);
   const s1 = (r() * 1e6) | 0, s2 = (r() * 1e6) | 0, s3 = (r() * 1e6) | 0;
   const c30 = 30 * ppm, c6 = 6 * ppm, c2 = 2.2 * ppm;
   const band = (5 + 9 * Math.min(1, edad)) * ppm;
@@ -403,6 +403,7 @@ async function genAging(S, st, assets, B, paper, counts) {
   const tint = [1, 1, 1];
   const soil = [0.83, 0.8, 0.75];
   const st6 = Math.max(1, Math.round(c6 / 8)), st30 = Math.max(1, Math.round(c30 / 10));
+  const AM = st._final ? (B.ageMap = new Float32Array(w * h)) : null;   // para envejecer la tinta igual que el papel
   const N1 = lowField(w, h, st30, (x, y) => fbm2(x / c30, y / c30, s1));
   const N2 = lowField(w, h, st6, (x, y) => vnoise(x / c6, y / c6, s2));
   const N3 = lowField(w, h, st30, (x, y) => vnoise(x / c30, y / c30, s3));
@@ -421,6 +422,7 @@ async function genAging(S, st, assets, B, paper, counts) {
         const ex = smooth(-soft, soft, dpx);
         if (ex > 0) a += sol * 0.22 * def(paper.ageK, 1) * ex * (0.72 + 0.28 * clamp((t - cut) / (1 - cut), 0, 1)) * (0.85 + 0.3 * n1);
       }
+      if (AM) AM[o] = a;
       if (a > 0.002) { ageTint(a, tint); alb[j] *= tint[0]; alb[j + 1] *= tint[1]; alb[j + 2] *= tint[2]; }
       if (sheet) {
         let u = x / w, v = y / h; if (flipX) u = 1 - u; if (flipY) v = 1 - v;
@@ -450,7 +452,7 @@ function genShape(S, st, B, counts) {
   const { w, h, ppm, N } = S;
   const kk = clamp(S.k, 0, 2);
   const cock = (def(counts.cockle, 0) + clamp(def(st.edad, 0), 0, 1) * 0.25) * kk;
-  const r = rng(S.seed * 17 + 3);
+  const r = rng(S.seedE * 17 + 3);
   const s1 = (r() * 1e6) | 0, s2 = (r() * 1e6) | 0;
   const along = h >= w;   // la fibra suele ir a lo largo de la hoja
   const cA = 16 * ppm, cB = 44 * ppm;
@@ -471,120 +473,89 @@ function genShape(S, st, B, counts) {
 }
 
 // ================================================================ PLIEGUES Y ARRUGAS
-// Cada textura de pliegue viene de una hoja real fotografiada con luz rasante: se reconstruyó su relieve
-// (pendientes = normales, y altura). Aquí se coloca sobre el documento (se gira si es apaisado, se voltea al azar),
-// y se derivan las aristas: crestas (el exterior del doblez, lo que roza y pierde tinta) y valles (el interior).
-// Devuelve un muestreador que el render final usa para: sombreado con la luz elegida, desplazamiento de la tinta,
-// desgaste de las aristas y grietas en las zonas impresas.
+// Cada textura es el sombreado REAL de una hoja fotografiada (sin la luz de la toma ni el grano de su papel).
+// Se aplica tal cual: multiplica papel y tinta a la vez (la luz cae sobre todo por igual). De ella salen también
+//  · un mapa de desplazamiento suave (como «Desplazar» de Photoshop con la textura desenfocada): la tinta se
+//    quiebra un poco al cruzar el pliegue, sin forzar;
+//  · las aristas (líneas finas de alto contraste): ahí roza el papel doblado y se levanta la tinta.
+const FOLD_LIGHT = { ninguna: 1, escaner: 0.8, dia: 1, ventana: 1.2, foco: 1, flash: 0.75, sombra: 1, lampara: 1.12 };
+function cubic(a, b, c, d, t) { return b + 0.5 * t * (c - a + t * (2 * a - 5 * b + 4 * c - d + t * (3 * (b - c) + d - a))); }
 async function genFolds(S, st, assets, B) {
   const pid = st.pliegue || 'ninguno';
   const pre = (P.PLIEGUES || []).filter(p => p.id === pid)[0];
-  const cat = cache.folds && pre && cache.folds[pre.cat || pid];
+  const cat = cache.folds && pre && pre.group ? cache.folds[pre.group] : null;
   const amt = clamp(def(st.pliegueAmount, 1), 0, 3) * clamp(S.k, 0, 2);
   if (!cat || !cat.items.length || amt <= 0) return null;
-  const r = rng(S.seed * 13 + 101);
+  const r = rng(S.seedF);
   const nv = cat.items.length;
-  const vi = (def(st.pliegueVar, 0) | 0) > 0 ? ((st.pliegueVar | 0) - 1) % nv : (r() * nv) | 0;
+  const vi = (((def(st.pliegueVar, 0) | 0) % nv) + nv) % nv;
   const it = cat.items[vi];
-  const gk = def(it.gain, 1);         // cada hoja normalizada dentro de su grupo
   const img = await loadImg(assets, 'folds/' + it.file);
-  const himg = await loadImg(assets, 'folds/' + it.hfile);
   const { w, h, ppm } = S;
-  const tw = img.width, th = img.height;
-  // ---- colocación: el lado largo de la textura sigue al lado largo del documento; volteos al azar
-  const rot = w > h;
-  const fx = r() < 0.5, fy = r() < 0.5;
-  // coordenadas de textura: u = a*x + b*y + c ; v = d*x + e*y + f
-  let a, b, c, d, e, f;
-  if (!rot) { a = (tw - 1) / (w - 1); b = 0; d = 0; e = (th - 1) / (h - 1); c = 0; f = 0; }
-  else { a = 0; b = (tw - 1) / (h - 1); d = (th - 1) / (w - 1); e = 0; c = 0; f = 0; }
+  const tw = img.width, th = img.height, TN = tw * th, ch = img.channels, sd = img.data;
+  // colocación: el lado largo de la textura con el lado largo del documento; volteos según la variación
+  const rot = w > h, fx = r() < 0.5, fy = r() < 0.5;
+  let a, b, c = 0, d, e, f = 0;
+  if (!rot) { a = (tw - 1) / (w - 1); b = 0; d = 0; e = (th - 1) / (h - 1); }
+  else { a = 0; b = (tw - 1) / (h - 1); d = (th - 1) / (w - 1); e = 0; }
   if (fx) { a = -a; b = -b; c = tw - 1; }
   if (fy) { d = -d; e = -e; f = th - 1; }
-  // escala física: la textura cubre una hoja de 210 mm de ancho; el documento mide (w,h)/ppm mm
-  const docW = (rot ? h : w) / ppm, docH = (rot ? w : h) / ppm;
-  const ax = docW / (tw * it.mmpp), ay = docH / (th * it.mmpp), sbar = Math.sqrt(ax * ay);
-  const hK = it.mmpp * sbar;            // px de altura de la textura → mm en el documento
-  // ---- campos a resolución de textura: pendiente (en px de altura por px), curvatura → crestas, valles, cruces
-  const TN = tw * th, sd = img.data, ch = img.channels;
-  const GX = new Float32Array(TN), GY = new Float32Array(TN);
-  const gm = it.gmax / 127;
-  for (let o = 0; o < TN; o++) { GX[o] = (sd[o * ch] - 128) * gm; GY[o] = (sd[o * ch + 1] - 128) * gm; }
-  const kN = 1 / (it.kmax * it.gmax || 1e-3);
-  const RID = new Float32Array(TN), VAL = new Float32Array(TN), JN = new Float32Array(TN), tmp = new Float32Array(TN);
-  for (let y = 1; y < th - 1; y++) for (let x = 1; x < tw - 1; x++) {
-    const o = y * tw + x;
-    const kxx = (GX[o + 1] - GX[o - 1]) * 0.5 * kN, kyy = (GY[o + tw] - GY[o - tw]) * 0.5 * kN;
-    const div = kxx + kyy;
-    RID[o] = -div; VAL[o] = div;
-    JN[o] = Math.min(Math.abs(kxx), Math.abs(kyy));
-  }
-  gaussBlur(RID, tw, th, 0.7, tmp); gaussBlur(VAL, tw, th, 0.7, tmp);
-  gaussBlur(JN, tw, th, 5, tmp);
-  let jm = 0; for (let o = 0; o < TN; o += 3) if (JN[o] > jm) jm = JN[o];
-  const jinv = 1 / (jm * 0.55 || 1);
-  for (let o = 0; o < TN; o++) {
-    RID[o] = smooth(0.12, 0.75, RID[o]);
-    VAL[o] = smooth(0.12, 0.75, VAL[o]);
-    JN[o] = smooth(0.15, 1, JN[o] * jinv);
-  }
-  const hd = himg.data, hw = himg.width, hh = himg.height, hch = himg.channels;
-  const hsx = (hw - 1) / (tw - 1), hsy = (hh - 1) / (th - 1), hm = it.hmax / 127;
-  const bil = (A, W, H, u, v) => {
-    u = u < 0 ? 0 : u > W - 1.001 ? W - 1.001 : u; v = v < 0 ? 0 : v > H - 1.001 ? H - 1.001 : v;
-    const iu = u | 0, iv = v | 0, du = u - iu, dv = v - iv, o = iv * W + iu;
-    return (A[o] * (1 - du) + A[o + 1] * du) * (1 - dv) + (A[o + W] * (1 - du) + A[o + W + 1] * du) * dv;
+  const tpm = tw / 210;                                   // px de textura por mm (la foto es un A4)
+  // ---- campos a resolución de textura
+  const g = 1 / it.gain * def(it.norm, 1);
+  const SH = new Float32Array(TN);
+  for (let o = 0; o < TN; o++) SH[o] = (sd[o * ch] - 128) * g;
+  const tmp = new Float32Array(TN);
+  const DS = new Float32Array(SH); gaussBlur(DS, tw, th, 1.3 * tpm, tmp);          // desplazamiento: textura desenfocada
+  const CR = new Float32Array(SH); gaussBlur(CR, tw, th, 0.7 * tpm, tmp);          // aristas: contraste fino
+  for (let o = 0; o < TN; o++) CR[o] = Math.abs(SH[o] - CR[o]);
+  gaussBlur(CR, tw, th, 0.35, tmp);
+  let cm = 0; { const hst = new Float32Array(TN >> 4); for (let i = 0; i < hst.length; i++) hst[i] = CR[i << 4]; hst.sort(); cm = hst[(hst.length * 0.996) | 0] || 1e-3; }
+  for (let o = 0; o < TN; o++) CR[o] = smooth(0.3, 1, CR[o] / cm);
+  const JN = new Float32Array(CR); gaussBlur(JN, tw, th, 2.5 * tpm, tmp);            // cruces: mucha arista junta
+  let jm = 0; for (let o = 0; o < TN; o += 5) if (JN[o] > jm) jm = JN[o];
+  for (let o = 0; o < TN; o++) JN[o] = smooth(0.35, 0.9, JN[o] / (jm || 1));
+  const bil = (A, u, v) => {
+    u = u < 0 ? 0 : u > tw - 1.001 ? tw - 1.001 : u; v = v < 0 ? 0 : v > th - 1.001 ? th - 1.001 : v;
+    const iu = u | 0, iv = v | 0, du = u - iu, dv = v - iv, o = iv * tw + iu;
+    return (A[o] * (1 - du) + A[o + 1] * du) * (1 - dv) + (A[o + tw] * (1 - du) + A[o + tw + 1] * du) * dv;
   };
-  const bilH = (u, v) => {
-    u *= hsx; v *= hsy;
-    u = u < 0 ? 0 : u > hw - 1.001 ? hw - 1.001 : u; v = v < 0 ? 0 : v > hh - 1.001 ? hh - 1.001 : v;
-    const iu = u | 0, iv = v | 0, du = u - iu, dv = v - iv, o = iv * hw + iu;
-    return ((hd[o * hch] * (1 - du) + hd[(o + 1) * hch] * du) * (1 - dv) + (hd[(o + hw) * hch] * (1 - du) + hd[(o + hw + 1) * hch] * du) * dv - 128) * hm;
+  // bicúbico (Catmull-Rom) para el sombreado: las aristas siguen nítidas al ampliar la textura
+  const bic = (u, v) => {
+    u = u < 1 ? 1 : u > tw - 2.001 ? tw - 2.001 : u; v = v < 1 ? 1 : v > th - 2.001 ? th - 2.001 : v;
+    const iu = u | 0, iv = v | 0, du = u - iu, dv = v - iv;
+    let o = (iv - 1) * tw + iu - 1;
+    const r0 = cubic(SH[o], SH[o + 1], SH[o + 2], SH[o + 3], du); o += tw;
+    const r1 = cubic(SH[o], SH[o + 1], SH[o + 2], SH[o + 3], du); o += tw;
+    const r2 = cubic(SH[o], SH[o + 1], SH[o + 2], SH[o + 3], du); o += tw;
+    const r3 = cubic(SH[o], SH[o + 1], SH[o + 2], SH[o + 3], du);
+    return cubic(r0, r1, r2, r3, dv);
   };
-  // pendiente en el documento (adimensional, mm de altura por mm) a partir de la de la textura
-  const jx = a * ppm * it.mmpp * sbar, jy = e * ppm * it.mmpp * sbar, jxy = b * ppm * it.mmpp * sbar, jyx = d * ppm * it.mmpp * sbar;
-  const wearBase = def(pre.wear, 1);
   const F = {
     amt, it, pre,
-    wear: clamp(def(st.pliegueWear, 1), 0, 3) * wearBase * (1 + 0.8 * clamp(def(st.edad, 0), 0, 1.2)) * Math.min(1.4, clamp(S.k, 0, 2)),
+    wear: clamp(def(st.pliegueWear, 1), 0, 3) * (1 + 0.8 * clamp(def(st.edad, 0), 0, 1.2)) * Math.min(1.4, clamp(S.k, 0, 2)),
     dirt: clamp(def(st.edad, 0), 0, 1.2),
-    // muestra en el píxel (x, y) del documento: out = [pendiente x, pendiente y, altura mm, cresta, valle, cruce]
+    // out = [sombreado-1, desplazamiento, arista, cruce]
     sample(x, y, out) {
       const u = a * x + b * y + c, v = d * x + e * y + f;
-      const gu = bil(GX, tw, th, u, v), gv = bil(GY, tw, th, u, v);
-      out[0] = (gu * jx + gv * jyx) * amt * gk; out[1] = (gu * jxy + gv * jy) * amt * gk;
-      out[2] = bilH(u, v) * hK * amt * gk * 5;     // la reconstrucción pierde la forma amplia: altura realista de una hoja desplegada
-      out[3] = bil(RID, tw, th, u, v); out[4] = bil(VAL, tw, th, u, v); out[5] = bil(JN, tw, th, u, v);
+      out[0] = bic(u, v) * amt; out[1] = bil(DS, u, v) * amt; out[2] = bil(CR, u, v); out[3] = bil(JN, u, v);
       return out;
     }
   };
-  // ---- color del papel en las aristas: fibras rotas (algo más claras) y, con los años, suciedad en las crestas
-  const alb = B.alb, q = [0, 0, 0, 0, 0, 0];
-  const ds = (S.seed * 5 + 3) | 0, cell = 4 * ppm;
-  const shadeIt = !st._final;     // en «Papel de fondo» se ve el pliegue con una luz suave fija; al aplicar, con la luz elegida
-  const Lx = -0.55, Ly = -0.83, shK = FOLD_LIGHT.ninguna;
+  // ---- en el papel: color de la arista (fibra rota algo más clara; con los años, suciedad) y, en «Papel de fondo»,
+  // el sombreado para ver el pliegue mientras se trabaja
+  const alb = B.alb, q = [0, 0, 0, 0];
+  const ds = (S.seedF * 5 + 3) | 0, cell = 4 * ppm;
+  const shadeIt = !st._final, am1 = Math.min(1, amt);
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
     F.sample(x, y, q);
-    const o = y * w + x, j = o * 4;
-    const rr = q[3] * Math.min(1, amt), vv = q[4] * Math.min(1, amt);
+    const j = (y * w + x) * 4;
     let m = 1;
-    if (rr > 0.01 || vv > 0.01) {
-      const n = fbm2(x / cell, y / cell, ds);
-      m += rr * 0.025 * (1 - F.dirt) - (rr * (0.03 + 0.09 * smooth(0.35, 0.75, n)) * F.dirt) - vv * 0.012;
-    }
-    if (shadeIt) m *= foldShade(q, Lx, Ly, shK);
-    if (m !== 1) {
-      alb[j] *= m; alb[j + 1] *= m; alb[j + 2] *= m * (m < 1 ? 0.995 : 1);
-    }
+    if (q[2] > 0.02) m += q[2] * am1 * (0.02 * (1 - F.dirt) - (0.025 + 0.08 * smooth(0.35, 0.75, fbm2(x / cell, y / cell, ds))) * F.dirt);
+    if (shadeIt) m *= clamp(1 + q[0], 0.3, 1.6);
+    if (m !== 1) { alb[j] *= m; alb[j + 1] *= m; alb[j + 2] *= m * (m < 1 ? 0.995 : 1); }
   }
   return F;
-}
-// luz que revela el relieve del pliegue según la toma (el escáner lo marca mucho: su luz entra rasante por un lado)
-const FOLD_LIGHT = { ninguna: 0.62, escaner: 0.9, dia: 0.85, ventana: 1.35, foco: 0.95, flash: 0.55, sombra: 0.9, lampara: 1.25 };
-function foldShade(q, Lx, Ly, k) {
-  // Lambert linealizado con la luz a ~35° de elevación + oclusión suave en el interior de los valles
-  const s = -(q[0] * Lx + q[1] * Ly) * 1.4 * k;
-  const ao = q[4] * 0.03 * k;
-  return 1 + clamp(s, -0.28, 0.22) - ao;
 }
 
 async function genEstado(S, st, assets, B) {
@@ -595,7 +566,7 @@ async function genEstado(S, st, assets, B) {
   const { w, h, ppm } = S;
   const Wm = w / ppm, Hm = h / ppm, areaK = (Wm * Hm) / (210 * 297);
   const cats = cache.imperf;
-  const r = rng(S.seed * 31 + 7);
+  const r = rng(S.seedE * 31 + 7);
   const opK = clamp(k, 0, 2) * Math.min(1.5, amt);
   const order = ['nodulos', 'fibras', 'descamacion', 'polvo', 'uv', 'calor', 'humedad', 'agua', 'foxing', 'cafe', 'salp_cafe',
     'barro', 'grasa', 'cera', 'adhesivo', 'matasellos', 'quemadura', 'sangrado', 'salp_tinta', 'grafito', 'huella_tinta',
@@ -802,6 +773,10 @@ async function renderPaper(opts) {
   const st = Object.assign({}, P.DEFAULT_STATE, state || {});
   const N = w * h;
   const S = { w, h, ppm, N, seed: (def(st.seed, 1) | 0) * 7919 + 13, k: clamp(def(st.intensity, 50), 0, 100) / 50 };
+  // semillas por sección: el botón ⟳ de cada sección cambia sólo lo suyo
+  S.seedP = S.seed + (def(st.seedPaper, 0) | 0) * 104729;
+  S.seedE = S.seed + (def(st.seedEstado, 0) | 0) * 130363;
+  S.seedF = S.seed * 3 + 101 + (def(st.pliegueVar, 0) | 0) * 7;
   const B = { alb: new Uint8ClampedArray(N * 4), D: new Float32Array(N), T: new Float32Array(N), F: new Float32Array(N), R: new Float32Array(N),
     trans: new Uint8Array(N), gloss: new Uint8Array(N), damage: new Uint8Array(N) };
   await prog(0.05, 'Cargando la textura…');
@@ -894,10 +869,16 @@ async function renderFinal(opts) {
   const feather = method === 'inkjet' ? Math.max(0.4, ppm * 0.03 * (1 + 2.5 * porous)) : 0;
 
   // ---- 3) envejecimiento de la tinta
+  // Una tinta de 100 años: los colorantes se han ido con la luz (el amarillo y el magenta antes que el cian), el negro
+  // ha perdido fuerza y vira a pardo, y la tinta se ha levantado — primero en las crestas del grano, a manchitas y a
+  // tramos. Todo sigue el envejecimiento del propio papel: donde el papel está más tostado (cantos, zona al sol) la
+  // tinta está más gastada.
   const inkAge = clamp(def(st.edad, 0), 0, 1.3) * clamp(def(st.inkAge, 1), 0, 2) * kk;
-  const cap = 0.955 - 0.07 * Math.min(1, inkAge);          // el negro nunca es negro puro
-  const desat = 0.28 * Math.min(1, inkAge), yFade = 0.38 * Math.min(1, inkAge), dens = 1 - 0.14 * Math.min(1, inkAge);
-  const warm = 0.12 * Math.min(1, inkAge);
+  const cap = 0.955 - 0.03 * Math.min(1, inkAge);          // el negro nunca es negro puro
+  const AM = B.ageMap || null;
+  let amInv = 1;
+  if (AM) { let sm = 0, n = 0; for (let o = 0; o < N; o += 37) { sm += AM[o]; n++; } amInv = n && sm > 0 ? n / sm : 1; }
+  const lft = Math.max(1.1, 0.16 * ppm), mot2 = 1.6 * ppm, flk = Math.max(1.5, 0.3 * ppm), lSeed = (S.seedE * 11 + 17) | 0, patchE = 7 * ppm;
   const absorb = clamp(def(st.absorb, 1), 0, 3) * kk;
   const mixK = clamp(k * 1.4, 0, 1);
   const inkMode = st.inkMode === 'normal' ? 'normal' : 'multiply';
@@ -915,17 +896,13 @@ async function renderFinal(opts) {
   const cA = [0, 0, 0, 0], cB2 = [0, 0, 0, 0];
   const dinv = 1 / (S.dstd || 0.01);
   // ---- pliegues: normales (sombreado con la luz de la toma), desplazamiento de la tinta y desgaste de las aristas
-  const FD = B.fold, fq = [0, 0, 0, 0, 0, 0];
-  const isPhoto = st.luz !== 'ninguna' && st.luz !== 'escaner';
+  const FD = B.fold, fq = [0, 0, 0, 0];
   const fShK = FOLD_LIGHT[st.luz] || FOLD_LIGHT.ninguna;
-  // la hoja desplegada no queda plana: lo alto se ve desplazado (inclinación de la toma + perspectiva) y la tinta
-  // cruza la arista con un pequeño quiebro (pendiente)
-  const fTilt = (st.luz === 'escaner' ? 0.04 : isPhoto ? 0.18 : 0.08) * ppm, fTiltX = 0.35, fTiltY = 1;
-  const fPersp = isPhoto ? ppm / (Math.hypot(w, h) * 1.3) : 0;
-  const fSlope = ppm * 0.33;
+  // desplazamiento suave (como «Desplazar» con la textura desenfocada): ~0,3 mm en los pliegues más marcados
+  const fDisp = 2.4 * ppm;
   const methW = { offset: 1, tipografia: 0.85, inkjet: 0.7, laser: 1.5 }[method] || 1;
-  const fWear = FD ? FD.wear * methW * 0.45 : 0;
-  const fCell = 2.6 * ppm, fFine = Math.max(1.2, 0.35 * ppm), fSeed = (S.seed * 7 + 5) | 0;
+  const fWear = FD ? FD.wear * methW * 0.36 : 0;
+  const fCell = 2.6 * ppm, fFine = Math.max(1.2, 0.35 * ppm), fSeed = (S.seedF * 7 + 5) | 0;
   const edgeMm = 28 * ppm;
   const mot = 0.8 * ppm, sMot = (S.seed * 3) | 0;
   await prog(0.55, 'Imprimiendo en el papel…');
@@ -937,12 +914,7 @@ async function renderFinal(opts) {
       const gx = (Hs[o + 1] - Hs[o - 1]) * ginv, gy = (Hs[o + w] - Hs[o - w]) * ginv;
       let sx = x - gx * disp, sy = y - gy * disp;
       if (camK) { const f = F[o]; sx -= f * (x - cxp) * camK / ppm; sy -= f * (y - cyp) * camK / ppm; }
-      if (FD) {
-        FD.sample(x, y, fq);
-        const hz = fq[2];
-        sx -= hz * (fTilt * fTiltX + (x - cxp) * fPersp) + fq[0] * fSlope;
-        sy -= hz * (fTilt * fTiltY + (y - cyp) * fPersp) + fq[1] * fSlope;
-      }
+      if (FD) { FD.sample(x, y, fq); sx -= fq[1] * fDisp; sy -= fq[1] * fDisp * 0.65; }
       sampleArt(sx, sy, cA);
       if (feather > 0) {
         // la tinta líquida se abre siguiendo las fibras
@@ -955,15 +927,28 @@ async function renderFinal(opts) {
       // absorbancia de la tinta (premultiplicada sobre blanco)
       let a0 = (1 - cA[0]) * al, a1 = (1 - cA[1]) * al, a2 = (1 - cA[2]) * al;
       const am = (a0 + a1 + a2) / 3;
-      if (inkAge > 0) {
-        // los colores se apagan, el amarillo es el primero en irse y el negro se vuelve pardo
-        a0 = lerp(a0, am, desat); a1 = lerp(a1, am, desat); a2 = lerp(a2, am, desat);
-        const yel = Math.max(0, a2 - Math.max(a0, a1)); a2 -= yel * yFade;
-        a0 *= dens; a1 *= dens; a2 *= dens;
-        if (am > 0.55) a2 *= 1 - warm * (am - 0.55) / 0.45;
+      const hn = D[o] * dinv;
+      if (inkAge > 0 && am > 0.003) {
+        const Fl = AM ? clamp(AM[o] * amInv, 0.55, 2.2) : 1;
+        const ea = 1 - Math.exp(-1.8 * inkAge * Fl);
+        // densidades ópticas: parte neutra (negro) y parte de color
+        let d0 = -Math.log(1 - Math.min(0.985, a0)), d1 = -Math.log(1 - Math.min(0.985, a1)), d2 = -Math.log(1 - Math.min(0.985, a2));
+        const kN = Math.min(d0, d1, d2);
+        const c0 = (d0 - kN) * (1 - 0.45 * ea), c1 = (d1 - kN) * (1 - 0.7 * ea), c2 = (d2 - kN) * (1 - 0.8 * ea);
+        const kD = kN * (1 - 0.42 * ea);
+        // tinta levantada: en las fibras altas, irregular, con escamas sueltas
+        const fineN = fbm2(x / lft, y / lft, lSeed);
+        const lift = ea * (0.14 + 0.4 * smooth(0.3, 0.8, fineN * 0.8 + 0.22 * smooth(-1, 2, hn)));
+        const pv = fbm2(x / patchE, y / patchE, lSeed + 5);       // zonas más gastadas (manchas de varios mm)
+        const mott = (1 - ea * 0.25 * (fbm2(x / mot2, y / mot2, lSeed + 3) - 0.5)) * (1 - ea * 0.3 * smooth(0.42, 0.75, pv));
+        // escamas: se agrupan en las zonas gastadas, casi no hay en las sanas
+        const ft = 0.9 - 0.1 * ea - 0.16 * ea * smooth(0.35, 0.75, pv);
+        const fl = ea > 0.12 ? smooth(ft, ft + 0.04, fbm2(x / flk, y / flk, lSeed + 7)) : 0;
+        const keep = (1 - lift) * mott * (1 - 0.9 * fl);
+        d0 = (c0 + kD * (1 - 0.24 * ea)) * keep; d1 = (c1 + kD * (1 - 0.11 * ea)) * keep; d2 = (c2 + kD) * keep;
+        a0 = 1 - Math.exp(-d0); a1 = 1 - Math.exp(-d1); a2 = 1 - Math.exp(-d2);
       }
       a0 *= cap; a1 *= cap; a2 *= cap;
-      const hn = D[o] * dinv;
       let cover = 1;
       let pr = alb[j], pg = alb[j + 1], pb = alb[j + 2];
       if (method === 'offset') {
@@ -986,7 +971,7 @@ async function renderFinal(opts) {
         const gv = gloss[o] + am * 90; gloss[o] = gv > 255 ? 255 : gv;
       }
       if (B.damage) cover *= 1 - B.damage[o] / 255 * 0.85;
-      if (fWear > 0 && (fq[3] > 0.02 || fq[4] > 0.05)) {
+      if (fWear > 0 && fq[2] > 0.03) {
         // la arista exterior del doblez roza y se lleva la tinta: a tramos, primero en las crestas del grano,
         // más en los cruces de pliegues y cerca de los bordes de la hoja (las esquinas del paquete doblado)
         const ed = Math.min(x, y, w - 1 - x, h - 1 - y);
@@ -994,10 +979,9 @@ async function renderFinal(opts) {
         const patch = smooth(0.28, 0.68, fbm2(x / fCell, y / fCell, fSeed));
         const fine = fbm2(x / fFine, y / fFine, fSeed + 9) - 0.5;
         const sharp = method === 'laser' ? 0.08 : 0.22;
-        const rg = fq[3] * fq[3], vl = fq[4] * fq[4];      // sólo el filo de la arista, no todo el doblez
-        let wv = fWear * (rg * (0.45 + 1.1 * fq[5]) * edgeK * (0.25 + 0.75 * patch) + vl * 0.12 * (method === 'laser' ? 1 : 0.3));
+        let wv = fWear * fq[2] * fq[2] * (0.5 + 1.1 * fq[3]) * edgeK * (0.25 + 0.75 * patch);   // sólo el filo de la arista
         wv = smooth(0.42 - sharp, 0.42 + sharp, wv * (0.7 + 0.6 * smooth(-1.5, 1.5, hn + fine * 2.2)));
-        cover *= 1 - 0.9 * wv;
+        cover *= 1 - 0.82 * wv;
       }
       if (gloss && method !== 'laser') cover *= 1 - gloss[o] / 255 * 0.1;
       let r, g, b;
@@ -1012,7 +996,7 @@ async function renderFinal(opts) {
       if (rk) shade += clamp(-(gx * Lx + gy * Ly) * rk, -0.12, 0.12);
       if (fk) shade += clamp(-((F[o + 1] - F[o - 1]) * Lx + (F[o + w] - F[o - w]) * Ly) * 0.5 * ppm * fk * 0.06, -0.14, 0.14);
       if (Cb && rk) shade += clamp(((Cb[o + 1] - Cb[o - 1]) * Lx + (Cb[o + w] - Cb[o - w]) * Ly) * 0.06 * kk, -0.05, 0.05);
-      if (FD) shade *= foldShade(fq, Lx, Ly, fShK);
+      if (FD) shade *= clamp(1 + fq[0] * fShK, 0.3, 1.6);
       out[j] = r * shade; out[j + 1] = g * shade; out[j + 2] = b * shade; out[j + 3] = 255;
     }
   }
