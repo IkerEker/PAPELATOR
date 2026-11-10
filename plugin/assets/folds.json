@@ -14,7 +14,8 @@
     "rough": 0.00642,
     "lightDeg": 90,
     "src": 1,
-    "bytes": 565325
+    "bytes": 565325,
+    "gain": 1.0
    },
    {
     "file": "mitad_1.png",
@@ -28,7 +29,8 @@
     "rough": 0.00433,
     "lightDeg": 270,
     "src": 17,
-    "bytes": 773714
+    "bytes": 773714,
+    "gain": 1.35
    },
    {
     "file": "mitad_2.png",
@@ -42,7 +44,8 @@
     "rough": 0.01033,
     "lightDeg": 270,
     "src": 19,
-    "bytes": 672217
+    "bytes": 672217,
+    "gain": 0.857
    },
    {
     "file": "mitad_3.png",
@@ -56,7 +59,8 @@
     "rough": 0.00843,
     "lightDeg": 270,
     "src": 20,
-    "bytes": 680640
+    "bytes": 680640,
+    "gain": 0.907
    },
    {
     "file": "mitad_4.png",
@@ -70,7 +74,8 @@
     "rough": 0.00616,
     "lightDeg": 270,
     "src": 22,
-    "bytes": 741500
+    "bytes": 741500,
+    "gain": 1.066
    }
   ]
  },
@@ -89,7 +94,8 @@
     "rough": 0.01347,
     "lightDeg": 90,
     "src": 2,
-    "bytes": 475801
+    "bytes": 475801,
+    "gain": 1.261
    },
    {
     "file": "mitad_gastado_1.png",
@@ -103,7 +109,8 @@
     "rough": 0.0229,
     "lightDeg": 270,
     "src": 25,
-    "bytes": 471206
+    "bytes": 471206,
+    "gain": 0.917
    },
    {
     "file": "mitad_gastado_2.png",
@@ -117,7 +124,8 @@
     "rough": 0.01994,
     "lightDeg": 270,
     "src": 35,
-    "bytes": 478276
+    "bytes": 478276,
+    "gain": 1.0
    }
   ]
  },
@@ -136,7 +144,8 @@
     "rough": 0.00866,
     "lightDeg": 270,
     "src": 5,
-    "bytes": 774716
+    "bytes": 774716,
+    "gain": 1.204
    },
    {
     "file": "cuatro_1.png",
@@ -150,7 +159,8 @@
     "rough": 0.01105,
     "lightDeg": 270,
     "src": 7,
-    "bytes": 639938
+    "bytes": 639938,
+    "gain": 0.982
    },
    {
     "file": "cuatro_2.png",
@@ -164,7 +174,8 @@
     "rough": 0.01143,
     "lightDeg": 0,
     "src": 8,
-    "bytes": 606754
+    "bytes": 606754,
+    "gain": 1.002
    },
    {
     "file": "cuatro_3.png",
@@ -178,7 +189,8 @@
     "rough": 0.01477,
     "lightDeg": 90,
     "src": 11,
-    "bytes": 638237
+    "bytes": 638237,
+    "gain": 0.885
    },
    {
     "file": "cuatro_4.png",
@@ -192,7 +204,8 @@
     "rough": 0.01093,
     "lightDeg": 90,
     "src": 12,
-    "bytes": 647517
+    "bytes": 647517,
+    "gain": 1.044
    },
    {
     "file": "cuatro_5.png",
@@ -206,7 +219,8 @@
     "rough": 0.01273,
     "lightDeg": 270,
     "src": 14,
-    "bytes": 603020
+    "bytes": 603020,
+    "gain": 0.959
    },
    {
     "file": "cuatro_6.png",
@@ -220,7 +234,8 @@
     "rough": 0.01446,
     "lightDeg": 270,
     "src": 16,
-    "bytes": 585139
+    "bytes": 585139,
+    "gain": 0.859
    },
    {
     "file": "cuatro_7.png",
@@ -234,7 +249,8 @@
     "rough": 0.01815,
     "lightDeg": 135,
     "src": 26,
-    "bytes": 825413
+    "bytes": 825413,
+    "gain": 0.761
    },
    {
     "file": "cuatro_8.png",
@@ -248,7 +264,8 @@
     "rough": 0.01053,
     "lightDeg": 270,
     "src": 27,
-    "bytes": 726442
+    "bytes": 726442,
+    "gain": 1.078
    },
    {
     "file": "cuatro_9.png",
@@ -262,7 +279,8 @@
     "rough": 0.00646,
     "lightDeg": 135,
     "src": 37,
-    "bytes": 986219
+    "bytes": 986219,
+    "gain": 1.5
    },
    {
     "file": "cuatro_10.png",
@@ -276,7 +294,8 @@
     "rough": 0.01049,
     "lightDeg": 270,
     "src": 39,
-    "bytes": 671301
+    "bytes": 671301,
+    "gain": 1.076
    },
    {
     "file": "cuatro_11.png",
@@ -290,7 +309,8 @@
     "rough": 0.00899,
     "lightDeg": 270,
     "src": 44,
-    "bytes": 654181
+    "bytes": 654181,
+    "gain": 1.108
    },
    {
     "file": "cuatro_12.png",
@@ -304,7 +324,8 @@
     "rough": 0.0126,
     "lightDeg": 240,
     "src": 46,
-    "bytes": 629521
+    "bytes": 629521,
+    "gain": 0.989
    },
    {
     "file": "cuatro_13.png",
@@ -318,7 +339,8 @@
     "rough": 0.01201,
     "lightDeg": 270,
     "src": 53,
-    "bytes": 610320
+    "bytes": 610320,
+    "gain": 0.998
    }
   ]
  },
@@ -337,7 +359,8 @@
     "rough": 0.02145,
     "lightDeg": 90,
     "src": 28,
-    "bytes": 671121
+    "bytes": 671121,
+    "gain": 1.01
    },
    {
     "file": "cuatro_gastado_1.png",
@@ -351,7 +374,8 @@
     "rough": 0.02144,
     "lightDeg": 300,
     "src": 38,
-    "bytes": 590436
+    "bytes": 590436,
+    "gain": 1.0
    },
    {
     "file": "cuatro_gastado_2.png",
@@ -365,27 +389,14 @@
     "rough": 0.02263,
     "lightDeg": 120,
     "src": 41,
-    "bytes": 706699
+    "bytes": 706699,
+    "gain": 0.964
    }
   ]
  },
  "seis": {
   "name": "En seis",
   "items": [
-   {
-    "file": "seis_0.png",
-    "hfile": "seis_0_h.png",
-    "w": 791,
-    "h": 1118,
-    "gmax": 0.13892,
-    "hmax": 1.0033,
-    "kmax": 0.37167,
-    "mmpp": 0.26549,
-    "rough": 0.01919,
-    "lightDeg": 285,
-    "src": 9,
-    "bytes": 532122
-   },
    {
     "file": "seis_1.png",
     "hfile": "seis_1_h.png",
@@ -398,7 +409,8 @@
     "rough": 0.0121,
     "lightDeg": 90,
     "src": 10,
-    "bytes": 545184
+    "bytes": 545184,
+    "gain": 1.305
    },
    {
     "file": "seis_2.png",
@@ -412,7 +424,8 @@
     "rough": 0.01622,
     "lightDeg": 90,
     "src": 32,
-    "bytes": 676969
+    "bytes": 676969,
+    "gain": 1.009
    },
    {
     "file": "seis_3.png",
@@ -426,7 +439,8 @@
     "rough": 0.01841,
     "lightDeg": 270,
     "src": 33,
-    "bytes": 643970
+    "bytes": 643970,
+    "gain": 0.918
    },
    {
     "file": "seis_4.png",
@@ -440,7 +454,8 @@
     "rough": 0.01793,
     "lightDeg": 90,
     "src": 42,
-    "bytes": 651333
+    "bytes": 651333,
+    "gain": 0.991
    },
    {
     "file": "seis_5.png",
@@ -454,7 +469,8 @@
     "rough": 0.01576,
     "lightDeg": 270,
     "src": 43,
-    "bytes": 709672
+    "bytes": 709672,
+    "gain": 1.025
    },
    {
     "file": "seis_6.png",
@@ -468,13 +484,29 @@
     "rough": 0.04089,
     "lightDeg": 270,
     "src": 49,
-    "bytes": 449465
+    "bytes": 449465,
+    "gain": 0.75
    }
   ]
  },
  "ocho": {
   "name": "En ocho",
   "items": [
+   {
+    "file": "seis_0.png",
+    "hfile": "seis_0_h.png",
+    "w": 791,
+    "h": 1118,
+    "gmax": 0.13892,
+    "hmax": 1.0033,
+    "kmax": 0.37167,
+    "mmpp": 0.26549,
+    "rough": 0.01919,
+    "lightDeg": 285,
+    "src": 9,
+    "bytes": 532122,
+    "gain": 1.09
+   },
    {
     "file": "ocho_0.png",
     "hfile": "ocho_0_h.png",
@@ -487,21 +519,8 @@
     "rough": 0.01968,
     "lightDeg": 285,
     "src": 31,
-    "bytes": 614820
-   },
-   {
-    "file": "ocho_1.png",
-    "hfile": "ocho_1_h.png",
-    "w": 791,
-    "h": 1118,
-    "gmax": 0.1064,
-    "hmax": 0.6282,
-    "kmax": 0.51435,
-    "mmpp": 0.26549,
-    "rough": 0.01478,
-    "lightDeg": 300,
-    "src": 34,
-    "bytes": 827136
+    "bytes": 614820,
+    "gain": 1.0
    },
    {
     "file": "ocho_2.png",
@@ -515,26 +534,13 @@
     "rough": 0.056,
     "lightDeg": 285,
     "src": 45,
-    "bytes": 447436
-   },
-   {
-    "file": "ocho_3.png",
-    "hfile": "ocho_3_h.png",
-    "w": 791,
-    "h": 1118,
-    "gmax": 0.11829,
-    "hmax": 0.9499,
-    "kmax": 0.38297,
-    "mmpp": 0.26549,
-    "rough": 0.01783,
-    "lightDeg": 270,
-    "src": 48,
-    "bytes": 573380
+    "bytes": 447436,
+    "gain": 0.75
    }
   ]
  },
- "cuadricula": {
-  "name": "Cuadrícula",
+ "nueve": {
+  "name": "En nueve",
   "items": [
    {
     "file": "cuadricula_0.png",
@@ -548,7 +554,8 @@
     "rough": 0.02882,
     "lightDeg": 90,
     "src": 0,
-    "bytes": 578161
+    "bytes": 578161,
+    "gain": 1.0
    },
    {
     "file": "cuadricula_1.png",
@@ -562,7 +569,8 @@
     "rough": 0.03767,
     "lightDeg": 285,
     "src": 3,
-    "bytes": 644283
+    "bytes": 644283,
+    "gain": 0.874
    },
    {
     "file": "cuadricula_2.png",
@@ -576,21 +584,8 @@
     "rough": 0.02912,
     "lightDeg": 300,
     "src": 4,
-    "bytes": 646535
-   },
-   {
-    "file": "cuadricula_3.png",
-    "hfile": "cuadricula_3_h.png",
-    "w": 791,
-    "h": 1118,
-    "gmax": 0.09747,
-    "hmax": 0.578,
-    "kmax": 0.51761,
-    "mmpp": 0.26549,
-    "rough": 0.01224,
-    "lightDeg": 75,
-    "src": 13,
-    "bytes": 735592
+    "bytes": 646535,
+    "gain": 0.999
    },
    {
     "file": "cuadricula_4.png",
@@ -604,7 +599,8 @@
     "rough": 0.01384,
     "lightDeg": 270,
     "src": 18,
-    "bytes": 647223
+    "bytes": 647223,
+    "gain": 1.5
    },
    {
     "file": "cuadricula_5.png",
@@ -618,7 +614,58 @@
     "rough": 0.01738,
     "lightDeg": 300,
     "src": 23,
-    "bytes": 600961
+    "bytes": 600961,
+    "gain": 1.444
+   }
+  ]
+ },
+ "cuadricula": {
+  "name": "Muchas veces",
+  "items": [
+   {
+    "file": "ocho_1.png",
+    "hfile": "ocho_1_h.png",
+    "w": 791,
+    "h": 1118,
+    "gmax": 0.1064,
+    "hmax": 0.6282,
+    "kmax": 0.51435,
+    "mmpp": 0.26549,
+    "rough": 0.01478,
+    "lightDeg": 300,
+    "src": 34,
+    "bytes": 827136,
+    "gain": 0.99
+   },
+   {
+    "file": "ocho_3.png",
+    "hfile": "ocho_3_h.png",
+    "w": 791,
+    "h": 1118,
+    "gmax": 0.11829,
+    "hmax": 0.9499,
+    "kmax": 0.38297,
+    "mmpp": 0.26549,
+    "rough": 0.01783,
+    "lightDeg": 270,
+    "src": 48,
+    "bytes": 573380,
+    "gain": 0.929
+   },
+   {
+    "file": "cuadricula_3.png",
+    "hfile": "cuadricula_3_h.png",
+    "w": 791,
+    "h": 1118,
+    "gmax": 0.09747,
+    "hmax": 0.578,
+    "kmax": 0.51761,
+    "mmpp": 0.26549,
+    "rough": 0.01224,
+    "lightDeg": 75,
+    "src": 13,
+    "bytes": 735592,
+    "gain": 1.043
    },
    {
     "file": "cuadricula_6.png",
@@ -632,7 +679,8 @@
     "rough": 0.04013,
     "lightDeg": 90,
     "src": 30,
-    "bytes": 606007
+    "bytes": 606007,
+    "gain": 0.75
    },
    {
     "file": "cuadricula_7.png",
@@ -646,7 +694,8 @@
     "rough": 0.01686,
     "lightDeg": 270,
     "src": 47,
-    "bytes": 586106
+    "bytes": 586106,
+    "gain": 1.011
    },
    {
     "file": "cuadricula_8.png",
@@ -660,7 +709,8 @@
     "rough": 0.00605,
     "lightDeg": 135,
     "src": 50,
-    "bytes": 726461
+    "bytes": 726461,
+    "gain": 1.5
    }
   ]
  },
@@ -679,7 +729,8 @@
     "rough": 0.03504,
     "lightDeg": 0,
     "src": 24,
-    "bytes": 473320
+    "bytes": 473320,
+    "gain": 1.103
    },
    {
     "file": "acordeon_1.png",
@@ -693,7 +744,8 @@
     "rough": 0.02952,
     "lightDeg": 270,
     "src": 15,
-    "bytes": 497540
+    "bytes": 497540,
+    "gain": 0.919
    }
   ]
  },
@@ -712,7 +764,8 @@
     "rough": 0.00984,
     "lightDeg": 270,
     "src": 51,
-    "bytes": 674611
+    "bytes": 674611,
+    "gain": 1.019
    },
    {
     "file": "casual_1.png",
@@ -726,7 +779,8 @@
     "rough": 0.00957,
     "lightDeg": 75,
     "src": 52,
-    "bytes": 739026
+    "bytes": 739026,
+    "gain": 1.024
    },
    {
     "file": "casual_2.png",
@@ -740,7 +794,8 @@
     "rough": 0.00752,
     "lightDeg": 240,
     "src": 64,
-    "bytes": 919368
+    "bytes": 919368,
+    "gain": 1.298
    },
    {
     "file": "casual_3.png",
@@ -754,7 +809,8 @@
     "rough": 0.0105,
     "lightDeg": 270,
     "src": 69,
-    "bytes": 684012
+    "bytes": 684012,
+    "gain": 1.0
    },
    {
     "file": "casual_4.png",
@@ -768,7 +824,8 @@
     "rough": 0.00952,
     "lightDeg": 75,
     "src": 70,
-    "bytes": 732336
+    "bytes": 732336,
+    "gain": 1.089
    },
    {
     "file": "casual_5.png",
@@ -782,7 +839,8 @@
     "rough": 0.01076,
     "lightDeg": 255,
     "src": 76,
-    "bytes": 821426
+    "bytes": 821426,
+    "gain": 0.972
    },
    {
     "file": "casual_6.png",
@@ -796,7 +854,8 @@
     "rough": 0.01132,
     "lightDeg": 300,
     "src": 77,
-    "bytes": 954751
+    "bytes": 954751,
+    "gain": 0.959
    },
    {
     "file": "casual_7.png",
@@ -810,7 +869,8 @@
     "rough": 0.01091,
     "lightDeg": 255,
     "src": 78,
-    "bytes": 700808
+    "bytes": 700808,
+    "gain": 0.935
    },
    {
     "file": "casual_8.png",
@@ -824,7 +884,8 @@
     "rough": 0.01261,
     "lightDeg": 270,
     "src": 80,
-    "bytes": 621623
+    "bytes": 621623,
+    "gain": 0.893
    }
   ]
  },
@@ -843,7 +904,8 @@
     "rough": 0.0178,
     "lightDeg": 270,
     "src": 55,
-    "bytes": 783760
+    "bytes": 783760,
+    "gain": 1.009
    },
    {
     "file": "arrugado_suave_1.png",
@@ -857,7 +919,8 @@
     "rough": 0.01567,
     "lightDeg": 120,
     "src": 56,
-    "bytes": 954380
+    "bytes": 954380,
+    "gain": 1.165
    },
    {
     "file": "arrugado_suave_2.png",
@@ -871,7 +934,8 @@
     "rough": 0.01586,
     "lightDeg": 270,
     "src": 57,
-    "bytes": 812620
+    "bytes": 812620,
+    "gain": 1.103
    },
    {
     "file": "arrugado_suave_3.png",
@@ -885,7 +949,8 @@
     "rough": 0.02464,
     "lightDeg": 255,
     "src": 65,
-    "bytes": 784027
+    "bytes": 784027,
+    "gain": 0.829
    },
    {
     "file": "arrugado_suave_4.png",
@@ -899,7 +964,8 @@
     "rough": 0.01813,
     "lightDeg": 270,
     "src": 67,
-    "bytes": 776869
+    "bytes": 776869,
+    "gain": 0.991
    },
    {
     "file": "arrugado_suave_5.png",
@@ -913,7 +979,8 @@
     "rough": 0.02279,
     "lightDeg": 90,
     "src": 68,
-    "bytes": 821514
+    "bytes": 821514,
+    "gain": 0.882
    }
   ]
  },
@@ -932,7 +999,8 @@
     "rough": 0.0233,
     "lightDeg": 285,
     "src": 58,
-    "bytes": 795888
+    "bytes": 795888,
+    "gain": 1.369
    },
    {
     "file": "arrugado_1.png",
@@ -946,7 +1014,8 @@
     "rough": 0.03439,
     "lightDeg": 135,
     "src": 59,
-    "bytes": 858767
+    "bytes": 858767,
+    "gain": 1.099
    },
    {
     "file": "arrugado_2.png",
@@ -960,7 +1029,8 @@
     "rough": 0.04466,
     "lightDeg": 270,
     "src": 60,
-    "bytes": 662793
+    "bytes": 662793,
+    "gain": 0.923
    },
    {
     "file": "arrugado_3.png",
@@ -974,7 +1044,8 @@
     "rough": 0.04989,
     "lightDeg": 270,
     "src": 61,
-    "bytes": 730086
+    "bytes": 730086,
+    "gain": 0.877
    },
    {
     "file": "arrugado_4.png",
@@ -988,7 +1059,8 @@
     "rough": 0.04512,
     "lightDeg": 255,
     "src": 63,
-    "bytes": 792463
+    "bytes": 792463,
+    "gain": 0.903
    },
    {
     "file": "arrugado_5.png",
@@ -1002,7 +1074,8 @@
     "rough": 0.0368,
     "lightDeg": 270,
     "src": 66,
-    "bytes": 761949
+    "bytes": 761949,
+    "gain": 1.118
    },
    {
     "file": "arrugado_6.png",
@@ -1016,7 +1089,8 @@
     "rough": 0.04441,
     "lightDeg": 90,
     "src": 71,
-    "bytes": 744590
+    "bytes": 744590,
+    "gain": 1.003
    },
    {
     "file": "arrugado_7.png",
@@ -1030,7 +1104,8 @@
     "rough": 0.04261,
     "lightDeg": 270,
     "src": 72,
-    "bytes": 758523
+    "bytes": 758523,
+    "gain": 1.045
    },
    {
     "file": "arrugado_8.png",
@@ -1044,7 +1119,8 @@
     "rough": 0.04857,
     "lightDeg": 270,
     "src": 73,
-    "bytes": 782650
+    "bytes": 782650,
+    "gain": 0.953
    },
    {
     "file": "arrugado_9.png",
@@ -1058,7 +1134,8 @@
     "rough": 0.04297,
     "lightDeg": 270,
     "src": 79,
-    "bytes": 749263
+    "bytes": 749263,
+    "gain": 0.997
    }
   ]
  },
@@ -1077,7 +1154,8 @@
     "rough": 0.02758,
     "lightDeg": 270,
     "src": 54,
-    "bytes": 730136
+    "bytes": 730136,
+    "gain": 1.293
    },
    {
     "file": "arrugado_plegado_1.png",
@@ -1091,7 +1169,8 @@
     "rough": 0.03889,
     "lightDeg": 270,
     "src": 62,
-    "bytes": 713496
+    "bytes": 713496,
+    "gain": 1.056
    },
    {
     "file": "arrugado_plegado_2.png",
@@ -1105,7 +1184,8 @@
     "rough": 0.0462,
     "lightDeg": 270,
     "src": 74,
-    "bytes": 732181
+    "bytes": 732181,
+    "gain": 0.95
    },
    {
     "file": "arrugado_plegado_3.png",
@@ -1119,7 +1199,8 @@
     "rough": 0.04548,
     "lightDeg": 90,
     "src": 75,
-    "bytes": 693108
+    "bytes": 693108,
+    "gain": 0.951
    }
   ]
  }

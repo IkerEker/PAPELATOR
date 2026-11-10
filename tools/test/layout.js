@@ -6,7 +6,7 @@ const { chromium } = require('playwright');
   await p.evaluate(() => {
     document.getElementById('pro').style.display = 'none';
     const r = document.getElementById('simple'); r.style.height = window.innerHeight + 'px';
-    for (const id of ['s-groups','s-colors','s-estado','s-calco','s-luz','s-calidad']) for (let i = 0; i < 9; i++) { const c = document.createElement('div'); c.className = 'chip'; c.textContent = 'Opción ' + i; document.getElementById(id).appendChild(c); }
+    for (const id of ['s-groups','s-colors','s-estado','s-pliegue','s-calco','s-impresion','s-luz','s-calidad']) for (let i = 0; i < 9; i++) { const c = document.createElement('div'); c.className = 'chip'; c.textContent = 'Opción ' + i; document.getElementById(id).appendChild(c); }
     for (let i = 0; i < 12; i++) { const d = document.createElement('div'); d.className = 'sw'; d.innerHTML = '<div class="img" style="background:#ddd"></div><div class="lbl">Papel</div>'; document.getElementById('s-swatches').appendChild(d); }
   });
   await p.screenshot({ path: 'lay1.png' });

@@ -47,6 +47,7 @@ const PLIEGUES = [
   { id: 'cuatro_gastado', name: 'En cuatro, gastado', desc: 'Cartera o bolsillo', cat: 'cuatro_gastado', wear: 1.6 },
   { id: 'seis', name: 'En seis', desc: 'Carta en tres y por la mitad', cat: 'seis', wear: 0.9 },
   { id: 'ocho', name: 'En ocho', desc: 'Tres dobleces', cat: 'ocho', wear: 1 },
+  { id: 'nueve', name: 'En nueve', desc: 'Tres por tres', cat: 'nueve', wear: 1 },
   { id: 'cuadricula', name: 'Muchas veces', desc: 'Doblado hasta ser un cuadradito', cat: 'cuadricula', wear: 1.2 },
   { id: 'acordeon', name: 'Acordeón', desc: 'Dobleces alternos', cat: 'acordeon', wear: 0.9 },
   { id: 'casual', name: 'Pliegues sueltos', desc: 'Doblado sin cuidado', cat: 'casual', wear: 0.8 },

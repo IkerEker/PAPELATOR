@@ -144,9 +144,12 @@ async function genPaper(S, st, assets, B) {
   const Cn = [C[0] / 255, C[1] / 255, C[2] / 255];
   const dark = [1 - Cn[0], 1 - Cn[1], 1 - Cn[2]];
   // anti-repetición: dos lecturas desplazadas mezcladas por un ruido suave (no en papeles con patrón)
-  const mix = paper.kind !== 'pattern';
+  // (cartón ondulado: sólo a lo largo de la onda; verjurado: nada, sus líneas son regulares)
+  const mix = paper.kind !== 'pattern' && paper.mix !== 'none';
   const r = rng(S.seed + 77);
-  const o1x = r() * mw, o1y = r() * mh, o2x = r() * mw, o2y = r() * mh;
+  const o1x = r() * mw, o2x = r() * mw;
+  let o1y = r() * mh, o2y = r() * mh;
+  if (paper.mix === 'x') { o1y = 0; o2y = 0; }
   const M = B.T; M.fill(0);
   if (mix) addValueNoise(M, w, h, (mw / ux) * 0.7, (mh / uy) * 0.7, 1, S.seed + 78);
   // tinte de color propio
@@ -207,6 +210,17 @@ function vnoise(x, y, seed) {
   fx = fx * fx * (3 - 2 * fx); fy = fy * fy * (3 - 2 * fy);
   const a = hashi(ix, iy, seed), b = hashi(ix + 1, iy, seed), c = hashi(ix, iy + 1, seed), d = hashi(ix + 1, iy + 1, seed);
   return (a + (b - a) * fx) * (1 - fy) + (c + (d - c) * fx) * fy;
+}
+// campo suave evaluado en una rejilla gruesa (cada `step` px) e interpolado: el ruido de baja frecuencia no
+// necesita calcularse en cada píxel (en un A4 a 300 ppp son 8,7 millones de llamadas)
+function lowField(w, h, step, fn) {
+  const gw = Math.ceil((w - 1) / step) + 2, gh = Math.ceil((h - 1) / step) + 2, g = new Float32Array(gw * gh);
+  for (let j = 0; j < gh; j++) for (let i = 0; i < gw; i++) g[j * gw + i] = fn(i * step, j * step);
+  const inv = 1 / step;
+  return (x, y) => {
+    const fx = x * inv, fy = y * inv, ix = fx | 0, iy = fy | 0, ax = fx - ix, ay = fy - iy, o = iy * gw + ix;
+    return (g[o] * (1 - ax) + g[o + 1] * ax) * (1 - ay) + (g[o + gw] * (1 - ax) + g[o + gw + 1] * ax) * ay;
+  };
 }
 function fbm2(x, y, seed) { return vnoise(x, y, seed) * 0.57 + vnoise(x * 2.07, y * 2.07, seed + 1) * 0.29 + vnoise(x * 4.3, y * 4.3, seed + 2) * 0.14; }
 
@@ -366,37 +380,56 @@ async function genAging(S, st, assets, B, paper, counts) {
   const band = (5 + 9 * Math.min(1, edad)) * ppm;
   const Wm = w / ppm;
   // mancha de envejecimiento a hoja completa (de las imágenes de papel viejo): cubre todo el papel
-  let sheet = null, sOp = 0, flipX = false, flipY = false;
+  // Se combinan dos mapas distintos, el segundo girado 90°: las fotos de origen tienen vetas verticales y así ni se
+  // repite una hoja reconocible ni domina una dirección. Sólo oscurece (normalizado a su zona más limpia), así que
+  // nunca blanquea ni azulea el papel.
+  let sheet = null, sheet2 = null, sOp = 0, flipX = false, flipY = false, hiA = [1, 1, 1], hiB = [1, 1, 1];
   const scat = cache.imperf.manchado;
   if (scat && (edad > 0.15 || manchado > 0)) {
-    const it = scat.items[(r() * scat.items.length) | 0];
-    sheet = await loadImg(assets, 'imperf/' + it.file);
-    sOp = clamp((0.2 + 0.8 * clamp(manchado, 0, 1.5)) * Math.min(1, edad * 1.2) * 0.55, 0, 0.8) * Math.min(1, kk);
+    const ia = (r() * scat.items.length) | 0, ib = (ia + 1 + ((r() * (scat.items.length - 1)) | 0)) % scat.items.length;
+    sheet = await loadImg(assets, 'imperf/' + scat.items[ia].file);
+    sheet2 = await loadImg(assets, 'imperf/' + scat.items[ib].file);
+    hiA = scat.items[ia].hi || hiA; hiB = scat.items[ib].hi || hiB;
+    sOp = clamp((0.2 + 0.8 * clamp(manchado, 0, 1.5)) * Math.min(1, edad * 1.2) * 0.4, 0, 0.6) * Math.min(1, kk);
     flipX = r() < 0.5; flipY = r() < 0.5;
   }
   const sw = sheet ? sheet.width : 0, shh = sheet ? sheet.height : 0, sd = sheet ? sheet.data : null;
-  // sol: un lado expuesto, el resto tapado por otro papel (borde algo nítido)
-  const side = (r() * 4) | 0, cut = lerp(0.55, 0.8, r());
+  const sw2 = sheet2 ? sheet2.width : 0, sh2 = sheet2 ? sheet2.height : 0, sd2 = sheet2 ? sheet2.data : null;
+  // sol: la parte que asomaba (de una carpeta, bajo otra hoja) se tuesta; el borde es la línea recta del papel
+  // que la tapaba (algo inclinada, 2-3 mm de transición) y el tostado crece hacia el canto expuesto
+  const side = (r() * 4) | 0, cut = lerp(0.6, 0.85, r()), tilt = (r() - 0.5) * 0.06;
+  const soft = 2.6 * ppm, cutLen = side < 2 ? w : h;
   const alb = B.alb, D = B.D, dinv = 1 / (S.dstd || 0.01);
   const tint = [1, 1, 1];
   const soil = [0.83, 0.8, 0.75];
+  const st6 = Math.max(1, Math.round(c6 / 8)), st30 = Math.max(1, Math.round(c30 / 10));
+  const N1 = lowField(w, h, st30, (x, y) => fbm2(x / c30, y / c30, s1));
+  const N2 = lowField(w, h, st6, (x, y) => vnoise(x / c6, y / c6, s2));
+  const N3 = lowField(w, h, st30, (x, y) => vnoise(x / c30, y / c30, s3));
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
       const o = y * w + x, j = o * 4;
-      const n1 = fbm2(x / c30, y / c30, s1), n2 = vnoise(x / c6, y / c6, s2);
+      const n1 = N1(x, y), n2 = N2(x, y);
       // distancia irregular al borde: los cantos absorben antes la contaminación
       const dE = Math.min(x, y, w - 1 - x, h - 1 - y) + (n2 - 0.5) * 9 * ppm + (n1 - 0.5) * 12 * ppm;
       const edge = Math.exp(-Math.max(0, dE) / band);
       let a = edad * (0.2 + 0.26 * n1) + edad * 0.55 * edge;
       if (sol > 0) {
         const t = side === 0 ? x / w : side === 1 ? 1 - x / w : side === 2 ? y / h : 1 - y / h;
-        a += sol * 0.42 * def(paper.ageK, 1) * smooth(cut - 0.012, cut + 0.012, t + (vnoise(x / c2, y / c2, s3) - 0.5) * 0.01);
+        const along = side < 2 ? y / h - 0.5 : x / w - 0.5;
+        const dpx = (t - cut - tilt * along) * cutLen + (N3(x, y) - 0.5) * 0.8 * ppm;
+        const ex = smooth(-soft, soft, dpx);
+        if (ex > 0) a += sol * 0.22 * def(paper.ageK, 1) * ex * (0.72 + 0.28 * clamp((t - cut) / (1 - cut), 0, 1)) * (0.85 + 0.3 * n1);
       }
       if (a > 0.002) { ageTint(a, tint); alb[j] *= tint[0]; alb[j + 1] *= tint[1]; alb[j + 2] *= tint[2]; }
       if (sheet) {
         let u = x / w, v = y / h; if (flipX) u = 1 - u; if (flipY) v = 1 - v;
         const si = (Math.min(shh - 1, (v * shh) | 0) * sw + Math.min(sw - 1, (u * sw) | 0)) * 3;
-        for (let c = 0; c < 3; c++) { const rel = sd[si + c] / 127.5; alb[j + c] *= 1 + (Math.min(rel, 1.15) - 1) * sOp; }
+        const si2 = (Math.min(sh2 - 1, (u * sh2) | 0) * sw2 + Math.min(sw2 - 1, ((1 - v) * sw2) | 0)) * 3;
+        for (let c = 0; c < 3; c++) {
+          const fa = Math.min(1, sd[si + c] / 127.5 / hiA[c]), fb = Math.min(1, sd2[si2 + c] / 127.5 / hiB[c]);
+          alb[j + c] *= 1 + (Math.sqrt(fa * fb) - 1) * sOp;
+        }
       }
       if (manoseo > 0) {
         // suciedad de las manos: esquina inferior exterior y centro del margen inferior, se queda en las crestas
@@ -453,6 +486,7 @@ async function genFolds(S, st, assets, B) {
   const nv = cat.items.length;
   const vi = (def(st.pliegueVar, 0) | 0) > 0 ? ((st.pliegueVar | 0) - 1) % nv : (r() * nv) | 0;
   const it = cat.items[vi];
+  const gk = def(it.gain, 1);         // cada hoja normalizada dentro de su grupo
   const img = await loadImg(assets, 'folds/' + it.file);
   const himg = await loadImg(assets, 'folds/' + it.hfile);
   const { w, h, ppm } = S;
@@ -517,8 +551,8 @@ async function genFolds(S, st, assets, B) {
     sample(x, y, out) {
       const u = a * x + b * y + c, v = d * x + e * y + f;
       const gu = bil(GX, tw, th, u, v), gv = bil(GY, tw, th, u, v);
-      out[0] = (gu * jx + gv * jyx) * amt; out[1] = (gu * jxy + gv * jy) * amt;
-      out[2] = bilH(u, v) * hK * amt * 5;     // la reconstrucción pierde la forma amplia: altura realista de una hoja desplegada
+      out[0] = (gu * jx + gv * jyx) * amt * gk; out[1] = (gu * jxy + gv * jy) * amt * gk;
+      out[2] = bilH(u, v) * hK * amt * gk * 5;     // la reconstrucción pierde la forma amplia: altura realista de una hoja desplegada
       out[3] = bil(RID, tw, th, u, v); out[4] = bil(VAL, tw, th, u, v); out[5] = bil(JN, tw, th, u, v);
       return out;
     }
@@ -1022,21 +1056,24 @@ function photo(S, st, px, B, paper) {
     const sy = L.scanYellow ? clamp(def(paper.translucency, 0.25), 0, 1) * 0.035 * k : 0;
     // sombra blanda del móvil / de la mano (desde abajo a la derecha)
     const shK = L.shadow ? 0.2 * Math.min(1, k) : 0, shx = w * 0.62, shy = h * 1.08, sra = w * 0.38, srb = h * 0.3;
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      const o = y * w + x, j = o * 4;
+    // la iluminación es suave: se calcula en una rejilla de 8 px y se interpola
+    const E = lowField(w, h, 8, (x, y) => {
       let e = 1;
       if (L.spot) { const rr = Math.hypot(x - cx, y - cy) / (diag * 0.5); e = 1 - fall * smooth(0.2 * L.spot, 1.3, rr); }
       else if (fall > 0) { const q = (x - sxp) ** 2 + (y - syp) ** 2 + hgt * hgt; e = Math.pow(hgt / (q * Math.sqrt(q)) / e0, fall * 1.4) / (1 + fall * 0.15); }
       const rx = (x - cx) / (diag / 2), ry = (y - cy) / (diag / 2);
       e *= 1 / Math.pow(1 + (rx * rx + ry * ry) * vig, 2);
       if (shK) { const qx = (x - shx) / sra, qy = (y - shy) / srb; e *= 1 - shK * smooth(1.45, 0.75, Math.sqrt(qx * qx + qy * qy)); }
-      e *= expo;
+      return e * expo;
+    });
+    const gx0 = L.spot ? cx : cx - (L.sx || 0) * diag * 0.25, gy0 = L.spot ? cy : cy - (L.sy || 0) * diag * 0.25;
+    const G = glare > 0 ? lowField(w, h, 8, (x, y) => glare * Math.exp(-((x - gx0) ** 2 + (y - gy0) ** 2) / (diag * diag * 0.04))) : null;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const o = y * w + x, j = o * 4;
+      const e = E(x, y);
       let g = 0;
-      if (glare > 0) {
-        const gx = L.spot ? cx : cx - (L.sx || 0) * diag * 0.25, gy = L.spot ? cy : cy - (L.sy || 0) * diag * 0.25;
-        const gd = ((x - gx) ** 2 + (y - gy) ** 2) / (diag * diag * 0.04);
-        g = glare * Math.exp(-gd) * (1 + (gl ? gl[o] / 255 * 3 : 0));
-      } else if (gl && gl[o] && luz !== 'escaner') g = gl[o] / 255 * 0.025 * k;
+      if (G) g = G(x, y) * (1 + (gl ? gl[o] / 255 * 3 : 0));
+      else if (gl && gl[o] && luz !== 'escaner') g = gl[o] / 255 * 0.025 * k;
       const cool = (L.cool || 0) * k * (1 - Math.min(1, e));
       for (let c = 0; c < 3; c++) {
         let v = px[j + c] * e * tint[c];
@@ -1057,7 +1094,7 @@ function quality(S, st, px, cal, k) {
     escaner_pro: { sharpen: 0.25, noise: 0.5, contrast: 0.02 },
     escaner_oficina: { blur: 0.55, sharpen: 0.45, noise: 1.0, contrast: 0.1, white: 0.05, desat: 0.1, streak: 1, dust: 1 },
     movil: { sharpen: 0.55, noise: 2.6, chroma: 1.0, contrast: 0.05, sat: 0.06, vig: 0.06 },
-    movil_antiguo: { blur: 0.9, noise: 6, chroma: 3.5, contrast: 0.08, jpeg: 0.3, ca: 1.1, cast: [0.99, 1.02, 0.955], vig: 0.14 },
+    movil_antiguo: { blur: 0.9, noise: 6, chroma: 3.5, contrast: 0.08, jpeg: 0.3, ca: 1.1, cast: [1.01, 1.0, 0.955], vig: 0.14 },
     fotocopia: { gray: 1, blur: 0.65, contrast: 0.5, toner: 1, white: 0.1, noise: 1.8, dust: 1 },
     analogica: { grain: 6, blur: 0.45, contrast: -0.05, lift: 0.05, cast: [1.025, 1.0, 0.95], vig: 0.2, sat: -0.07 }
   }[cal];

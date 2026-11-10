@@ -35,6 +35,10 @@ tools/                scripts que procesan las fuentes y generan los assets del 
   build_extras.py     rugosidad y tamaño de grano de cada papel, manchas de envejecimiento a hoja completa
   build_imperf2.py    imperfecciones sutiles: grapas, agujeros de grapa, clip, pinza, medias lunas, arruguitas
   build_folds.py      pliegues y arrugas: relieve reconstruido desde la foto (fold_lib.py), luz estimada por foto
+  folds_regroup.py    agrupa los pliegues por número real de paneles y normaliza su fuerza
+  build_grids.py      milimetrados con geometría exacta (1/5/10 mm) y papel sintetizado sin restos de líneas
+  papers_fix.py       correcciones de escala/mezcla (acuarela gruesa, cartón ondulado, verjurado)
+  imperf_tune.py      color real del café (los bordes del cerco venían quemados a gris)
 plugin/               el plugin UXP (manifest, interfaz, motor y assets procesados)
   src/engine.js       motor (JavaScript puro, se prueba también en Node)
   src/png.js          decodificador PNG propio (UXP no trae zlib)
@@ -49,6 +53,9 @@ python3 build_imperf.py      # ~3 min
 python3 build_calco.py
 python3 build_imperf2.py
 python3 build_folds.py       # ~25 min
+python3 folds_regroup.py
+python3 build_grids.py && python3 papers_fix.py
+python3 imperf_tune.py       # una sola vez, sobre los mapas originales
 ```
 
 Requiere Python 3 con numpy, scipy, opencv, scikit-image y Pillow.

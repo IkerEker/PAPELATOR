@@ -154,12 +154,12 @@
    9.776253700256348
   ],
   "tileMm": [
-   112.31,
-   104.23
+   100.0,
+   100.0
   ],
   "size": [
-   1098,
-   1019
+   1200,
+   1200
   ],
   "gain": 1738.692,
   "detailStd": 0.0158,
@@ -177,7 +177,8 @@
   "rough": 0.01434,
   "grainMm": 0.2046,
   "ageK": 1.0,
-  "reliefAdj": 1.0
+  "reliefAdj": 1.0,
+  "grid": "1/5/10 mm"
  },
  {
   "id": "milimetrado_naranja",
@@ -190,12 +191,12 @@
    10.43066120147705
   ],
   "tileMm": [
-   100.09,
-   100.09
+   100.0,
+   100.0
   ],
   "size": [
-   1044,
-   1044
+   1200,
+   1200
   ],
   "gain": 1752.423,
   "detailStd": 0.0157,
@@ -213,7 +214,8 @@
   "rough": 0.01249,
   "grainMm": 0.1917,
   "ageK": 1.0,
-  "reliefAdj": 1.0
+  "reliefAdj": 1.0,
+  "grid": "1/5/10 mm"
  },
  {
   "id": "milimetrado_azul",
@@ -226,12 +228,12 @@
    10.354161262512207
   ],
   "tileMm": [
-   100.83,
-   100.83
+   100.0,
+   100.0
   ],
   "size": [
-   1044,
-   1044
+   1200,
+   1200
   ],
   "gain": 1723.615,
   "detailStd": 0.016,
@@ -249,7 +251,8 @@
   "rough": 0.01347,
   "grainMm": 0.1932,
   "ageK": 1.0,
-  "reliefAdj": 1.0
+  "reliefAdj": 1.0,
+  "grid": "1/5/10 mm"
  },
  {
   "id": "punteado",
@@ -438,8 +441,8 @@
   "kind": "neutral",
   "source": "Textura de papel acuarela blanco rugoso.png",
   "tileMm": [
-   111.0,
-   111.0
+   72.15,
+   72.15
   ],
   "size": [
    1160,
@@ -459,7 +462,7 @@
    0.99
   ],
   "rough": 0.05303,
-  "grainMm": 0.1914,
+  "grainMm": 0.1244,
   "ageK": 0.7,
   "reliefAdj": 1.0
  },
@@ -470,8 +473,8 @@
   "kind": "neutral",
   "source": "Textura de papel acuarela blanco.png",
   "tileMm": [
-   111.0,
-   111.0
+   72.15,
+   72.15
   ],
   "size": [
    1160,
@@ -491,7 +494,7 @@
    0.98
   ],
   "rough": 0.05427,
-  "grainMm": 0.1914,
+  "grainMm": 0.1244,
   "ageK": 0.7,
   "reliefAdj": 1.0
  },
@@ -685,7 +688,8 @@
   "rough": 0.02858,
   "grainMm": 0.1914,
   "ageK": 1.0,
-  "reliefAdj": 1.0
+  "reliefAdj": 1.0,
+  "mix": "none"
  },
  {
   "id": "verjurado_marfil",
@@ -717,7 +721,8 @@
   "rough": 0.03157,
   "grainMm": 0.1754,
   "ageK": 1.0,
-  "reliefAdj": 1.0
+  "reliefAdj": 1.0,
+  "mix": "none"
  },
  {
   "id": "algodon",
@@ -1269,7 +1274,8 @@
   "rough": 0.09399,
   "grainMm": 0.8936,
   "ageK": 1.2,
-  "reliefAdj": 0.7
+  "reliefAdj": 0.7,
+  "mix": "x"
  },
  {
   "id": "corrugado_fino",
@@ -1302,7 +1308,8 @@
   "rough": 0.13986,
   "grainMm": 0.7943,
   "ageK": 1.2,
-  "reliefAdj": 0.55
+  "reliefAdj": 0.55,
+  "mix": "x"
  },
  {
   "id": "periodico",
