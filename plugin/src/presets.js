@@ -148,10 +148,12 @@ const CALIDAD_FAMILIAS = [
 ];
 
 const DEFAULT_STATE = {
-  version: 3,
+  version: 4,
   seed: 11,
   seedPaper: 0,                       // ⟳ de cada sección
   seedEstado: 0,
+  seedFoto: 0,
+  seedCalco: 0,
   intensity: 50,                      // 0 = casi sin cambio · 50 = sutil (por defecto) · 100 = muy marcado
   paper: 'folio',
   color: 'original',                  // id de COLORS o '#rrggbb'

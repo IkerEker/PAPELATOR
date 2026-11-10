@@ -19027,7 +19027,7 @@
   "mode": "relief",
   "pitch_mm": 9.0,
   "place": "text",
-  "opacity": 0.64,
+  "opacity": 0.24,
   "atlas": "escritura_atlas.png",
   "sprites": [
    {
@@ -19759,7 +19759,7 @@
   "mode": "relief",
   "pitch_mm": 8.5,
   "place": "text",
-  "opacity": 0.64,
+  "opacity": 0.28,
   "atlas": "mecano_atlas.png",
   "sprites": [
    {
@@ -20223,11 +20223,11 @@
   "kind": "stamp",
   "mode": "erase",
   "size": [
-   16,
-   38
+   6,
+   13
   ],
   "place": "any",
-  "opacity": 0.64,
+  "opacity": 0.3,
   "maxd": 600,
   "items": [
    {
@@ -29547,9 +29547,9 @@
   "name": "Descamación",
   "kind": "sprites",
   "mode": "relief",
-  "src_mm": 70,
+  "src_mm": 42.0,
   "place": "uniform",
-  "opacity": 0.64,
+  "opacity": 0.4,
   "min_area": 3,
   "atlas": "descamacion_atlas.png",
   "sprites": [
@@ -38817,7 +38817,7 @@
    48
   ],
   "place": "seal",
-  "opacity": 0.68,
+  "opacity": 0.2,
   "maxd": 700,
   "items": [
    {

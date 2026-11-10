@@ -41,6 +41,7 @@ tools/                scripts que procesan las fuentes y generan los assets del 
   build_calco.py      documentos de detrás (periódico, folio, apuntes, rotulador)
   build_extras.py     rugosidad y tamaño de grano de cada papel, manchas de envejecimiento a hoja completa
   build_imperf2.py    imperfecciones sutiles: grapas, agujeros de grapa, clip, pinza, medias lunas, arruguitas
+  build_rotulador.py  calco de rotulador: notas, etiqueta y lista escritas a mano (cursiva) con charcos de tinta
   build_folds.py      pliegues y arrugas: sombreado real de cada foto (fold_sources.json), agrupado por nº de pliegues
   build_grids.py      milimetrados con geometría exacta (1/5/10 mm) y papel sintetizado sin restos de líneas
   papers_fix.py       correcciones de escala/mezcla (acuarela gruesa, cartón ondulado, verjurado)

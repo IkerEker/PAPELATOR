@@ -40,10 +40,12 @@ function loadJSON(key) { try { const s = localStorage.getItem(key); return s ? J
 function saveJSON(key, v) { try { localStorage.setItem(key, JSON.stringify(v)); } catch (e) { /* sin almacenamiento */ } }
 
 let state = merge(clone(P.DEFAULT_STATE), loadJSON('papelator3.state'));
+// v4: la intensidad global ya no está en el panel principal; vuelve a la de referencia
+if ((state.version | 0) < 4) { state.intensity = 50; state.version = 4; }
 if (P.PLIEGUE_ALIAS[state.pliegue]) { state.pliegue = P.PLIEGUE_ALIAS[state.pliegue]; state.pliegueVar = 0; }
 if (!P.PLIEGUES.some(x => x.id === state.pliegue)) state.pliegue = 'ninguno';
 const ui = merge({ live: true, group: null, open: { general: true, papel: true } }, loadJSON('papelator2.ui'));
-let papers = [], imperfCats = {}, foldCats = {};
+let papers = [], imperfCats = {}, foldCats = {}, calcoCats = {};
 
 const refreshers = [];
 let thumbTimer = null, liveTimer = null;
@@ -326,13 +328,14 @@ function buildSimple() {
     if (byId('s-impresion')) chipRow(byId('s-impresion'), P.IMPRESIONES, it => state.impresion === it.id, it => { state.impresion = it.id; });
   }
   function sliders() {
-    const it = byId('s-intensity'), sc = byId('s-scale'), ex = byId('s-exposure'), ed = byId('s-edad');
+    const sc = byId('s-scale'), ex = byId('s-exposure'), ed = byId('s-edad');
     const pa = byId('s-plamt'), pw = byId('s-plwear');
     pa.value = Math.round(state.pliegueAmount * 100); byId('s-plamtval').textContent = Math.round(state.pliegueAmount * 100) + '%';
     pw.value = Math.round(state.pliegueWear * 100); byId('s-plwearval').textContent = Math.round(state.pliegueWear * 100) + '%';
     byId('s-plopts').style.display = state.pliegue && state.pliegue !== 'ninguno' ? 'block' : 'none';
+    byId('s-calcoopts').style.display = state.calco && state.calco !== 'ninguno' ? 'block' : 'none';
+    byId('s-calcoamt').value = Math.round(state.calcoAmount * 100); byId('s-calcoval').textContent = Math.round(state.calcoAmount * 100) + '%';
     ed.value = Math.round(state.edad * 100); byId('s-edadval').textContent = Math.round(state.edad * 100) + '%';
-    it.value = state.intensity; byId('s-intval').textContent = state.intensity + '%';
     sc.value = Math.round(state.scale * 100); byId('s-scaleval').textContent = Math.round(state.scale * 100) + '%';
     ex.value = Math.round(state.exposure * 100); byId('s-expval').textContent = (state.exposure > 0 ? '+' : '') + Math.round(state.exposure * 100);
   }
@@ -348,12 +351,12 @@ function buildSimple() {
     el.addEventListener('input', e => { byId(valId).textContent = fmt(Number(e.target.value)); });
     el.addEventListener('change', e => { apply(Number(e.target.value)); changed({ source: 'slider' }); });
   };
-  bindSlider('s-intensity', 's-intval', v => { state.intensity = v; }, v => v + '%');
   bindSlider('s-scale', 's-scaleval', v => { state.scale = v / 100; }, v => v + '%');
   bindSlider('s-exposure', 's-expval', v => { state.exposure = v / 100; }, v => (v > 0 ? '+' : '') + v);
   bindSlider('s-edad', 's-edadval', v => { state.edad = v / 100; }, v => v + '%');
   bindSlider('s-plamt', 's-plamtval', v => { state.pliegueAmount = v / 100; }, v => v + '%');
   bindSlider('s-plwear', 's-plwearval', v => { state.pliegueWear = v / 100; }, v => v + '%');
+  bindSlider('s-calcoamt', 's-calcoval', v => { state.calcoAmount = v / 100; }, v => v + '%');
   // ⟳ de cada sección: otra versión de eso, sin tocar lo demás
   const dice = (id, fn) => { const el = byId(id); if (el) el.addEventListener('click', () => { fn(); changed({ source: 'simple' }); }); };
   dice('s-r-papel', () => { state.paper = nextIn(typeOf(state.paper).papers, state.paper); state.seedPaper = (state.seedPaper | 0) + 1; });
@@ -364,9 +367,14 @@ function buildSimple() {
     const n = cat ? cat.items.length : 1;
     state.pliegueVar = ((state.pliegueVar | 0) + 1) % n;
   });
-  dice('s-r-calco', () => { const f = famOf(P.CALCO_FAMILIAS, state.calco); if (f) state.calco = nextIn(f.items, state.calco); });
-  dice('s-r-luz', () => { const f = famOf(P.LUZ_FAMILIAS, state.luz); if (f) state.luz = nextIn(f.items, state.luz); });
-  dice('s-r-calidad', () => { const f = famOf(P.CALIDAD_FAMILIAS, state.calidad); if (f) state.calidad = nextIn(f.items, state.calidad); state.seed = (state.seed | 0) + 1; });
+  dice('s-r-calco', () => {
+    // primero las variantes del mismo calco (p. ej. otra nota a rotulador); al acabarlas, el siguiente de la familia
+    const f = famOf(P.CALCO_FAMILIAS, state.calco), info = calcoCats[state.calco] || {}, n = (info.inks || []).length;
+    state.seedCalco = (state.seedCalco | 0) + 1;
+    if (f && (!n || state.seedCalco % n === 0)) state.calco = nextIn(f.items, state.calco);
+  });
+  dice('s-r-luz', () => { const f = famOf(P.LUZ_FAMILIAS, state.luz); if (f) state.luz = nextIn(f.items, state.luz); state.seedFoto = (state.seedFoto | 0) + 1; });
+  dice('s-r-calidad', () => { const f = famOf(P.CALIDAD_FAMILIAS, state.calidad); if (f) state.calidad = nextIn(f.items, state.calidad); state.seedFoto = (state.seedFoto | 0) + 1; });
   byId('s-paper').addEventListener('click', doPaper);
   byId('s-apply').addEventListener('click', doApply);
   byId('s-remove').addEventListener('click', doRemove);
@@ -526,7 +534,7 @@ let ready = null;
 function init() {
   if (!ready) ready = (async () => {
     const cat = await engine.catalogs(assets);
-    papers = cat.papers; imperfCats = cat.imperf; foldCats = cat.folds || {};
+    papers = cat.papers; imperfCats = cat.imperf; foldCats = cat.folds || {}; calcoCats = cat.calco || {};
     if (!papers.filter(p => p.id === state.paper).length) state.paper = papers[0].id;
   })();
   return ready;

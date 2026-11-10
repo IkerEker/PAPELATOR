@@ -284,7 +284,7 @@ function drawSprite(S, B, src, rect, cx, cy, sx, sy, rot, mode, op, mask, flip, 
         if (md && (mode === 'erase' || mode === 'wax')) {
           const mm = ((md[iv * sw + iu] + md[iv * sw + Math.min(sw - 1, iu + 1)]) / 2) / 255 * k;
           if (mode === 'erase') {
-            alb[j] += (255 - alb[j]) * mm * 0.12; alb[j + 1] += (255 - alb[j + 1]) * mm * 0.12; alb[j + 2] += (255 - alb[j + 2]) * mm * 0.12;
+            alb[j] += (255 - alb[j]) * mm * 0.06; alb[j + 1] += (255 - alb[j + 1]) * mm * 0.06; alb[j + 2] += (255 - alb[j + 2]) * mm * 0.06;
             const dv = B.damage[oo] + mm * 255; B.damage[oo] = dv > 255 ? 255 : dv;
           } else {
             const tv = B.trans[oo] + mm * 220; B.trans[oo] = tv > 255 ? 255 : tv;
@@ -505,6 +505,9 @@ async function genFolds(S, st, assets, B) {
   const g = 1 / it.gain * def(it.norm, 1);
   const SH = new Float32Array(TN);
   for (let o = 0; o < TN; o++) SH[o] = (sd[o * ch] - 128) * g;
+  // la luz de la foto: lo más claro del pliegue llega al blanco del papel y el resto queda por debajo (como en una foto
+  // real de papel blanco). Si no, en papel blanco las luces se queman y el pliegue se ve plano y falso.
+  let hiS = 0; { const hs = new Float32Array(TN >> 4); for (let i = 0; i < hs.length; i++) hs[i] = SH[i << 4]; hs.sort(); hiS = Math.max(0, hs[(hs.length * 0.995) | 0]); }
   const tmp = new Float32Array(TN);
   const DS = new Float32Array(SH); gaussBlur(DS, tw, th, 1.3 * tpm, tmp);          // desplazamiento: textura desenfocada
   const CR = new Float32Array(SH); gaussBlur(CR, tw, th, 0.7 * tpm, tmp);          // aristas: contraste fino
@@ -531,6 +534,7 @@ async function genFolds(S, st, assets, B) {
     const r3 = cubic(SH[o], SH[o + 1], SH[o + 2], SH[o + 3], du);
     return cubic(r0, r1, r2, r3, dv);
   };
+  const hiA = hiS * amt;
   const F = {
     amt, it, pre,
     wear: clamp(def(st.pliegueWear, 1), 0, 3) * (1 + 0.8 * clamp(def(st.edad, 0), 0, 1.2)) * Math.min(1.4, clamp(S.k, 0, 2)),
@@ -538,7 +542,7 @@ async function genFolds(S, st, assets, B) {
     // out = [sombreado-1, desplazamiento, arista, cruce]
     sample(x, y, out) {
       const u = a * x + b * y + c, v = d * x + e * y + f;
-      out[0] = bic(u, v) * amt; out[1] = bil(DS, u, v) * amt; out[2] = bil(CR, u, v); out[3] = bil(JN, u, v);
+      out[0] = (bic(u, v) * amt - hiA) / (1 + hiA); out[1] = bil(DS, u, v) * amt; out[2] = bil(CR, u, v); out[3] = bil(JN, u, v);
       return out;
     }
   };
@@ -665,6 +669,12 @@ async function genEstado(S, st, assets, B) {
 }
 
 // ================================================================ CALCO
+// variantes de un calco (p. ej. distintas notas a rotulador): ⟳ pasa a la siguiente
+function calcoFile(info, key, st) {
+  const list = info[key + 's'];
+  if (!list || !list.length) return info[key];
+  return list[(((def(st.seedCalco, 0) | 0) % list.length) + list.length) % list.length];
+}
 async function genCalco(S, st, assets, B, paper, backArt) {
   const id = st.calco;
   if (!id || id === 'ninguno') return;
@@ -693,7 +703,7 @@ async function genCalco(S, st, assets, B, paper, backArt) {
       colB[0][o] = 1 - R0; colB[1][o] = 1 - G0; colB[2][o] = 1 - B0;
     }
   } else {
-    const img = await loadImg(assets, 'calco/' + cache.calco[id].ink);
+    const img = await loadImg(assets, 'calco/' + calcoFile(cache.calco[id], 'ink', st));
     mapBack(img, cov, lw, lh);
   }
   gaussBlur(cov, lw, lh, blur / f, tmpL);
@@ -721,7 +731,9 @@ async function genCalco(S, st, assets, B, paper, backArt) {
   const info = cache.calco[id] || {};
   const thin = 0.15 + 0.85 * tr;
   const bleedLayers = [];
-  if (id === 'rotulador') bleedLayers.push({ file: info.pool, col: [0.2, 0.22, 0.3], k: 0.34 * thin, base: info.ink, baseK: 0.08 * thin, blur: 0.12 });
+  // rotulador: el tinte atraviesa el papel por todo el trazo (gris violáceo, borde abierto en las fibras) y aún más
+  // donde la punta se paró
+  if (id === 'rotulador') bleedLayers.push({ file: calcoFile(info, 'pool', st), col: [0.24, 0.23, 0.31], k: 0.3 * thin, base: calcoFile(info, 'ink', st), baseK: 0.17 * thin, blur: 0.14 });
   if (id === 'apuntes') bleedLayers.push({ file: info.fluor, col: [0.97, 0.94, 0.45], k: 0.17 * thin, blur: 0.45 });
   for (const L of bleedLayers) {
     const img = await loadImg(assets, 'calco/' + L.file);
@@ -742,7 +754,7 @@ async function genCalco(S, st, assets, B, paper, backArt) {
       const hgt = new Float32Array(N); mapBack(img, hgt, w, h);
       gaussBlur(hgt, w, h, ppm * 0.08, tmp);
       const d = Math.max(1, Math.round(ppm * 0.08));
-      for (let y = d; y < h - d; y++) for (let x = d; x < w - d; x++) { const o = y * w + x; B.R[o] += (hgt[o - d * w - d] - hgt[o + d * w + d]) * 0.06 * pk; }
+      for (let y = d; y < h - d; y++) for (let x = d; x < w - d; x++) { const o = y * w + x; B.R[o] += (hgt[o - d * w - d] - hgt[o + d * w + d]) * 0.025 * pk; }
     }
   }
 }
@@ -1075,12 +1087,12 @@ function photo(S, st, px, B, paper) {
 function quality(S, st, px, cal, k) {
   const { w, h, N } = S;
   const Q = {
-    escaner_pro: { sharpen: 0.25, noise: 0.5, contrast: 0.02 },
-    escaner_oficina: { blur: 0.55, sharpen: 0.45, noise: 1.0, contrast: 0.1, white: 0.05, desat: 0.1, streak: 1, dust: 1 },
-    movil: { sharpen: 0.55, noise: 2.6, chroma: 1.0, contrast: 0.05, sat: 0.06, vig: 0.06 },
-    movil_antiguo: { blur: 0.9, noise: 6, chroma: 3.5, contrast: 0.08, jpeg: 0.3, ca: 1.1, cast: [1.01, 1.0, 0.955], vig: 0.14 },
-    fotocopia: { gray: 1, blur: 0.65, contrast: 0.5, toner: 1, white: 0.1, noise: 1.8, dust: 1 },
-    analogica: { grain: 6, blur: 0.45, contrast: -0.05, lift: 0.05, cast: [1.025, 1.0, 0.95], vig: 0.2, sat: -0.07 }
+    escaner_pro: { sharpen: 0.25, noise: 0.5, contrast: 0.02, rot: 0.3 },
+    escaner_oficina: { blur: 0.55, sharpen: 0.45, noise: 1.0, contrast: 0.1, white: 0.05, desat: 0.1, streak: 1, dust: 1, rot: 0.7, edge: 0.6 },
+    movil: { sharpen: 0.55, noise: 2.6, chroma: 1.0, contrast: 0.05, sat: 0.06, vig: 0.06, rot: 0.9, persp: 0.014, edge: 1.4 },
+    movil_antiguo: { blur: 0.9, noise: 6, chroma: 3.5, contrast: 0.08, jpeg: 0.3, ca: 1.1, cast: [1.01, 1.0, 0.955], vig: 0.14, rot: 1.3, persp: 0.022, edge: 2.4 },
+    fotocopia: { gray: 1, blur: 0.65, contrast: 0.5, toner: 1, white: 0.1, noise: 1.8, dust: 1, rot: 0.6 },
+    analogica: { grain: 6, blur: 0.45, contrast: -0.05, lift: 0.05, cast: [1.025, 1.0, 0.95], vig: 0.2, sat: -0.07, rot: 0.8, persp: 0.012, edge: 1.8 }
   }[cal];
   if (!Q) return;
   const scaleK = Math.max(1, Math.max(w, h) / 3000);
@@ -1148,6 +1160,64 @@ function quality(S, st, px, cal, k) {
     for (let y = Math.max(0, (d[1] - R) | 0); y < Math.min(h, d[1] + R); y++) for (let x = Math.max(0, (d[0] - R) | 0); x < Math.min(w, d[0] + R); x++) {
       const t = clamp(d[2] - Math.hypot(x - d[0], y - d[1]) + 0.5, 0, 1) * d[3] * Math.min(1, k); if (t <= 0) continue;
       const j = (y * w + x) * 4; px[j] *= 1 - t * 0.6; px[j + 1] *= 1 - t * 0.6; px[j + 2] *= 1 - t * 0.6;
+    }
+  }
+  captureGeometry(S, st, px, Q, k);
+}
+
+// La toma nunca es perfecta: la hoja queda un poco girada, con algo de perspectiva (el móvil no está paralelo)
+// y los márgenes se desenfocan (profundidad de campo; más en el lado que queda más lejos). Se recorta lo justo
+// para que no aparezcan esquinas vacías.
+function captureGeometry(S, st, px, Q, k) {
+  const { w, h, N } = S;
+  const kk = Math.min(1.5, k);
+  const rot = (Q.rot || 0) * kk, persp = (Q.persp || 0) * kk, edge = (Q.edge || 0) * kk * Math.max(w, h) / 2000;
+  if (rot <= 0 && persp <= 0 && edge <= 0) return;
+  const r = rng((S.seed + (def(st.seedFoto, 0) | 0) * 7717) * 3 + 41);
+  const th = (r() < 0.5 ? -1 : 1) * rot * (0.55 + 0.45 * r()) * Math.PI / 180;
+  const pa = r() * Math.PI * 2, pxk = Math.cos(pa) * persp * (0.6 + 0.4 * r()), pyk = Math.sin(pa) * persp * (0.6 + 0.4 * r());
+  const ca = Math.cos(th), sa = Math.sin(th), asp = w / h;
+  // de la imagen (u,v ∈ [-1,1]) a la hoja: giro y perspectiva; zoom para cubrir sin esquinas vacías
+  const map = (u, v, z, out) => {
+    const x = u * asp, y = v;
+    let xs = (x * ca - y * sa) / asp, ys = x * sa + y * ca;
+    const ww = 1 + pxk * xs + pyk * ys;
+    out[0] = xs / ww * z; out[1] = ys / ww * z;
+  };
+  const t = [0, 0];
+  let m = 1;
+  for (const [u, v] of [[-1, -1], [1, -1], [-1, 1], [1, 1], [0, -1], [0, 1], [-1, 0], [1, 0]]) { map(u, v, 1, t); m = Math.max(m, Math.abs(t[0]), Math.abs(t[1])); }
+  const z = 0.998 / m;
+  const src = new Uint8ClampedArray(px);
+  if (rot > 0 || persp > 0) {
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      map((2 * x + 1) / w - 1, (2 * y + 1) / h - 1, z, t);
+      let sx = (t[0] + 1) * w / 2 - 0.5, sy = (t[1] + 1) * h / 2 - 0.5;
+      sx = sx < 0 ? 0 : sx > w - 1.001 ? w - 1.001 : sx; sy = sy < 0 ? 0 : sy > h - 1.001 ? h - 1.001 : sy;
+      const ix = sx | 0, iy = sy | 0, fx = sx - ix, fy = sy - iy, a = (iy * w + ix) * 4, b = a + 4, c = a + w * 4, d = c + 4;
+      const j = (y * w + x) * 4;
+      for (let q = 0; q < 3; q++) px[j + q] = (src[a + q] * (1 - fx) + src[b + q] * fx) * (1 - fy) + (src[c + q] * (1 - fx) + src[d + q] * fx) * fy;
+    }
+  }
+  if (edge > 0.3) {
+    // desenfoque progresivo hacia los márgenes (dos niveles mezclados), mayor en el lado más alejado
+    const tmp = new Float32Array(N), b1 = [], b2 = [];
+    for (let q = 0; q < 3; q++) {
+      const a = new Float32Array(N); for (let o = 0; o < N; o++) a[o] = px[o * 4 + q];
+      const c = new Float32Array(a); gaussBlur(a, w, h, edge * 0.5, tmp); gaussBlur(c, w, h, edge, tmp); b1.push(a); b2.push(c);
+    }
+    const pn = Math.hypot(pxk, pyk) || 1;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const u = (2 * x + 1) / w - 1, v = (2 * y + 1) / h - 1;
+      const far = persp > 0 ? (pxk * u + pyk * v) / pn * 0.35 : 0;
+      const rr = Math.sqrt(u * u * 0.8 + v * v * 0.8) + far;
+      const m2 = smooth(0.55, 1.25, rr);
+      if (m2 <= 0) continue;
+      const o = y * w + x, j = o * 4;
+      for (let q = 0; q < 3; q++) {
+        const lo = lerp(px[j + q], b1[q][o], Math.min(1, m2 * 2)), hi = b2[q][o];
+        px[j + q] = m2 > 0.5 ? lerp(lo, hi, (m2 - 0.5) * 2) : lo;
+      }
     }
   }
 }
