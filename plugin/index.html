@@ -5,7 +5,12 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- ===================== PANEL 1 · PRESETS ===================== -->
+  <div id="app" class="app">
+   <div class="tabs">
+    <div class="tab on" id="tab-simple">Presets</div>
+    <div class="tab" id="tab-pro">Avanzado</div>
+   </div>
+  <!-- ===================== PESTAÑA 1 · PRESETS ===================== -->
   <div id="simple" class="root">
    <div class="scroll">
     <div class="brand">
@@ -81,11 +86,11 @@
    </div>
   </div>
 
-  <!-- ===================== PANEL 2 · AJUSTES ===================== -->
+  <!-- ===================== PESTAÑA 2 · AVANZADO ===================== -->
   <div id="pro" class="root">
    <div class="scroll">
     <div class="brand">
-      <span class="logo">PAPELATOR</span><span class="sub">ajustes</span>
+      <span class="logo">PAPELATOR</span><span class="sub">avanzado</span>
       <span class="spacer"></span>
       <div class="iconbtn" id="p-reset" title="Restablecer ajustes">↺</div>
     </div>
@@ -106,6 +111,7 @@
    </div>
   </div>
 
+  </div>
   <script src="main.js"></script>
 </body>
 </html>

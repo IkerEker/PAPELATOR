@@ -44,7 +44,7 @@ let state = merge(clone(P.DEFAULT_STATE), loadJSON('papelator3.state'));
 if ((state.version | 0) < 4) { state.intensity = 50; state.version = 4; }
 if (P.PLIEGUE_ALIAS[state.pliegue]) { state.pliegue = P.PLIEGUE_ALIAS[state.pliegue]; state.pliegueVar = 0; }
 if (!P.PLIEGUES.some(x => x.id === state.pliegue)) state.pliegue = 'ninguno';
-const ui = merge({ live: true, group: null, open: { general: true, papel: true } }, loadJSON('papelator2.ui'));
+const ui = merge({ live: true, group: null, tab: 'simple', open: { general: true, papel: true } }, loadJSON('papelator2.ui'));
 let papers = [], imperfCats = {}, foldCats = {}, calcoCats = {};
 
 const refreshers = [];
@@ -527,9 +527,21 @@ function buildPro() {
 }
 
 // =============================================================== arranque
+const appRoot = document.getElementById('app');
 simpleRoot = document.getElementById('simple');
 proRoot = document.getElementById('pro');
-proRoot.style.display = 'none';
+// pestañas: primero los presets, luego las opciones avanzadas (comparten estado y botones)
+function showTab(t) {
+  ui.tab = t === 'pro' ? 'pro' : 'simple'; saveJSON('papelator2.ui', ui);
+  simpleRoot.style.display = ui.tab === 'simple' ? 'flex' : 'none';
+  proRoot.style.display = ui.tab === 'pro' ? 'flex' : 'none';
+  const ts = document.getElementById('tab-simple'), tp = document.getElementById('tab-pro');
+  if (ts) ts.className = 'tab' + (ui.tab === 'simple' ? ' on' : '');
+  if (tp) tp.className = 'tab' + (ui.tab === 'pro' ? ' on' : '');
+  if (ui.tab === 'pro') updateThumbs();
+}
+document.getElementById('tab-simple').addEventListener('click', () => showTab('simple'));
+document.getElementById('tab-pro').addEventListener('click', () => showTab('pro'));
 let ready = null;
 function init() {
   if (!ready) ready = (async () => {
@@ -557,7 +569,6 @@ function fitHeights() {
 function attach(root, arg) {
   const node = arg && arg.node ? arg.node : arg;
   if (node && typeof node.appendChild === 'function' && root.parentNode !== node && node !== root) { try { node.appendChild(root); } catch (e) { /* queda en el body */ } }
-  root.style.display = 'flex';
   if (shown.indexOf(root) < 0) shown.push(root);
   fitHeights(); setTimeout(fitHeights, 50); setTimeout(fitHeights, 400);
 }
@@ -565,8 +576,10 @@ try { if (typeof window !== 'undefined') window.addEventListener('resize', fitHe
 setInterval(fitHeights, 400);
 uxp.entrypoints.setup({
   panels: {
-    papelator: { show(arg) { attach(simpleRoot, arg); if (!builtSimple) { builtSimple = true; init().then(() => { buildSimple(); updateThumbs(); }).catch(e => setStatus('No se pudieron cargar las texturas: ' + e.message, true)); } } },
-    papelatorAjustes: { show(arg) { attach(proRoot, arg); if (!builtPro) { builtPro = true; init().then(() => { buildPro(); updateThumbs(); }).catch(e => setStatus('No se pudieron cargar las texturas: ' + e.message, true)); } } }
+    papelator: { show(arg) {
+      attach(appRoot, arg); showTab(ui.tab || 'simple');
+      if (!builtSimple) { builtSimple = builtPro = true; init().then(() => { buildSimple(); buildPro(); updateThumbs(); }).catch(e => setStatus('No se pudieron cargar las texturas: ' + e.message, true)); }
+    } }
   }
 });
 try {

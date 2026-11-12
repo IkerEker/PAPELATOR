@@ -6,13 +6,13 @@ Pensado para ser **sutil**: el papel acompaña, la lámina sigue siendo la prota
 
 ## Uso
 
-Dos paneles (menú **Plugins › PAPELATOR**):
+Una sola ventana (menú **Plugins › PAPELATOR**) con dos pestañas:
 
-- **PAPELATOR** (presets): intensidad del filtro, papel, escala, color, estado, calco, luz y calidad de la foto.
+- **Presets**: intensidad del filtro, papel, escala, color, estado, calco, luz y calidad de la foto.
   - **Papel de fondo**: genera el papel en la capa inferior del documento para trabajar encima.
   - **Aplicar**: imprime todas las capas visibles en el papel (tinta desplazada por las fibras, huecos en el grano,
     raspaduras que se comen la tinta) y aplica la luz y la calidad de fotografía elegidas.
-- **PAPELATOR · Ajustes**: todos los parámetros finos (cada imperfección por separado, calco, tinta, foto…).
+- **Avanzado**: todos los parámetros finos (cada imperfección por separado, calco, tinta, foto…).
 
 **Pliegues**: 1 a 6 veces o arrugado. Cada opción reúne las hojas reales fotografiadas de ese tipo; ⟳ pasa a la
 siguiente. Se usa el sombreado real de la foto (sin la luz de la toma ni el grano de su papel), a resolución completa

@@ -37,7 +37,6 @@ require(ROOT + '/main.js');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 (async () => {
   panels.papelator.show({ node: new El('uxp-panel') });
-  panels.papelatorAjustes.show({ node: new El('uxp-panel') });
   await sleep(2500);
   const $ = id => document.getElementById(id);
   console.log('swatches', $('s-swatches').querySelectorAll('.sw').length, 'thumb', String(($('p-thumb') || {}).src).slice(0, 25));
