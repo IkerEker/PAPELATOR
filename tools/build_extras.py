@@ -35,7 +35,7 @@ for p in cat:
 json.dump(cat, open(A + '/papers.json', 'w'), ensure_ascii=False, indent=1)
 
 # ---- manchas de envejecimiento a hoja completa
-IDX = dict(json.load(open('/tmp/claude-0/-home-claude/7670252d-a654-52b9-a1b1-4f0466e0fd73/scratchpad/sheets/imp_index.json')))
+IDX = dict(json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'indices', 'imp_index.json'))))
 icat = json.load(open(A + '/imperf.json'))
 items = []
 for n, i in enumerate([8, 9, 10, 41, 52, 58, 59]):

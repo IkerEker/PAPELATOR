@@ -6,7 +6,7 @@ from scipy import ndimage
 from PIL import Image
 from imperf_lib import *
 
-IDX = dict(json.load(open('/tmp/claude-0/-home-claude/7670252d-a654-52b9-a1b1-4f0466e0fd73/scratchpad/sheets/nimp_index.json')))
+IDX = dict(json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'indices', 'nimp_index.json'))))
 # size = dimensión mayor real en mm; place = regla física de colocación
 NEW = {
  'grapa_marca':  dict(name='Marca de grapa', kind='stamp', mode='relief', items=[0, 1, 13, 30, 31], size=[13, 15], place='staple', opacity=0.55, maxd=640, aniso=0.03, group='grapa'),
