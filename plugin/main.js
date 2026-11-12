@@ -202,7 +202,8 @@ async function doPaper() { await runModal('Papelator · Papel de fondo', paperJo
 async function doApply() {
   await runModal('Papelator · Aplicar', async (doc, d, onProgress) => {
     const t0 = Date.now();
-    const mine = tagged(doc);
+    // para leer sólo tu arte se ocultan un momento las capas de PAPELATOR; al terminar todo queda tal cual estaba
+    const mine = tagged(doc), vis = mine.map(l => l.visible);
     mine.forEach(l => { l.visible = false; });
     await onProgress(0.02, 'Leyendo las capas…');
     const comp = await readComposite(doc, d.w, d.h);
@@ -212,8 +213,7 @@ async function doApply() {
     const layer = await createLayer(doc, RESULT_NAME);
     await putFull(doc, layer, res.rgba, d.w, d.h);
     await moveToTop(doc, layer);
-    if (state.hideOriginals) { const top = doc.layers; for (let i = 0; i < top.length; i++) if (top[i].id !== layer.id) top[i].visible = false; }
-    else mine.forEach(l => { if (l.name === PAPER_NAME) l.visible = true; });
+    mine.forEach((l, i) => { try { l.visible = vis[i]; } catch (e) { /* capa borrada */ } });
     setStatus('Aplicado en «' + RESULT_NAME + '» (' + ((Date.now() - t0) / 1000).toFixed(1) + ' s). Ctrl/Cmd+Z lo deshace de una vez.');
   });
 }
@@ -283,7 +283,7 @@ function chip(label, on, onClick, dot) {
   return c;
 }
 // familias: el panel muestra pocas opciones; cada una agrupa variantes reales y ⟳ pasa a la siguiente
-const GROUPS = ['Lisos', 'Impresos', 'Rústicos', 'Translúcidos'];
+const GROUPS = ['Oficina y escuela', 'Bellas artes', 'Rústicos', 'Translúcidos'];
 function typeOf(paperId) { return P.PAPER_TYPES.filter(t => t.papers.indexOf(paperId) >= 0)[0] || P.PAPER_TYPES[0]; }
 function famOf(list, id) { return list.filter(f => f.items.indexOf(id) >= 0)[0] || null; }
 function nextIn(arr, cur) { const i = arr.indexOf(cur); return arr[(i + 1) % arr.length]; }
@@ -433,7 +433,7 @@ function buildSections() {
       { t: 'slider', path: 'grain', label: 'Deformación por el grano del papel', min: 0, max: 4, step: 0.05, fmt: pct },
       { t: 'slider', path: 'inkAge', label: 'Envejecimiento de la tinta', min: 0, max: 2, step: 0.05, fmt: pct },
       { t: 'slider', path: 'absorb', label: 'Absorción (huecos en el grano)', min: 0, max: 3, step: 0.05, fmt: pct },
-      { t: 'check', path: 'hideOriginals', label: 'Ocultar las capas originales al aplicar' }
+
     ] },
     { id: 'foto', title: 'Fotografía', items: [
       { t: 'picker', path: 'luz', label: 'Luz', options: () => P.LUCES.map(c => [c.id, c.name]) },

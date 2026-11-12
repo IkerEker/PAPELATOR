@@ -15,27 +15,27 @@ const COLORS = [
 
 // Tipos de papel (lo que se elige). Cada tipo agrupa sus variantes reales; ⟳ pasa a la siguiente.
 const PAPER_TYPES = [
-  { id: 'folio', name: 'Folio', group: 'Lisos', papers: ['folio', 'papel_fino', 'bristol'] },
-  { id: 'acuarela_fina', name: 'Acuarela fina', group: 'Lisos', papers: ['acuarela_fino', 'acuarela_satinada'] },
-  { id: 'acuarela_gruesa', name: 'Acuarela gruesa', group: 'Lisos', papers: ['acuarela_grueso', 'acuarela_grueso_2'] },
-  { id: 'algodon', name: 'Algodón', group: 'Lisos', papers: ['algodon', 'algodon_crema'] },
-  { id: 'verjurado', name: 'Verjurado', group: 'Lisos', papers: ['verjurado', 'verjurado_marfil'] },
-  { id: 'periodico', name: 'Periódico', group: 'Lisos', papers: ['periodico', 'periodico_gris'] },
-  { id: 'rayado', name: 'Rayado', group: 'Impresos', papers: ['rayado', 'rayado_tenue'] },
-  { id: 'cuadriculado', name: 'Cuadriculado', group: 'Impresos', papers: ['cuadricula', 'cuadricula_clara'] },
-  { id: 'milimetrado', name: 'Milimetrado', group: 'Impresos', papers: ['milimetrado_azul', 'milimetrado_naranja', 'milimetrado'] },
-  { id: 'punteado', name: 'Punteado', group: 'Impresos', papers: ['punteado', 'punteado_suave'] },
-  { id: 'isometrico', name: 'Isométrico', group: 'Impresos', papers: ['isometrico', 'triangular'] },
-  { id: 'pentagrama', name: 'Pentagrama', group: 'Impresos', papers: ['pentagrama'] },
+  { id: 'folio', name: 'Folio', group: 'Oficina y escuela', papers: ['folio', 'papel_fino', 'bristol'] },
+  { id: 'periodico', name: 'Periódico', group: 'Oficina y escuela', papers: ['periodico', 'periodico_gris'] },
+  { id: 'rayado', name: 'Rayado', group: 'Oficina y escuela', papers: ['rayado', 'rayado_tenue'] },
+  { id: 'cuadriculado', name: 'Cuadriculado', group: 'Oficina y escuela', papers: ['cuadricula', 'cuadricula_clara'] },
+  { id: 'milimetrado', name: 'Milimetrado', group: 'Oficina y escuela', papers: ['milimetrado_azul', 'milimetrado_naranja', 'milimetrado'] },
+  { id: 'punteado', name: 'Punteado', group: 'Oficina y escuela', papers: ['punteado', 'punteado_suave'] },
+  { id: 'isometrico', name: 'Isométrico', group: 'Oficina y escuela', papers: ['isometrico', 'triangular'] },
+  { id: 'pentagrama', name: 'Pentagrama', group: 'Oficina y escuela', papers: ['pentagrama'] },
+  { id: 'acuarela_fina', name: 'Acuarela fina', group: 'Bellas artes', papers: ['acuarela_fino', 'acuarela_satinada'] },
+  { id: 'acuarela_gruesa', name: 'Acuarela gruesa', group: 'Bellas artes', papers: ['acuarela_grueso', 'acuarela_grueso_2'] },
+  { id: 'algodon', name: 'Algodón', group: 'Bellas artes', papers: ['algodon', 'algodon_crema'] },
+  { id: 'verjurado', name: 'Verjurado', group: 'Bellas artes', papers: ['verjurado', 'verjurado_marfil'] },
+  { id: 'arroz', name: 'Arroz', group: 'Bellas artes', papers: ['arroz', 'arroz_artesanal', 'arroz_dorado'] },
+  { id: 'cartulina', name: 'Cartulina gris', group: 'Bellas artes', papers: ['cartulina_gris'] },
   { id: 'kraft', name: 'Kraft', group: 'Rústicos', papers: ['kraft', 'kraft_claro'] },
-  { id: 'reciclado', name: 'Reciclado', group: 'Rústicos', papers: ['reciclado', 'reciclado_motas'] },
+  { id: 'reciclado', name: 'Reciclado', group: 'Rústicos', papers: ['reciclado', 'reciclado_motas', 'reciclado_gris'] },
   { id: 'hecho_mano', name: 'Hecho a mano', group: 'Rústicos', papers: ['hecho_mano', 'hecho_mano_fibroso', 'hecho_mano_grumos'] },
-  { id: 'arroz', name: 'Arroz', group: 'Rústicos', papers: ['arroz', 'arroz_artesanal', 'arroz_dorado'] },
-  { id: 'pergamino', name: 'Pergamino', group: 'Rústicos', papers: ['pergamino', 'pergamino_oscuro', 'pergamino_blanco'] },
+  { id: 'pergamino', name: 'Pergamino', group: 'Rústicos', papers: ['pergamino', 'pergamino_oscuro'] },
   { id: 'carton', name: 'Cartón', group: 'Rústicos', papers: ['corrugado', 'corrugado_fino'] },
-  { id: 'cartulina', name: 'Cartulina gris', group: 'Rústicos', papers: ['cartulina_gris', 'reciclado_gris'] },
   { id: 'vegetal', name: 'Vegetal', group: 'Translúcidos', papers: ['vegetal', 'vegetal_arrugado'] },
-  { id: 'encerado', name: 'Encerado', group: 'Translúcidos', papers: ['encerado', 'horno'] }
+  { id: 'horno', name: 'Papel de horno', group: 'Translúcidos', papers: ['horno', 'encerado', 'pergamino_blanco'] }
 ];
 
 // Estado del papel: cada preset cuenta una historia distinta.
@@ -182,7 +182,7 @@ const DEFAULT_STATE = {
   luz: 'ninguna',
   exposure: 0,
   calidad: 'perfecta',
-  hideOriginals: true
+  hideOriginals: false
 };
 
 module.exports = { COLORS, PAPER_TYPES, ESTADO_FAMILIAS, CALCO_FAMILIAS, LUZ_FAMILIAS, CALIDAD_FAMILIAS, PLIEGUE_ALIAS, ESTADOS, PLIEGUES, CALCOS, IMPRESIONES, LUCES, CALIDADES, DEFAULT_STATE };
