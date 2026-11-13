@@ -413,7 +413,7 @@ function buildSections() {
     { id: 'papel', title: 'Papel', items: [
       { t: 'picker', path: 'paper', label: 'Tipo de papel', options: () => papers.map(p => [p.id, p.group + ' · ' + p.name]) },
       { t: 'text', path: 'color', label: 'Color (hex) o «original»', placeholder: '#f2ead8' },
-      { t: 'slider', path: 'scale', label: 'Escala de la textura', min: 0.25, max: 4, step: 0.05, fmt: pct },
+      { t: 'slider', path: 'scale', label: 'Escala de la textura', min: 0.05, max: 4, step: 0.01, fmt: pct },
       { t: 'slider', path: 'texture', label: 'Contraste de la textura', min: 0, max: 2.5, step: 0.05, fmt: pct },
       { t: 'text', path: 'patternColor', label: 'Color de las líneas impresas (hex, vacío = original)', placeholder: '#6e9ed6' },
       { t: 'slider', path: 'patternOpacity', label: 'Intensidad de las líneas', min: 0, max: 1.5, step: 0.05, fmt: pct }

@@ -124,10 +124,10 @@ async function genPaper(S, st, assets, B) {
   const iimg = paper.kind === 'pattern' ? await loadImg(assets, 'papers/' + paper.id + '_ink.png') : null;
   const tw = dimg.width, th = dimg.height;
   // px de textura por px de documento
-  const scale = clamp(def(st.scale, 1), 0.1, 10);
+  const scale = clamp(def(st.scale, 1), 0.04, 10);
   const kx = tw / (paper.tileMm[0] * ppm * scale), ky = th / (paper.tileMm[1] * ppm * scale);
   let level = 0; let kk = Math.max(kx, ky);
-  while (kk > 1.5 && level < 6) { kk /= 2; level++; }
+  while (kk > 1.5 && level < 8) { kk /= 2; level++; }
   const lv = 1 << level;
   const dm = mipLevel(paper.id + '_d', dimg, level);
   const im = iimg ? mipLevel(paper.id + '_i', iimg, level) : null;
@@ -860,7 +860,7 @@ async function renderFinal(opts) {
 
   // ---- 1) mapa de desplazamiento propio de este papel: el relieve del grano a su escala real
   await prog(0.48, 'Mapa de desplazamiento del papel…');
-  const scale = clamp(def(st.scale, 1), 0.1, 10);
+  const scale = clamp(def(st.scale, 1), 0.04, 10);
   const reliefK = clamp(def(paper.rough, 0.02) / 0.03, 0.2, 3) * def(paper.reliefAdj, 1);
   const Hs = new Float32Array(N), tmp = new Float32Array(N);
   const tk = 1 / (S.texK || 1);
