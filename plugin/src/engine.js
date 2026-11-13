@@ -1209,7 +1209,7 @@ const LUZ = {
   ventana: { expo: 0.86, white: 0.93, black: 0.05, tint: [1.02, 1.0, 0.97], side: 0.58, frame: 0.22, coolShadow: 0.1, vig: 0.25, contrast: 0.06 },
   lampara: { expo: 0.9, white: 0.92, black: 0.06, tint: [1.16, 0.97, 0.66], pool: [0.92, 0.04, 0.62], poolK: 0.68, vig: 0.3, contrast: 0.05 },
   foco: { expo: 0.98, white: 0.93, black: 0.05, tint: [1.07, 1.0, 0.88], spot: [0.5, 0.42, 0.36, 0.3], outside: 0.4, vig: 0.2, contrast: 0.08 },
-  flash: { expo: 1.0, white: 0.95, black: 0.05, tint: [0.96, 1.0, 1.06], hot: [0.5, 0.44], fall: 0.62, glare: 0.75, vig: 0.15, contrast: 0.12 },
+  flash: { expo: 1.0, white: 0.95, black: 0.05, tint: [0.97, 1.0, 1.05], hot: [0.5, 0.44], fall: 0.72, glare: 0.9, vig: 0.1, contrast: 0.05 },
   sombra: { expo: 0.88, white: 0.93, black: 0.05, tint: [0.97, 1.0, 1.04], grad: [0.1, -0.9, 0.12], phone: 0.5, vig: 0.25, contrast: 0.02 }
 };
 function photo(S, st, px, B, paper) {
@@ -1277,22 +1277,32 @@ function photo(S, st, px, B, paper) {
     const gl = B.gloss;
     const G = L.glare ? lowField(w, h, 6, (x, y) => {
       const dx = (x / w - L.hot[0] - jx * 0.5) * w / half, dy = (y / h - L.hot[1] - jy * 0.5) * h / half;
-      return L.glare * kl * Math.exp(-(dx * dx + dy * dy) / 0.012);
+      return L.glare * kl * Math.exp(-(dx * dx + dy * dy) / 0.02);
     }) : null;
     const sy = L.scanYellow ? clamp(def(paper.translucency, 0.25), 0, 1) * 0.04 * k : 0;
+    const D = B.D, dinvP = 1 / (S.dstd || 0.01);
     const cool = def(L.coolShadow, 0) * kl;
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
       const o = y * w + x, j = o * 4;
       const e = E(x, y);
       let g = 0;
-      if (G) g = G(x, y) * (1 + (gl ? gl[o] / 255 * 2 : 0));
+      if (G) {
+        // reflejo del flash: no es un velo, es brillo especular que sólo devuelven las partes del relieve que miran a
+        // la cámara (crestas del grano, virutas, fibras) y lo que brilla (tóner, grasa, cera). La textura se sigue viendo.
+        const gv = G(x, y);
+        if (gv > 0.004) {
+          const hn = D ? D[o] * dinvP : 0;
+          const crest = smooth(-0.2, 1.8, hn);
+          g = gv * (0.06 + 0.55 * crest * crest + (gl ? gl[o] / 255 * 0.9 : 0));
+        }
+      }
       else if (gl && gl[o] && luz !== 'escaner' && luz !== 'ninguna') g = gl[o] / 255 * 0.05 * kl;
       const sh = cool * clamp(1 - e, 0, 1);
       for (let c = 0; c < 3; c++) {
         let v = px[j + c] * e * tint[c];
         if (c === 2) v *= 1 + sh - sy; else if (c === 0) v *= 1 - sh * 0.6;
         if (con) v = 128 + (v - 128) * (1 + con);
-        v += (255 - v) * Math.min(1, g);
+        v += (255 - v) * Math.min(0.85, g);
         v = black + clamp(v, 0, 255) * white * (255 - black) / 255;
         px[j + c] = v;
       }
