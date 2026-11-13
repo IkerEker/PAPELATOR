@@ -2,7 +2,7 @@
 
 > Pega o adjunta este archivo al empezar el chat nuevo. Todo el proyecto está en GitHub:
 > **https://github.com/IkerEker/PAPELATOR** (rama `main`, último commit «Una sola ventana con dos pestañas: Presets y Avanzado»).
-> Versión actual del plugin: **3.10.0** (`plugin/manifest.json`). Instalable: `dist/PAPELATOR.ccx`.
+> Versión actual del plugin: **3.11.0** (`plugin/manifest.json`). Instalable: `dist/PAPELATOR.ccx`.
 
 ---
 
@@ -180,6 +180,15 @@ escaner_oficina, movil, movil_antiguo, fotocopia, analogica.
   (refleja la luz: gris de 16 niveles con tramado, blanco grisáceo, fantasma de la página anterior; admite luz natural).
 - Foto de pantalla: moiré con dos familias de franjas curvadas, modulado por zonas; bandas del obturador con una
   más marcada; reflejos de lámpara, flash, ventana/día y tu propio reflejo; huellas sólo en el reflejo.
+
+## 6f. v3.11 — interfaz más amable
+- Arranque limpio: al abrir Photoshop, estado Nuevo, sin pliegues, sin calco, sin sobreponer, sin foto, calidad
+  perfecta (se conserva el papel elegido). Botón «Limpiar» junto al ⟳ grande hace lo mismo en cualquier momento.
+- Tarjetas plegables (clic en el título) con resumen de lo elegido a la derecha y una línea de descripción.
+- Corregido: las secciones no disponibles (pantalla, madera, cartón) ahora desaparecen enteras (antes sólo el título).
+- Avanzado: cada control aparece sólo si sirve (líneas impresas sólo en papeles con patrón, sliders de pliegue/calco/
+  vidrio sólo si hay pliegue/calco/vidrio, tinta y textura ocultas en pantalla).
+- Prueba de la interfaz real en navegador: `tools/test/layout2.js` (main.js con UXP simulado).
 
 ## 7. Pendiente / ideas que no se han hecho
 - Probar todo dentro de Photoshop real (las pruebas son en Node + simulación del DOM de UXP; el usuario es quien lo

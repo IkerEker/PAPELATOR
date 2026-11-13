@@ -42,6 +42,9 @@ function saveJSON(key, v) { try { localStorage.setItem(key, JSON.stringify(v)); 
 let state = merge(clone(P.DEFAULT_STATE), loadJSON('papelator3.state'));
 // v4: la intensidad global ya no está en el panel principal; vuelve a la de referencia
 if ((state.version | 0) < 4) { state.intensity = 50; state.version = 4; }
+const CLEAN = { estado: 'nuevo', edad: 0, custom: null, pliegue: 'ninguno', pliegueVar: 0, calco: 'ninguno', sobre: 'ninguno', sobreVar: 0,
+  luz: 'ninguna', calidad: 'perfecta', exposure: 0 };
+Object.assign(state, CLEAN);
 if (P.PLIEGUE_ALIAS[state.pliegue]) { state.pliegue = P.PLIEGUE_ALIAS[state.pliegue]; state.pliegueVar = 0; }
 if (!P.PLIEGUES.some(x => x.id === state.pliegue)) state.pliegue = 'ninguno';
 const ui = merge({ live: true, group: null, tab: 'simple', open: { general: true, papel: true } }, loadJSON('papelator2.ui'));
@@ -373,6 +376,49 @@ function buildSimple() {
     chipRow(byId('s-calidad'), P.CALIDAD_FAMILIAS.filter(famUsable), it => it.items.indexOf(state.calidad) >= 0, it => pickFam('calidad', it));
     if (byId('s-impresion')) chipRow(byId('s-impresion'), P.IMPRESIONES, it => state.impresion === it.id, it => { state.impresion = it.id; });
   }
+  // cada tarjeta: cabecera (número, título, resumen de lo elegido, ⟳) + cuerpo plegable
+  const SEC_IDS = ['s-sec-papel', 's-sec-color', 's-sec-estado', 's-sec-pliegue', 's-sec-calco', 's-sec-sobre', 's-sec-foto'];
+  if (!ui.closed) ui.closed = {};
+  SEC_IDS.forEach(id => {
+    const sec = byId(id); if (!sec || sec._built) return; sec._built = true;
+    const head = sec.querySelector('.sechead'); if (!head || !sec.childNodes || !head.insertBefore) return;
+    const body = h('div', 'secbody');
+    const kids = []; for (let i = 0; i < sec.childNodes.length; i++) kids.push(sec.childNodes[i]);
+    kids.forEach(n => { if (n !== head) body.appendChild(n); });
+    sec.appendChild(body);
+    const sum = h('span', 'sum', ''), tw = h('span', 'tw', '');
+    const mini = head.querySelector('.mini');
+    head.insertBefore(sum, mini || null); head.insertBefore(tw, head.firstChild);
+    const desc = h('div', 'desc', ''); body.insertBefore(desc, body.firstChild);
+    sec._sum = sum; sec._tw = tw; sec._body = body; sec._desc = desc;
+    head.addEventListener('click', e => {
+      if (e.target && e.target.className && String(e.target.className).indexOf('mini') >= 0) return;
+      ui.closed[id] = !ui.closed[id]; saveJSON('papelator2.ui', ui); sections();
+    });
+  });
+  const pct0 = v => Math.round(v * 100) + '%';
+  function summary(id) {
+    const t = typeOf(state.paper), p = papers.filter(x => x.id === state.paper)[0];
+    const fam = (list, v) => { const f = list.filter(x => x.items.indexOf(v) >= 0)[0]; return f ? f.name : ''; };
+    const nm = (list, v) => { const f = list.filter(x => x.id === v)[0]; return f ? f.name : ''; };
+    switch (id) {
+      case 's-sec-papel': return (t ? t.name : '') + (t && t.papers.length > 1 ? ' ' + (t.papers.indexOf(state.paper) + 1) + '/' + t.papers.length : '');
+      case 's-sec-color': return nm(P.COLORS, state.color) || state.color;
+      case 's-sec-estado': return (state.custom ? 'Personalizado' : fam(P.ESTADO_FAMILIAS, state.estado)) + (state.edad > 0.005 ? ' · ' + pct0(state.edad) : '');
+      case 's-sec-pliegue': return nm(P.PLIEGUES, state.pliegue);
+      case 's-sec-calco': return fam(P.CALCO_FAMILIAS, state.calco);
+      case 's-sec-sobre': return nm(P.SOBRES, state.sobre);
+      case 's-sec-foto': return fam(P.LUZ_FAMILIAS, state.luz) + ' · ' + fam(P.CALIDAD_FAMILIAS, state.calidad);
+    }
+    return '';
+  }
+  function describe(id) {
+    if (id === 's-sec-estado' && !state.custom) { const e = P.ESTADOS.filter(x => x.id === state.estado)[0]; return e ? e.name + ': ' + (e.desc || '').toLowerCase() : ''; }
+    if (id === 's-sec-calco' && state.calco !== 'ninguno') { const c = P.CALCOS.filter(x => x.id === state.calco)[0]; return c && c.desc ? c.name + ': ' + c.desc.toLowerCase() : ''; }
+    if (id === 's-sec-papel' && materialOf(state.paper) === 'screen') return 'Pantalla: sin pliegues, calco ni estado del papel.';
+    if (id === 's-sec-papel' && (materialOf(state.paper) === 'wood' || materialOf(state.paper) === 'carton')) return 'Madera y cartón no se doblan ni transparentan.';
+    return '';
+  }
   function sections() {
     const show = { 's-sec-color': usable('color'), 's-sec-estado': usable('estado'), 's-sec-pliegue': usable('pliegues'), 's-sec-calco': usable('calco') };
     Object.keys(show).forEach(id => { const el = byId(id); if (el) el.style.display = show[id] ? 'block' : 'none'; });
@@ -381,11 +427,17 @@ function buildSimple() {
     byId('s-screenopts').style.display = scr ? 'block' : 'none';
     byId('s-zoom').value = Math.round(state.screenZoom * 100); byId('s-zoomval').textContent = Math.round(state.screenZoom * 100) + '%';
     byId('s-bright').value = Math.round(state.screenBright * 100); byId('s-brightval').textContent = Math.round(state.screenBright * 100) + '%';
-    // números seguidos aunque falten secciones
+    // números seguidos aunque falten secciones; resumen y plegado
     let n = 0;
-    ['s-sec-papel', 's-sec-color', 's-sec-estado', 's-sec-pliegue', 's-sec-calco', 's-sec-sobre', 's-sec-foto'].forEach(id => {
+    SEC_IDS.forEach(id => {
       const el = byId(id); if (!el || el.style.display === 'none') return;
       const num = el.querySelector('.num'); if (num) num.textContent = String(++n);
+      const closed = !!ui.closed[id];
+      if (el._body) el._body.style.display = closed ? 'none' : 'block';
+      if (el._tw) el._tw.textContent = closed ? '▸' : '▾';
+      if (el._sum) el._sum.textContent = summary(id);
+      if (el._desc) { const d = describe(id); el._desc.textContent = d; el._desc.style.display = d ? 'block' : 'none'; }
+      el.className = el.className.replace(/ closed/g, '') + (closed ? ' closed' : '');
     });
   }
   function sliders() {
@@ -448,6 +500,7 @@ function buildSimple() {
   byId('s-paper').addEventListener('click', doPaper);
   byId('s-apply').addEventListener('click', doApply);
   byId('s-remove').addEventListener('click', doRemove);
+  byId('s-reset').addEventListener('click', () => { Object.assign(state, CLEAN); changed({ source: 'simple' }); });
   byId('s-dice').addEventListener('click', () => { state.seed = 1 + Math.floor(Math.random() * 9999); changed({ source: 'simple' }); });
   live.addEventListener('change', e => { ui.live = !!e.target.checked; saveJSON('papelator2.ui', ui); refreshers.forEach(fn => fn('live')); });
 }
@@ -457,6 +510,7 @@ const pct = v => Math.round(v * 100) + '%';
 // recuentos de imperfecciones: [máximo, paso]
 const CAT_RANGE = { polvo: [600, 10], foxing: [400, 10], fibras: [30, 1], nodulos: [60, 2], descamacion: [200, 5], sol: [1, 0.05], manoseo: [1.5, 0.05], cockle: [1.5, 0.05], manchado: [1.5, 0.05] };
 const SPECIAL = { manoseo: 'Suciedad de las manos', cockle: 'Ondulación por humedad', sol: 'Un lado expuesto al sol' };
+function isPattern() { const p = papers.filter(x => x.id === state.paper)[0]; return !!(p && p.kind === 'pattern'); }
 function buildSections() {
   const estadoItems = [
     { t: 'picker', path: 'estado', label: 'Preset de estado', options: () => P.ESTADOS.map(e => [e.id, e.name]).concat([['custom', 'Personalizado']]),
@@ -481,36 +535,36 @@ function buildSections() {
     ] },
     { id: 'papel', title: 'Papel', items: [
       { t: 'picker', path: 'paper', label: 'Tipo de papel', options: () => papers.map(p => [p.id, p.group + ' · ' + p.name]) },
-      { t: 'text', path: 'color', label: 'Color (hex) o «original»', placeholder: '#f2ead8' },
-      { t: 'slider', path: 'scale', label: 'Escala de la textura', min: 0.05, max: 4, step: 0.01, fmt: pct },
-      { t: 'slider', path: 'texture', label: 'Contraste de la textura', min: 0, max: 2.5, step: 0.05, fmt: pct },
-      { t: 'text', path: 'patternColor', label: 'Color de las líneas impresas (hex, vacío = original)', placeholder: '#6e9ed6' },
-      { t: 'slider', path: 'patternOpacity', label: 'Intensidad de las líneas', min: 0, max: 1.5, step: 0.05, fmt: pct }
+      { t: 'text', path: 'color', label: 'Color (hex) o «original»', placeholder: '#f2ead8', when: () => usable('color') },
+      { t: 'slider', path: 'scale', label: 'Escala de la textura', min: 0.05, max: 4, step: 0.01, fmt: pct, when: () => materialOf(state.paper) !== 'screen' },
+      { t: 'slider', path: 'texture', label: 'Contraste de la textura', min: 0, max: 2.5, step: 0.05, fmt: pct, when: () => materialOf(state.paper) !== 'screen' },
+      { t: 'text', path: 'patternColor', label: 'Color de las líneas impresas (hex, vacío = original)', placeholder: '#6e9ed6', when: isPattern },
+      { t: 'slider', path: 'patternOpacity', label: 'Intensidad de las líneas', min: 0, max: 1.5, step: 0.05, fmt: pct, when: isPattern }
     ] },
     { id: 'estado', title: 'Estado e imperfecciones', when: () => usable('estado'), items: estadoItems },
     { id: 'pliegues', title: 'Pliegues y arrugas', when: () => usable('pliegues'), items: [
       { t: 'picker', path: 'pliegue', label: 'Cómo se dobló', options: () => P.PLIEGUES.map(c => [c.id, c.name]) },
-      { t: 'slider', path: 'pliegueAmount', label: 'Relieve de los pliegues', min: 0, max: 2.5, step: 0.05, fmt: pct },
-      { t: 'slider', path: 'pliegueWear', label: 'Desgaste de las aristas (tinta levantada)', min: 0, max: 3, step: 0.05, fmt: pct },
-      { t: 'slider', path: 'pliegueVar', label: 'Hoja real del grupo', min: 0, max: 28, step: 1, fmt: v => '#' + (v + 1) }
+      { t: 'slider', path: 'pliegueAmount', label: 'Relieve de los pliegues', min: 0, max: 2.5, step: 0.05, fmt: pct , when: () => state.pliegue !== 'ninguno' },
+      { t: 'slider', path: 'pliegueWear', label: 'Desgaste de las aristas (tinta levantada)', min: 0, max: 3, step: 0.05, fmt: pct , when: () => state.pliegue !== 'ninguno' },
+      { t: 'slider', path: 'pliegueVar', label: 'Hoja real del grupo', min: 0, max: 28, step: 1, fmt: v => '#' + (v + 1) , when: () => state.pliegue !== 'ninguno' }
     ] },
     { id: 'sobre', title: 'Sobreponer (vidrio, plástico)', items: [
       { t: 'picker', path: 'sobre', label: 'Qué hay delante', options: () => P.SOBRES.map(c => [c.id, c.name]) },
-      { t: 'slider', path: 'sobreDist', label: 'Distancia al papel', min: 0, max: 1, step: 0.01, fmt: v => Math.round(v * 40) + ' mm' },
-      { t: 'slider', path: 'sobreTrans', label: 'Transparencia (gastado, arañado)', min: 0, max: 1, step: 0.01, fmt: pct },
-      { t: 'slider', path: 'sobreRefl', label: 'Reflejos', min: 0, max: 3, step: 0.05, fmt: pct },
-      { t: 'slider', path: 'sobreDirt', label: 'Huellas y polvo en el vidrio', min: 0, max: 1, step: 0.05, fmt: pct },
-      { t: 'slider', path: 'sobreScale', label: 'Escala del vidrio', min: 0.25, max: 4, step: 0.05, fmt: pct },
-      { t: 'slider', path: 'sobreVar', label: 'Textura concreta', min: 0, max: 14, step: 1, fmt: v => '#' + (v + 1) }
+      { t: 'slider', path: 'sobreDist', label: 'Distancia al papel', min: 0, max: 1, step: 0.01, fmt: v => Math.round(v * 40) + ' mm' , when: () => state.sobre !== 'ninguno' },
+      { t: 'slider', path: 'sobreTrans', label: 'Transparencia (gastado, arañado)', min: 0, max: 1, step: 0.01, fmt: pct , when: () => state.sobre !== 'ninguno' },
+      { t: 'slider', path: 'sobreRefl', label: 'Reflejos', min: 0, max: 3, step: 0.05, fmt: pct , when: () => state.sobre !== 'ninguno' },
+      { t: 'slider', path: 'sobreDirt', label: 'Huellas y polvo en el vidrio', min: 0, max: 1, step: 0.05, fmt: pct , when: () => state.sobre !== 'ninguno' },
+      { t: 'slider', path: 'sobreScale', label: 'Escala del vidrio', min: 0.25, max: 4, step: 0.05, fmt: pct , when: () => state.sobre !== 'ninguno' },
+      { t: 'slider', path: 'sobreVar', label: 'Textura concreta', min: 0, max: 14, step: 1, fmt: v => '#' + (v + 1) , when: () => state.sobre !== 'ninguno' }
     ] },
     { id: 'calco', title: 'Calco', when: () => usable('calco'), items: [
       { t: 'picker', path: 'calco', label: 'Documento de detrás', options: () => P.CALCOS.map(c => [c.id, c.name]) },
-      { t: 'slider', path: 'calcoAmount', label: 'Trasluz', min: 0, max: 3, step: 0.05, fmt: pct },
-      { t: 'slider', path: 'calcoBleed', label: 'Traspaso de tinta', min: 0, max: 3, step: 0.05, fmt: pct },
-      { t: 'slider', path: 'calcoPressure', label: 'Presión (relieve)', min: 0, max: 3, step: 0.05, fmt: pct },
-      { t: 'slider', path: 'calcoBlur', label: 'Desenfoque', min: 0.2, max: 3, step: 0.05, fmt: pct }
+      { t: 'slider', path: 'calcoAmount', label: 'Trasluz', min: 0, max: 3, step: 0.05, fmt: pct , when: () => state.calco !== 'ninguno' },
+      { t: 'slider', path: 'calcoBleed', label: 'Traspaso de tinta', min: 0, max: 3, step: 0.05, fmt: pct , when: () => state.calco !== 'ninguno' },
+      { t: 'slider', path: 'calcoPressure', label: 'Presión (relieve)', min: 0, max: 3, step: 0.05, fmt: pct , when: () => state.calco !== 'ninguno' },
+      { t: 'slider', path: 'calcoBlur', label: 'Desenfoque', min: 0.2, max: 3, step: 0.05, fmt: pct , when: () => state.calco !== 'ninguno' }
     ] },
-    { id: 'aplicar', title: 'Aplicar (tinta)', items: [
+    { id: 'aplicar', title: 'Aplicar (tinta)', when: () => materialOf(state.paper) !== 'screen', items: [
       { t: 'picker', path: 'impresion', label: 'Técnica de impresión', options: () => P.IMPRESIONES.map(c => [c.id, c.name]) },
       { t: 'picker', path: 'inkMode', label: 'Tipo de tinta', options: () => [['multiply', 'Transparente (se suma al papel)'], ['normal', 'Opaca (serigrafía, blanco)']] },
       { t: 'slider', path: 'grain', label: 'Deformación por el grano del papel', min: 0, max: 4, step: 0.05, fmt: pct },
@@ -596,6 +650,7 @@ function buildPro() {
         row.appendChild(tf);
         controls.push({ src, set: () => { tf.value = getPath(it.path) || ''; } });
       }
+      if (it.when) whens.push(() => { row.style.display = it.when() ? 'block' : 'none'; });
       body.appendChild(row);
     });
     host.appendChild(grp);

@@ -17,7 +17,7 @@ const P = require('../../plugin/src/presets.js');
         if (dot && it.hex !== undefined) { const d = document.createElement('span'); d.className = 'dot'; d.style.backgroundColor = it.hex || 'transparent'; c.appendChild(d); }
         const s = document.createElement('span'); s.textContent = it.name || it; c.appendChild(s); el.appendChild(c); }); };
       mk('s-groups', ['Oficina y escuela', 'Bellas artes', 'Rústicos', 'Maderas y cartones', 'Translúcidos'], 3);
-      mk('s-colors', P.COLORS, 0, true); mk('s-estado', P.ESTADO_FAMILIAS, 1); mk('s-pliegue', P.PLIEGUES, 2);
+      mk('s-colors', P.COLORS, 0, true);  mk('s-estado', P.ESTADO_FAMILIAS, 1); mk('s-pliegue', P.PLIEGUES, 2);
       mk('s-calco', P.CALCO_FAMILIAS, 0); mk('s-sobre', P.SOBRES, 1); mk('s-luz', P.LUZ_FAMILIAS, 4); mk('s-calidad', P.CALIDAD_FAMILIAS, 2);
       const sw = document.getElementById('s-swatches');
       P.PAPER_TYPES.filter(t => t.group === 'Maderas y cartones').forEach((t, i) => { const d = document.createElement('div'); d.className = 'sw' + (i === 1 ? ' on' : '');
