@@ -2,7 +2,7 @@
 
 > Pega o adjunta este archivo al empezar el chat nuevo. Todo el proyecto está en GitHub:
 > **https://github.com/IkerEker/PAPELATOR** (rama `main`, último commit «Una sola ventana con dos pestañas: Presets y Avanzado»).
-> Versión actual del plugin: **3.6.0** (`plugin/manifest.json`). Instalable: `dist/PAPELATOR.ccx`.
+> Versión actual del plugin: **3.7.1** (`plugin/manifest.json`). Instalable: `dist/PAPELATOR.ccx`.
 
 ---
 
@@ -150,6 +150,18 @@ escaner_oficina, movil, movil_antiguo, fotocopia, analogica.
   ese repo —humo, fuego, VHS, mármol…— no se usan aquí). 7 tipos (acanalado 8, ondulado 6, martillado 6, armado 7,
   esmerilado 3, lluvia 4, plástico 15). Sección «6 · Sobreponer» con ⟳ y slider **Distancia al papel** (0–40 mm);
   en Avanzado: reflejos, huellas/polvo, escala y textura concreta. Sólo actúa al **Aplicar** (va delante del papel).
+
+## 6c. v3.7 — transparencia del vidrio y luz/calidad mucho más marcadas
+- Sobreponer › **Transparencia** (Presets y Avanzado): 100 % limpio; al bajar, vidrio gastado: velo lechoso
+  desigual, grupos de arañazos paralelos + sueltos, y más difusión.
+- **Luz** (`LUZ` en engine.js) y **Calidad** (`QUAL`) reescritas para que se noten mucho a intensidad 50:
+  escáner con sombra del canto levantado; día apagado y frío; ventana lateral con sombra del marco; lámpara
+  tungsteno naranja con charco de luz; foco circular definido; flash con centro quemado y caída cos⁴; sombra del
+  móvil y la mano. Calidad por **resolución efectiva** (móvil 1700 px, antiguo 900, fotocopia 1300, analógica 1500):
+  trepidación, reducción de ruido «acuarelada», HDR, halos de enfoque, ruido en manchas y de color, JPEG, aberración,
+  barril, giro/perspectiva/desenfoque de márgenes más fuertes; fotocopia con curva dura, tóner, rayas de tambor y
+  bordes; analógica con grano a dos escalas, halation, difusión, polvo y pelos.
+- Aplicar sobrescribe el resultado anterior si el arte no ha cambiado (huella del compuesto).
 
 ## 7. Pendiente / ideas que no se han hecho
 - Probar todo dentro de Photoshop real (las pruebas son en Node + simulación del DOM de UXP; el usuario es quien lo

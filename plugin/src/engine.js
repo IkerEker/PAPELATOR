@@ -830,11 +830,11 @@ const LIGHT = {
   ninguna: { lx: -0.5, ly: -0.7, rk: 0, fk: 0, tex: 1 },
   escaner: { lx: 0, ly: -1, rk: 0.22, fk: 0.05, tex: 0.6 },
   dia: { lx: 0.3, ly: -0.9, rk: 0.35, fk: 0.45, tex: 0.9 },
-  ventana: { lx: -0.95, ly: 0.3, rk: 1, fk: 1.1, tex: 1.12 },
-  foco: { lx: -0.2, ly: -0.6, rk: 0.4, fk: 0.55, tex: 0.95 },
+  ventana: { lx: -0.95, ly: 0.3, rk: 1.3, fk: 1.4, tex: 1.2 },
+  foco: { lx: -0.2, ly: -0.6, rk: 0.6, fk: 0.75, tex: 1.0 },
   flash: { lx: 0, ly: -0.3, rk: 0.1, fk: 0.25, tex: 0.78 },
   sombra: { lx: -0.3, ly: -0.9, rk: 0.35, fk: 0.55, tex: 0.92 },
-  lampara: { lx: 0.85, ly: -0.55, rk: 0.85, fk: 0.95, tex: 1.06 }
+  lampara: { lx: 0.85, ly: -0.55, rk: 1.1, fk: 1.2, tex: 1.12 }
 };
 function lightDir(id) { const L = LIGHT[id] || LIGHT.ninguna; const n = Math.hypot(L.lx, L.ly) || 1; return [L.lx / n, L.ly / n, L]; }
 
@@ -1194,60 +1194,106 @@ async function applyOverlay(S, st, px, assets, prog) {
 }
 
 // ================================================================ FOTOGRAFÍA
+// Luz de la toma. Cada luz tiene su forma real y, si se elige, SE NOTA:
+//  escáner  luz plana y fría, negros firmes, blancos casi a tope; sombra donde el papel se levanta del cristal
+//  día      luz suave de cielo, algo fría, cae poco a poco hacia una esquina, la foto queda algo apagada
+//  ventana  luz lateral fuerte: un lado claro, el otro en penumbra fría; sombra suave del marco de la ventana
+//  lámpara  bombilla cálida (tungsteno sin corregir: naranja), charco de luz en una esquina, el resto cae a oscuro
+//  foco     círculo de luz definido, fuera queda en penumbra
+//  flash    centro quemado (reflejo del flash en el papel), caída rápida hacia las esquinas, frío y contrastado
+//  sombra   el móvil y la mano tapan la luz: sombra blanda que entra desde abajo
+const LUZ = {
+  ninguna: {},
+  escaner: { expo: 1.03, white: 0.975, black: 0.025, tint: [0.99, 1.0, 1.02], lift: 0.32, contrast: 0.1, scanYellow: 1 },
+  dia: { expo: 0.84, white: 0.93, black: 0.05, tint: [0.965, 0.995, 1.055], grad: [0.85, -0.8, 0.26], vig: 0.3, contrast: -0.04 },
+  ventana: { expo: 0.86, white: 0.93, black: 0.05, tint: [1.02, 1.0, 0.97], side: 0.58, frame: 0.22, coolShadow: 0.1, vig: 0.25, contrast: 0.06 },
+  lampara: { expo: 0.9, white: 0.92, black: 0.06, tint: [1.16, 0.97, 0.66], pool: [0.92, 0.04, 0.62], poolK: 0.68, vig: 0.3, contrast: 0.05 },
+  foco: { expo: 0.98, white: 0.93, black: 0.05, tint: [1.07, 1.0, 0.88], spot: [0.5, 0.42, 0.36, 0.3], outside: 0.4, vig: 0.2, contrast: 0.08 },
+  flash: { expo: 1.0, white: 0.95, black: 0.05, tint: [0.96, 1.0, 1.06], hot: [0.5, 0.44], fall: 0.62, glare: 0.75, vig: 0.15, contrast: 0.12 },
+  sombra: { expo: 0.88, white: 0.93, black: 0.05, tint: [0.97, 1.0, 1.04], grad: [0.1, -0.9, 0.12], phone: 0.5, vig: 0.25, contrast: 0.02 }
+};
 function photo(S, st, px, B, paper) {
   const { w, h } = S;
-  const k = clamp(S.k, 0, 2);
+  const k = clamp(S.k, 0, 2), kl = Math.min(1.5, k);
   const luz = st.luz || 'ninguna', cal = st.calidad || 'perfecta';
-  const expo = Math.pow(2, clamp(def(st.exposure, 0), -1.5, 1.5) * 0.7);
-  const diag = Math.hypot(w, h);
+  const expo = Math.pow(2, clamp(def(st.exposure, 0), -1.5, 1.5) * 0.8);
+  const diag = Math.hypot(w, h), half = diag / 2;
+  const L = LUZ[luz] || {};
   if (luz !== 'ninguna' || expo !== 1) {
-    const L = {
-      ninguna: { fall: 0, tint: [1, 1, 1], vig: 0, glare: 0, white: 1, black: 0 },
-      escaner: { fall: 0, tint: [1.0, 1.003, 1.01], vig: 0, glare: 0, white: 0.985, black: 0.018, scanYellow: 1 },
-      dia: { sx: 0.5, sy: -0.6, fall: 0.07, tint: [0.995, 1.0, 1.012], vig: 0.06, glare: 0, white: 0.955, black: 0.03 },
-      ventana: { sx: -0.75, sy: 0.25, fall: 0.15, tint: [1.012, 1.0, 0.99], vig: 0.07, glare: 0.012, cool: 0.03, white: 0.95, black: 0.035 },
-      foco: { spot: 1, fall: 0.22, tint: [1.025, 1.0, 0.955], vig: 0.07, glare: 0.025, white: 0.955, black: 0.03 },
-      flash: { spot: 0.7, fall: 0.2, tint: [0.99, 1.0, 1.02], vig: 0.12, glare: 0.07, white: 0.96, black: 0.04 },
-      sombra: { sx: 0.1, sy: -0.8, fall: 0.06, tint: [0.995, 1.0, 1.01], vig: 0.07, glare: 0, shadow: 1, white: 0.95, black: 0.035 },
-      lampara: { sx: 0.8, sy: -0.75, fall: 0.2, tint: [1.05, 1.0, 0.885], vig: 0.1, glare: 0.03, white: 0.95, black: 0.035 }
-    }[luz] || {};
-    const fall = (L.fall || 0) * k, vig = (L.vig || 0) * k, glare = (L.glare || 0) * k;
-    const tint = (L.tint || [1, 1, 1]).map(v => 1 + (v - 1) * k);
-    // respuesta de la cámara: el blanco del papel nunca llega a 255 y el negro nunca a 0
-    const white = 1 - (1 - def(L.white, 1)) * Math.min(1, k), black = def(L.black, 0) * Math.min(1, k) * 255;
-    const cx = w / 2, cy = h / 2;
-    const sxp = cx + (L.sx || 0) * diag, syp = cy + (L.sy || 0) * diag, hgt = diag * 0.55;
-    let e0 = 1;
-    if (!L.spot && fall > 0) { const q = (cx - sxp) ** 2 + (cy - syp) ** 2 + hgt * hgt; e0 = hgt / (q * Math.sqrt(q)); }
-    const gl = B.gloss;
-    // escáner: la luz atraviesa dos veces el papel fino → se ve más amarillo
-    const sy = L.scanYellow ? clamp(def(paper.translucency, 0.25), 0, 1) * 0.035 * k : 0;
-    // sombra blanda del móvil / de la mano (desde abajo a la derecha)
-    const shK = L.shadow ? 0.2 * Math.min(1, k) : 0, shx = w * 0.62, shy = h * 1.08, sra = w * 0.38, srb = h * 0.3;
-    // la iluminación es suave: se calcula en una rejilla de 8 px y se interpola
-    const E = lowField(w, h, 8, (x, y) => {
+    const r = rng((S.seed + (def(st.seedFoto, 0) | 0) * 7717) * 5 + 9);
+    const jx = (r() - 0.5) * 0.12, jy = (r() - 0.5) * 0.1;
+    const lerpK = (v, base) => base + (v - base) * kl;
+    const tint = (L.tint || [1, 1, 1]).map(v => lerpK(v, 1));
+    const white = lerpK(def(L.white, 1), 1), black = lerpK(def(L.black, 0), 0) * 255;
+    const con = def(L.contrast, 0) * kl;
+    const ex0 = lerpK(def(L.expo, 1), 1) * expo;
+    const vig = def(L.vig, 0) * kl;
+    // lado del escáner donde el papel se separa del cristal (y la ventana / lámpara: de qué lado viene la luz)
+    // (la luz de ventana y lámpara viene del mismo lado que el relieve del grano: izquierda y arriba-derecha)
+    const side = (L.side || L.pool) ? 1 : (r() < 0.5 ? 1 : -1);
+    const E = lowField(w, h, 6, (x, y) => {
+      const u = x / w, v = y / h, rx = (x - w / 2) / half, ry = (y - h / 2) / half;
       let e = 1;
-      if (L.spot) { const rr = Math.hypot(x - cx, y - cy) / (diag * 0.5); e = 1 - fall * smooth(0.2 * L.spot, 1.3, rr); }
-      else if (fall > 0) { const q = (x - sxp) ** 2 + (y - syp) ** 2 + hgt * hgt; e = Math.pow(hgt / (q * Math.sqrt(q)) / e0, fall * 1.4) / (1 + fall * 0.15); }
-      const rx = (x - cx) / (diag / 2), ry = (y - cy) / (diag / 2);
+      if (L.lift) {                              // escáner: el papel se levanta en un canto → sombra degradada
+        const d = side > 0 ? u : 1 - u;
+        e *= 1 - L.lift * kl * Math.pow(1 - smooth(0, 0.09, d), 1.6);
+      }
+      if (L.grad) {                              // luz de cielo: degradado amplio hacia una esquina
+        const [gx, gy, gk] = L.grad, t = (rx * gx + ry * gy) / Math.hypot(gx, gy);
+        e *= 1 + gk * kl * t * 0.5;
+      }
+      if (L.side) {                              // ventana: un lado claro, el otro en penumbra
+        const t = side > 0 ? u : 1 - u;
+        e *= lerp(1.12, 1 - L.side * kl, smooth(-0.1, 1.15, t));
+      }
+      if (L.frame) {                             // sombra blanda del marco de la ventana (cruz de travesaños)
+        const fx = (side > 0 ? u : 1 - u) - (0.62 + jx), fy = v - (0.4 + jy) + 0.18 * (side > 0 ? u : 1 - u);
+        const bar = Math.max(Math.exp(-fx * fx / 0.0016), Math.exp(-fy * fy / 0.0012));
+        e *= 1 - L.frame * kl * bar;
+      }
+      if (L.pool) {                              // lámpara: charco de luz en una esquina
+        const px0 = side > 0 ? L.pool[0] : 1 - L.pool[0];
+        const dx = (u - px0) * w / half, dy = (v - L.pool[1]) * h / half, q = (dx * dx + dy * dy) / (L.pool[2] * L.pool[2]);
+        e *= lerp(1, 1.2 / Math.pow(1 + q, 1.4), L.poolK * kl);
+      }
+      if (L.spot) {                              // foco: círculo de luz definido
+        const [cx, cy, rxx, ryy] = L.spot, dx = (u - cx - jx) / rxx, dy = (v - cy - jy) / ryy, d = Math.sqrt(dx * dx + dy * dy);
+        e *= lerp(1.06, 1 - (1 - L.outside) * kl, smooth(0.78, 1.12, d));
+      }
+      if (L.hot) {                               // flash: ley del cuadrado inverso + cos⁴ (caída rápida a las esquinas)
+        const dx = (u - L.hot[0] - jx * 0.5) * w / half, dy = (v - L.hot[1] - jy * 0.5) * h / half;
+        e *= lerp(1, 1.18 / Math.pow(1 + (dx * dx + dy * dy) / (L.fall * L.fall), 2), kl);
+      }
+      if (L.phone) {                             // sombra del móvil y la mano, desde abajo
+        const cxp = 0.5 + jx * 2, dxp = (u - cxp) / 0.2, dyp = (v - 1.12) / 0.42;
+        const hand = Math.sqrt(((u - cxp - 0.2 * side) / 0.18) ** 2 + ((v - 1.0) / 0.25) ** 2);
+        const m = Math.max(smooth(1.25, 0.7, Math.sqrt(dxp ** 4 + dyp ** 2)), smooth(1.3, 0.6, hand) * 0.85);
+        e *= 1 - L.phone * kl * m;
+      }
       e *= 1 / Math.pow(1 + (rx * rx + ry * ry) * vig, 2);
-      if (shK) { const qx = (x - shx) / sra, qy = (y - shy) / srb; e *= 1 - shK * smooth(1.45, 0.75, Math.sqrt(qx * qx + qy * qy)); }
-      return e * expo;
+      return e * ex0;
     });
-    const gx0 = L.spot ? cx : cx - (L.sx || 0) * diag * 0.25, gy0 = L.spot ? cy : cy - (L.sy || 0) * diag * 0.25;
-    const G = glare > 0 ? lowField(w, h, 8, (x, y) => glare * Math.exp(-((x - gx0) ** 2 + (y - gy0) ** 2) / (diag * diag * 0.04))) : null;
+    // reflejo del flash: zona quemada (más donde el papel brilla: tóner, grasa, cera)
+    const gl = B.gloss;
+    const G = L.glare ? lowField(w, h, 6, (x, y) => {
+      const dx = (x / w - L.hot[0] - jx * 0.5) * w / half, dy = (y / h - L.hot[1] - jy * 0.5) * h / half;
+      return L.glare * kl * Math.exp(-(dx * dx + dy * dy) / 0.012);
+    }) : null;
+    const sy = L.scanYellow ? clamp(def(paper.translucency, 0.25), 0, 1) * 0.04 * k : 0;
+    const cool = def(L.coolShadow, 0) * kl;
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
       const o = y * w + x, j = o * 4;
       const e = E(x, y);
       let g = 0;
-      if (G) g = G(x, y) * (1 + (gl ? gl[o] / 255 * 3 : 0));
-      else if (gl && gl[o] && luz !== 'escaner') g = gl[o] / 255 * 0.025 * k;
-      const cool = (L.cool || 0) * k * (1 - Math.min(1, e));
+      if (G) g = G(x, y) * (1 + (gl ? gl[o] / 255 * 2 : 0));
+      else if (gl && gl[o] && luz !== 'escaner' && luz !== 'ninguna') g = gl[o] / 255 * 0.05 * kl;
+      const sh = cool * clamp(1 - e, 0, 1);
       for (let c = 0; c < 3; c++) {
         let v = px[j + c] * e * tint[c];
-        if (c === 2) v *= 1 + cool - sy; if (c === 0) v *= 1 - cool * 0.5;
-        v += (255 - v) * g;
-        v = black + v * white * (255 - black) / 255;
+        if (c === 2) v *= 1 + sh - sy; else if (c === 0) v *= 1 - sh * 0.6;
+        if (con) v = 128 + (v - 128) * (1 + con);
+        v += (255 - v) * Math.min(1, g);
+        v = black + clamp(v, 0, 255) * white * (255 - black) / 255;
         px[j + c] = v;
       }
     }
@@ -1256,112 +1302,221 @@ function photo(S, st, px, B, paper) {
   quality(S, st, px, cal, k);
 }
 
+// Calidad de la captura. Todo se mide respecto a una RESOLUCIÓN EFECTIVA (lado largo, px): por mucho que el
+// documento sea grande, una foto de móvil antiguo tiene el detalle de ~900 px.
+//   res        lado largo efectivo · motion: trepidación (fracción del lado largo) · focus: desenfoque extra
+//   denoise    el «acuarelado» de los móviles: borra la textura fina y deja los bordes
+//   sharpen    halos de enfoque digital · clarity: contraste local (HDR del móvil)
+//   noise/chroma  ruido de luminancia (más en las sombras) y manchas de color, al tamaño del píxel efectivo
+//   jpeg       bloques de 8×8 px efectivos · ca: aberración cromática · barrel: distorsión del objetivo
+//   halation   halo rojizo alrededor de las luces (película) · grain: grano a dos escalas
+const QUAL = {
+  escaner_pro: { res: 3200, sharpen: 0.45, noise: 0.8, contrast: 0.05, white: 0.03, dust: 0.4, rot: 0.4 },
+  escaner_oficina: { res: 1600, sharpen: 1.1, noise: 2.2, contrast: 0.2, white: 0.1, desat: 0.2, streak: 1, dust: 1.6, jpeg: 0.45, rot: 1.3 },
+  movil: { res: 1700, motion: 0.0022, sharpen: 1.25, denoise: 0.75, clarity: 0.35, noise: 6, chroma: 5, sat: 0.1, contrast: 0.06, jpeg: 0.45,
+    vig: 0.3, ca: 0.6, rot: 1.9, persp: 0.05, edge: 3.2, barrel: 0.018 },
+  movil_antiguo: { res: 900, motion: 0.004, focus: 0.45, sharpen: 0.8, denoise: 0.4, noise: 13, chroma: 12, jpeg: 1, ca: 2.2,
+    cast: [1.04, 1.05, 0.84], vig: 0.5, contrast: 0.14, white: 0.07, sat: -0.12, rot: 2.6, persp: 0.08, edge: 5, barrel: 0.04 },
+  fotocopia: { res: 1300, gray: 1, copy: 1, toner: 1, white: 0.12, noise: 3, streak: 2.5, dust: 3, border: 1, rot: 1.1 },
+  analogica: { res: 1500, focus: 0.5, grain: 1, halation: 0.75, fade: 0.09, cast: [1.05, 1.0, 0.88], vig: 0.45, sat: -0.14, contrast: 0.06,
+    diffusion: 0.18, dust: 1.2, hairs: 1, rot: 1.5, persp: 0.035, edge: 3.6, barrel: 0.022 }
+};
 function quality(S, st, px, cal, k) {
   const { w, h, N } = S;
-  const Q = {
-    escaner_pro: { sharpen: 0.25, noise: 0.5, contrast: 0.02, rot: 0.3 },
-    escaner_oficina: { blur: 0.55, sharpen: 0.45, noise: 1.0, contrast: 0.1, white: 0.05, desat: 0.1, streak: 1, dust: 1, rot: 0.7, edge: 0.6 },
-    movil: { sharpen: 0.55, noise: 2.6, chroma: 1.0, contrast: 0.05, sat: 0.06, vig: 0.06, rot: 0.9, persp: 0.014, edge: 1.4 },
-    movil_antiguo: { blur: 0.9, noise: 6, chroma: 3.5, contrast: 0.08, jpeg: 0.3, ca: 1.1, cast: [1.01, 1.0, 0.955], vig: 0.14, rot: 1.3, persp: 0.022, edge: 2.4 },
-    fotocopia: { gray: 1, blur: 0.65, contrast: 0.5, toner: 1, white: 0.1, noise: 1.8, dust: 1, rot: 0.6 },
-    analogica: { grain: 6, blur: 0.45, contrast: -0.05, lift: 0.05, cast: [1.025, 1.0, 0.95], vig: 0.2, sat: -0.07, rot: 0.8, persp: 0.012, edge: 1.8 }
-  }[cal];
+  const Q = QUAL[cal];
   if (!Q) return;
-  const scaleK = Math.max(1, Math.max(w, h) / 3000);
+  const kq = Math.min(1.6, k), longS = Math.max(w, h);
+  const r = rng((S.seed + (def(st.seedFoto, 0) | 0) * 7717) * 3 + 77);
+  // factor entre el documento y la resolución efectiva (cuanto mayor, más se pierde)
+  const f = Math.max(1, longS / lerp(longS, Q.res || longS, Math.min(1, kq)));
   const ch = [new Float32Array(N), new Float32Array(N), new Float32Array(N)];
   for (let o = 0; o < N; o++) { ch[0][o] = px[o * 4]; ch[1][o] = px[o * 4 + 1]; ch[2][o] = px[o * 4 + 2]; }
-  const tmp = new Float32Array(N);
-  if (Q.gray) { for (let o = 0; o < N; o++) { const l = ch[0][o] * 0.3 + ch[1][o] * 0.59 + ch[2][o] * 0.11; ch[0][o] = ch[1][o] = ch[2][o] = l; } }
-  if (Q.blur) for (let c = 0; c < 3; c++) gaussBlur(ch[c], w, h, Q.blur * scaleK * k, tmp);
-  if (Q.sharpen) {
-    const bl = new Float32Array(N);
-    for (let c = 0; c < 3; c++) { bl.set(ch[c]); gaussBlur(bl, w, h, 1.4 * scaleK, tmp); for (let o = 0; o < N; o++) ch[c][o] += (ch[c][o] - bl[o]) * Q.sharpen * k; }
+  const tmp = new Float32Array(N), bl = new Float32Array(N);
+  if (Q.gray) for (let o = 0; o < N; o++) { const l = ch[0][o] * 0.3 + ch[1][o] * 0.59 + ch[2][o] * 0.11; ch[0][o] = ch[1][o] = ch[2][o] = l; }
+  // 1) resolución efectiva + desenfoque del objetivo
+  const sigR = 0.55 * f + (Q.focus || 0) * f * kq;
+  if (sigR > 0.45) for (let c = 0; c < 3; c++) gaussBlur(ch[c], w, h, sigR, tmp);
+  // 2) trepidación: barrido en una dirección
+  if (Q.motion) {
+    const len = Q.motion * longS * kq * lerp(0.6, 1.2, r()), ang = (r() - 0.5) * 1.2 + (r() < 0.5 ? 0 : Math.PI / 2);
+    if (len > 1) {
+      const taps = Math.min(9, Math.max(3, Math.round(len))), dx = Math.cos(ang) * len / (taps - 1), dy = Math.sin(ang) * len / (taps - 1);
+      for (let c = 0; c < 3; c++) {
+        const a = ch[c]; tmp.set(a);
+        for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+          let s = 0;
+          for (let t = 0; t < taps; t++) {
+            const xx = clamp(Math.round(x + (t - (taps - 1) / 2) * dx), 0, w - 1), yy = clamp(Math.round(y + (t - (taps - 1) / 2) * dy), 0, h - 1);
+            s += tmp[yy * w + xx];
+          }
+          a[y * w + x] = s / taps;
+        }
+      }
+    }
   }
+  // 3) aberración cromática (rojo hacia fuera, azul hacia dentro; crece hacia los bordes)
   if (Q.ca) {
-    const cx = w / 2, cy = h / 2, R = Math.hypot(cx, cy);
+    const cx = w / 2, cy = h / 2, R = Math.hypot(cx, cy), s = Q.ca * kq * f;
     const r0 = new Float32Array(ch[0]), b0 = new Float32Array(ch[2]);
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      const dx = (x - cx) / R, dy = (y - cy) / R, s = Q.ca * k * scaleK;
+      const dx = (x - cx) / R, dy = (y - cy) / R;
       const xr = clamp(Math.round(x + dx * s), 0, w - 1), yr = clamp(Math.round(y + dy * s), 0, h - 1);
       const xb = clamp(Math.round(x - dx * s), 0, w - 1), yb = clamp(Math.round(y - dy * s), 0, h - 1);
       ch[0][y * w + x] = r0[yr * w + xr]; ch[2][y * w + x] = b0[yb * w + xb];
     }
   }
+  // 4) reducción de ruido del móvil: aplana la textura fina (papel «de acuarela»), conserva los bordes
+  if (Q.denoise) {
+    const am = Q.denoise * kq;
+    for (let c = 0; c < 3; c++) {
+      bl.set(ch[c]); gaussBlur(bl, w, h, 1.6 * f, tmp);
+      const a = ch[c];
+      for (let o = 0; o < N; o++) { const d = a[o] - bl[o]; a[o] = bl[o] + d * (1 - am * smooth(14, 3, Math.abs(d))); }
+    }
+  }
+  // 5) contraste local (HDR del móvil) y halos de enfoque
+  if (Q.clarity) {
+    const L = new Float32Array(N); for (let o = 0; o < N; o++) L[o] = ch[0][o] * 0.3 + ch[1][o] * 0.59 + ch[2][o] * 0.11;
+    gaussBlur(L, w, h, longS / 45, tmp);
+    const am = Q.clarity * kq;
+    for (let o = 0; o < N; o++) { const l = ch[0][o] * 0.3 + ch[1][o] * 0.59 + ch[2][o] * 0.11, d = (l - L[o]) * am; ch[0][o] += d; ch[1][o] += d; ch[2][o] += d; }
+  }
+  if (Q.sharpen) {
+    for (let c = 0; c < 3; c++) { bl.set(ch[c]); gaussBlur(bl, w, h, 1.3 * f, tmp); const a = ch[c]; for (let o = 0; o < N; o++) a[o] += (a[o] - bl[o]) * Q.sharpen * kq; }
+  }
+  // 6) difusión (película): las luces se abren un poco · halation: halo rojo-anaranjado alrededor de lo claro
+  if (Q.diffusion || Q.halation) {
+    const Hm = new Float32Array(N);
+    for (let o = 0; o < N; o++) { const l = ch[0][o] * 0.3 + ch[1][o] * 0.59 + ch[2][o] * 0.11; Hm[o] = Math.max(0, l - 175) / 80; }
+    gaussBlur(Hm, w, h, longS / 160, tmp);
+    const dk = (Q.diffusion || 0) * kq * 60, hk = (Q.halation || 0) * kq * 70;
+    for (let o = 0; o < N; o++) { const v = Hm[o]; if (v <= 0.001) continue; ch[0][o] += v * (dk + hk); ch[1][o] += v * (dk + hk * 0.35); ch[2][o] += v * dk * 0.8; }
+  }
+  // 7) JPEG: bloques de 8×8 píxeles efectivos que se aplanan donde hay poco detalle
   if (Q.jpeg) {
+    const bs = Math.max(8, Math.round(8 * f)), jk = Q.jpeg * kq;
     for (let c = 0; c < 3; c++) {
       const a = ch[c];
-      for (let by = 0; by < h; by += 8) for (let bx = 0; bx < w; bx += 8) {
+      for (let by = 0; by < h; by += bs) for (let bx = 0; bx < w; bx += bs) {
         let s = 0, s2 = 0, n = 0;
-        for (let y = by; y < Math.min(h, by + 8); y++) for (let x = bx; x < Math.min(w, bx + 8); x++) { const v = a[y * w + x]; s += v; s2 += v * v; n++; }
+        const ye = Math.min(h, by + bs), xe = Math.min(w, bx + bs);
+        for (let y = by; y < ye; y += 2) for (let x = bx; x < xe; x += 2) { const v = a[y * w + x]; s += v; s2 += v * v; n++; }
         const m = s / n, varr = s2 / n - m * m;
-        const t = Q.jpeg * k * clamp(1 - varr / 400, 0, 1);
-        if (t <= 0) continue;
-        for (let y = by; y < Math.min(h, by + 8); y++) for (let x = bx; x < Math.min(w, bx + 8); x++) { const o = y * w + x; a[o] = lerp(a[o], m, t); }
+        const t = jk * clamp(1 - varr / (c === 1 ? 260 : 600), 0, 1) * (c === 1 ? 0.75 : 1);   // el color se comprime más
+        if (t <= 0.01) continue;
+        for (let y = by; y < ye; y++) for (let x = bx; x < xe; x++) { const o = y * w + x; a[o] = lerp(a[o], m, t); }
       }
     }
   }
-  const nz = (Q.noise || 0) * k, chn = (Q.chroma || 0) * k, gr = (Q.grain || 0) * k;
-  let grainF = null;
-  if (gr > 0) { grainF = new Float32Array(N); for (let o = 0; o < N; o++) grainF[o] = hashi(o % w, (o / w) | 0, 5) - 0.5; gaussBlur(grainF, w, h, 0.7 * scaleK, tmp); }
-  const con = (Q.contrast || 0) * k, white = (Q.white || 0) * k, desat = (Q.desat || 0) * k, sat = (Q.sat || 0) * k, lift = (Q.lift || 0) * k;
-  const cast = (Q.cast || [1, 1, 1]).map(v => 1 + (v - 1) * k);
-  const vig = (Q.vig || 0) * k, diag = Math.hypot(w, h) / 2;
-  const toner = (Q.toner || 0) * k, streak = (Q.streak || 0) * k;
-  // motas de polvo del cristal (escáner / fotocopiadora)
-  const dust = [];
-  if (Q.dust) { const r = rng(S.seed + 999); const n = Math.round(14 * k); for (let i = 0; i < n; i++) dust.push([r() * w, r() * h, (0.6 + r() * 1.8) * scaleK, 0.2 + 0.5 * r()]); }
+  // 8) tono, color, ruido y grano (por píxel)
+  const nz = (Q.noise || 0) * kq, chn = (Q.chroma || 0) * kq, cellN = Math.max(1, f * 0.9);
+  const sNoise = (x, y, s) => {     // ruido al tamaño del píxel efectivo (manchitas, no puntos sueltos)
+    const gx = x / cellN, gy = y / cellN, ix = Math.floor(gx), iy = Math.floor(gy), fx = gx - ix, fy = gy - iy;
+    const a = hashi(ix, iy, s), b = hashi(ix + 1, iy, s), c = hashi(ix, iy + 1, s), d = hashi(ix + 1, iy + 1, s);
+    return (a + (b - a) * fx) * (1 - fy) + (c + (d - c) * fx) * fy - 0.5;
+  };
+  const gr = (Q.grain || 0) * kq, gC1 = Math.max(1, longS / 2600), gC2 = gC1 * 3.2;
+  const con = (Q.contrast || 0) * kq, white = (Q.white || 0) * kq, desat = (Q.desat || 0) * kq, sat = (Q.sat || 0) * kq, fade = (Q.fade || 0) * kq;
+  const cast = (Q.cast || [1, 1, 1]).map(v => 1 + (v - 1) * kq);
+  const vig = (Q.vig || 0) * kq, diag = Math.hypot(w, h) / 2;
+  const toner = (Q.toner || 0) * kq, streak = (Q.streak || 0) * kq, copy = (Q.copy || 0) * kq;
+  const sx0 = (r() * 1e5) | 0;
+  // fotocopia: rayas de tambor en posiciones fijas
+  const lines = []; if (streak) for (let i = 0; i < 3 + ((r() * 4) | 0); i++) lines.push([r() * w, lerp(0.4, 2, r()) * Math.max(1, longS / 2500), lerp(0.15, 0.6, r())]);
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
     const o = y * w + x, j = o * 4;
-    let r = ch[0][o], g = ch[1][o], b = ch[2][o];
-    const l = r * 0.2126 + g * 0.7152 + b * 0.0722;
-    if (desat || sat) { const s = 1 - desat + sat; r = l + (r - l) * s; g = l + (g - l) * s; b = l + (b - l) * s; }
-    r *= cast[0]; g *= cast[1]; b *= cast[2];
-    if (con) { r = 128 + (r - 128) * (1 + con); g = 128 + (g - 128) * (1 + con); b = 128 + (b - 128) * (1 + con); }
-    if (white) { const f = 1 / (1 - white); r *= f; g *= f; b *= f; }
-    if (lift) { r += lift * 255 * (1 - r / 255); g += lift * 255 * (1 - g / 255); b += lift * 255 * (1 - b / 255); }
-    if (vig) { const rr = ((x - w / 2) ** 2 + (y - h / 2) ** 2) / (diag * diag); const f = 1 - vig * rr; r *= f; g *= f; b *= f; }
-    if (nz) { const n = (hashi(x, y, 11) + hashi(x, y, 12) - 1) * nz * (0.5 + 1.2 * (1 - l / 255)); r += n; g += n; b += n; }
-    if (chn) { r += (hashi(x >> 1, y >> 1, 21) - 0.5) * chn; b += (hashi(x >> 1, y >> 1, 22) - 0.5) * chn; }
-    if (grainF) { const n = grainF[o] * gr * 4 * (0.6 + 0.8 * (1 - Math.abs(l - 128) / 128)); r += n; g += n; b += n; }
-    if (toner && hashi(x, y, 31) < 0.0006 * toner) { r *= 0.35; g *= 0.35; b *= 0.35; }
-    if (streak) { const s = (hashi(0, y >> 1, 41) - 0.5) * 3 * streak; r += s; g += s; b += s; }
-    px[j] = r; px[j + 1] = g; px[j + 2] = b;
+    let R = ch[0][o], G = ch[1][o], Bb = ch[2][o];
+    let l = R * 0.2126 + G * 0.7152 + Bb * 0.0722;
+    if (desat || sat) { const s = 1 - desat + sat; R = l + (R - l) * s; G = l + (G - l) * s; Bb = l + (Bb - l) * s; }
+    R *= cast[0]; G *= cast[1]; Bb *= cast[2];
+    if (con) { R = 128 + (R - 128) * (1 + con); G = 128 + (G - 128) * (1 + con); Bb = 128 + (Bb - 128) * (1 + con); }
+    if (copy) {
+      // fotocopiadora: los grises medios se van a blanco o a negro (curva muy dura) y el fondo queda moteado
+      const t = clamp(l / 255, 0, 1), c2 = 1 / (1 + Math.exp(-(t - 0.55) * (6 + 10 * copy)));
+      const v = lerp(t, c2, Math.min(1, copy)) * 255 - (sNoise(x * 0.25, y * 0.25, sx0 + 3) + 0.5) * 22 * copy * (t > 0.6 ? 1 : 0.3);
+      R = G = Bb = v;
+    }
+    if (white) { const ff = 1 / (1 - white); R *= ff; G *= ff; Bb *= ff; }
+    if (fade) { R = R * (1 - fade) + 255 * fade * 0.5 + 10 * fade; G = G * (1 - fade) + 255 * fade * 0.48 + 10 * fade; Bb = Bb * (1 - fade) + 255 * fade * 0.42 + 10 * fade; }
+    if (vig) { const rr = ((x - w / 2) ** 2 + (y - h / 2) ** 2) / (diag * diag); const vf = 1 - vig * rr * (0.6 + 0.4 * rr); R *= vf; G *= vf; Bb *= vf; }
+    l = R * 0.2126 + G * 0.7152 + Bb * 0.0722;
+    if (nz) { const n = sNoise(x, y, 11) * 2 * nz * (0.45 + 1.6 * Math.pow(1 - clamp(l / 255, 0, 1), 1.5)); R += n; G += n; Bb += n; }
+    if (chn) { const a = sNoise(x * 0.5, y * 0.5, 21) * chn * 2, b = sNoise(x * 0.5, y * 0.5, 22) * chn * 2; R += a; Bb += b; G -= (a + b) * 0.3; }
+    if (gr) {   // grano de película: dos escalas, más en los medios tonos
+      const mid = 0.5 + 1.2 * (1 - Math.abs(l - 128) / 128);
+      const n = ((hashi(x / gC1 | 0, y / gC1 | 0, 5) - 0.5) * 13 + sNoise(x / gC2 * cellN, y / gC2 * cellN, 6) * 18) * gr * mid;
+      R += n; G += n * 0.97; Bb += n * 1.05;
+    }
+    if (toner && hashi(x, y, 31) < 0.0012 * toner) { R *= 0.3; G *= 0.3; Bb *= 0.3; }
+    if (streak) {
+      let s = (hashi(0, y >> 1, 41) - 0.5) * 3 * streak;
+      for (const ln of lines) { const d = Math.abs(x - ln[0]); if (d < ln[1] * 2) s -= ln[2] * 120 * streak * Math.max(0, 1 - d / (ln[1] * 2)) * (0.6 + 0.4 * hashi(x, y >> 3, 43)); }
+      R += s; G += s; Bb += s;
+    }
+    px[j] = R; px[j + 1] = G; px[j + 2] = Bb;
   }
-  for (const d of dust) {
-    const R = Math.ceil(d[2] + 2);
-    for (let y = Math.max(0, (d[1] - R) | 0); y < Math.min(h, d[1] + R); y++) for (let x = Math.max(0, (d[0] - R) | 0); x < Math.min(w, d[0] + R); x++) {
-      const t = clamp(d[2] - Math.hypot(x - d[0], y - d[1]) + 0.5, 0, 1) * d[3] * Math.min(1, k); if (t <= 0) continue;
-      const j = (y * w + x) * 4; px[j] *= 1 - t * 0.6; px[j + 1] *= 1 - t * 0.6; px[j + 2] *= 1 - t * 0.6;
+  // 9) polvo del cristal / de la película y pelos
+  const area = (w * h) / (2480 * 3508), scaleK = Math.max(1, longS / 3000);
+  if (Q.dust) {
+    const n = Math.round(40 * Q.dust * kq * Math.max(0.4, area));
+    for (let i = 0; i < n; i++) {
+      const x0 = r() * w, y0 = r() * h, rad = lerp(0.6, 2.6, Math.pow(r(), 2)) * scaleK, op = lerp(0.25, 0.8, r()), dark = Q.gray || r() < 0.85;
+      const R2 = Math.ceil(rad + 2);
+      for (let y = Math.max(0, (y0 - R2) | 0); y < Math.min(h, y0 + R2); y++) for (let x = Math.max(0, (x0 - R2) | 0); x < Math.min(w, x0 + R2); x++) {
+        const t = clamp(rad - Math.hypot(x - x0, y - y0) + 0.5, 0, 1) * op; if (t <= 0) continue;
+        const j = (y * w + x) * 4; for (let c = 0; c < 3; c++) px[j + c] = dark ? px[j + c] * (1 - t * 0.75) : px[j + c] + (255 - px[j + c]) * t * 0.7;
+      }
+    }
+  }
+  if (Q.hairs) {
+    const n = Math.round(4 * Q.hairs * kq * Math.max(0.5, area));
+    for (let i = 0; i < n; i++) {
+      let x = r() * w, y = r() * h, a = r() * 6.28; const len = lerp(80, 400, r()) * scaleK, white2 = r() < 0.5;
+      for (let s = 0; s < len; s++) {
+        a += (r() - 0.5) * 0.08; x += Math.cos(a); y += Math.sin(a);
+        const xi = x | 0, yi = y | 0; if (xi < 0 || yi < 0 || xi >= w || yi >= h) break;
+        const j = (yi * w + xi) * 4; for (let c = 0; c < 3; c++) px[j + c] = white2 ? px[j + c] + (255 - px[j + c]) * 0.6 : px[j + c] * 0.35;
+      }
+    }
+  }
+  // fotocopia: borde oscuro del cristal y sombra del canto de la hoja
+  if (Q.border) {
+    const bw = Math.max(3, Math.round(longS * 0.006)) * kq;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const d = Math.min(x, y, w - 1 - x, h - 1 - y); if (d > bw * 3) continue;
+      const t = smooth(bw * 3, 0, d) * (0.5 + 0.5 * hashi(x >> 2, y >> 2, 51)), j = (y * w + x) * 4;
+      for (let c = 0; c < 3; c++) px[j + c] *= 1 - 0.75 * t;
     }
   }
   captureGeometry(S, st, px, Q, k);
 }
 
-// La toma nunca es perfecta: la hoja queda un poco girada, con algo de perspectiva (el móvil no está paralelo)
-// y los márgenes se desenfocan (profundidad de campo; más en el lado que queda más lejos). Se recorta lo justo
-// para que no aparezcan esquinas vacías.
+// La toma nunca es perfecta: la hoja queda girada, con perspectiva (el móvil no está paralelo), el objetivo curva
+// las rectas (barril) y los márgenes se desenfocan (profundidad de campo; más en el lado que queda más lejos).
+// Se recorta lo justo para que no aparezcan esquinas vacías.
 function captureGeometry(S, st, px, Q, k) {
   const { w, h, N } = S;
-  const kk = Math.min(1.5, k);
-  const rot = (Q.rot || 0) * kk, persp = (Q.persp || 0) * kk, edge = (Q.edge || 0) * kk * Math.max(w, h) / 2000;
-  if (rot <= 0 && persp <= 0 && edge <= 0) return;
+  const kk = Math.min(1.6, k);
+  const rot = (Q.rot || 0) * kk, persp = (Q.persp || 0) * kk, barrel = (Q.barrel || 0) * kk, edge = (Q.edge || 0) * kk * Math.max(w, h) / 2000;
+  if (rot <= 0 && persp <= 0 && edge <= 0 && barrel <= 0) return;
   const r = rng((S.seed + (def(st.seedFoto, 0) | 0) * 7717) * 3 + 41);
-  const th = (r() < 0.5 ? -1 : 1) * rot * (0.55 + 0.45 * r()) * Math.PI / 180;
-  const pa = r() * Math.PI * 2, pxk = Math.cos(pa) * persp * (0.6 + 0.4 * r()), pyk = Math.sin(pa) * persp * (0.6 + 0.4 * r());
+  const th = (r() < 0.5 ? -1 : 1) * rot * (0.6 + 0.4 * r()) * Math.PI / 180;
+  const pa = r() * Math.PI * 2, pxk = Math.cos(pa) * persp * (0.7 + 0.3 * r()), pyk = Math.sin(pa) * persp * (0.7 + 0.3 * r());
   const ca = Math.cos(th), sa = Math.sin(th), asp = w / h;
-  // de la imagen (u,v ∈ [-1,1]) a la hoja: giro y perspectiva; zoom para cubrir sin esquinas vacías
   const map = (u, v, z, out) => {
+    const rb = 1 + barrel * (u * u + v * v);               // barril: lo de los bordes se ve más hacia dentro
+    u *= rb; v *= rb;
     const x = u * asp, y = v;
-    let xs = (x * ca - y * sa) / asp, ys = x * sa + y * ca;
+    const xs = (x * ca - y * sa) / asp, ys = x * sa + y * ca;
     const ww = 1 + pxk * xs + pyk * ys;
     out[0] = xs / ww * z; out[1] = ys / ww * z;
   };
   const t = [0, 0];
   let m = 1;
-  for (const [u, v] of [[-1, -1], [1, -1], [-1, 1], [1, 1], [0, -1], [0, 1], [-1, 0], [1, 0]]) { map(u, v, 1, t); m = Math.max(m, Math.abs(t[0]), Math.abs(t[1])); }
+  for (let i = 0; i <= 8; i++) for (const [u, v] of [[-1 + i / 4, -1], [-1 + i / 4, 1], [-1, -1 + i / 4], [1, -1 + i / 4]]) { map(u, v, 1, t); m = Math.max(m, Math.abs(t[0]), Math.abs(t[1])); }
   const z = 0.998 / m;
-  const src = new Uint8ClampedArray(px);
-  if (rot > 0 || persp > 0) {
+  if (rot > 0 || persp > 0 || barrel > 0) {
+    const src = new Uint8ClampedArray(px);
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
       map((2 * x + 1) / w - 1, (2 * y + 1) / h - 1, z, t);
       let sx = (t[0] + 1) * w / 2 - 0.5, sy = (t[1] + 1) * h / 2 - 0.5;
@@ -1372,7 +1527,6 @@ function captureGeometry(S, st, px, Q, k) {
     }
   }
   if (edge > 0.3) {
-    // desenfoque progresivo hacia los márgenes (dos niveles mezclados), mayor en el lado más alejado
     const tmp = new Float32Array(N), b1 = [], b2 = [];
     for (let q = 0; q < 3; q++) {
       const a = new Float32Array(N); for (let o = 0; o < N; o++) a[o] = px[o * 4 + q];
@@ -1381,9 +1535,8 @@ function captureGeometry(S, st, px, Q, k) {
     const pn = Math.hypot(pxk, pyk) || 1;
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
       const u = (2 * x + 1) / w - 1, v = (2 * y + 1) / h - 1;
-      const far = persp > 0 ? (pxk * u + pyk * v) / pn * 0.35 : 0;
-      const rr = Math.sqrt(u * u * 0.8 + v * v * 0.8) + far;
-      const m2 = smooth(0.55, 1.25, rr);
+      const far = persp > 0 ? (pxk * u + pyk * v) / pn * 0.45 : 0;
+      const m2 = smooth(0.4, 1.15, Math.sqrt(u * u * 0.8 + v * v * 0.8) + far);
       if (m2 <= 0) continue;
       const o = y * w + x, j = o * 4;
       for (let q = 0; q < 3; q++) {
