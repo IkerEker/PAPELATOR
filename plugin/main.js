@@ -319,11 +319,12 @@ function usable(what) {
 }
 // en pantalla no hay escáner, ni luz de día, ni fotocopia: es una pantalla
 const SCREEN_NO = { escaner: 1, natural: 1, fotocopia: 1 };
-function famUsable(f) { return materialOf(state.paper) !== 'screen' || !SCREEN_NO[f.id]; }
+// el libro electrónico refleja la luz como el papel: con él sí tiene sentido la luz natural
+function famUsable(f) { return materialOf(state.paper) !== 'screen' || !SCREEN_NO[f.id] || (f.id === 'natural' && state.paper === 'pantalla_eink'); }
 function fixForMaterial() {
   if (materialOf(state.paper) !== 'screen') return;
   const lf = P.LUZ_FAMILIAS.filter(f => f.items.indexOf(state.luz) >= 0)[0];
-  if (lf && SCREEN_NO[lf.id]) state.luz = 'ninguna';
+  if (lf && !famUsable(lf)) state.luz = 'ninguna';
   const cf = P.CALIDAD_FAMILIAS.filter(f => f.items.indexOf(state.calidad) >= 0)[0];
   if (cf && SCREEN_NO[cf.id]) state.calidad = 'perfecta';
 }

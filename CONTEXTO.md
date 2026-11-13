@@ -2,7 +2,7 @@
 
 > Pega o adjunta este archivo al empezar el chat nuevo. Todo el proyecto está en GitHub:
 > **https://github.com/IkerEker/PAPELATOR** (rama `main`, último commit «Una sola ventana con dos pestañas: Presets y Avanzado»).
-> Versión actual del plugin: **3.9.0** (`plugin/manifest.json`). Instalable: `dist/PAPELATOR.ccx`.
+> Versión actual del plugin: **3.10.0** (`plugin/manifest.json`). Instalable: `dist/PAPELATOR.ccx`.
 
 ---
 
@@ -173,6 +173,13 @@ escaner_oficina, movil, movil_antiguo, fotocopia, analogica.
   Los números de sección se renumeran según lo visible. En Avanzado se ocultan los grupos que no aplican.
 - Fotografiar la pantalla (cualquier luz o calidad móvil/analógica): moiré de colores, bandas del obturador,
   reflejos (lámpara, flash, tu propio reflejo con «Sombra»), huellas que sólo se ven en el reflejo.
+
+## 6e. v3.10 — Pantallas revisadas + LED gigante y libro electrónico
+- 6 pantallas: OLED, LCD (con mura), portátil viejo, tubo (bloom + halation, eco, temblor de línea, nieve),
+  **LED gigante** (paquetes SMD con 3 chips, viseras, módulos 16×16 desiguales, LEDs muertos) y **libro electrónico**
+  (refleja la luz: gris de 16 niveles con tramado, blanco grisáceo, fantasma de la página anterior; admite luz natural).
+- Foto de pantalla: moiré con dos familias de franjas curvadas, modulado por zonas; bandas del obturador con una
+  más marcada; reflejos de lámpara, flash, ventana/día y tu propio reflejo; huellas sólo en el reflejo.
 
 ## 7. Pendiente / ideas que no se han hecho
 - Probar todo dentro de Photoshop real (las pruebas son en Node + simulación del DOM de UXP; el usuario es quien lo

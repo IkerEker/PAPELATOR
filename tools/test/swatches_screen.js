@@ -18,10 +18,10 @@ function png(file, w, h, rgba) {
     if (u > 0.55) { art[o] = art[o + 1] = art[o + 2] = 255 * (1 - t); }
     art[o + 3] = 255;
   }
-  const across = { pantalla_oled: 980, pantalla_lcd: 620, pantalla_vieja: 360, pantalla_crt: 300 };
+  const across = { pantalla_oled: 1, pantalla_lcd: 1, pantalla_vieja: 1, pantalla_crt: 1, pantalla_led: 1, pantalla_eink: 1 };
   for (const id of Object.keys(across)) {
     const zoom = 9 * across[id] / W;
-    const res = await E.renderFinal({ w: W, h: W, ppm: 3.5, art, artComponents: 4, assets, state: { paper: id, _pitch: 10, intensity: 60, seed: 2 } });
+    const res = await E.renderFinal({ w: W, h: W, ppm: 3.5, art, artComponents: 4, assets, state: { paper: id, _pitch: id === 'pantalla_eink' ? 2 : id === 'pantalla_led' ? 14 : 10, intensity: 60, seed: 2 } });
     png(path.resolve(__dirname, '../../plugin/assets/swatches/' + id + '.png'), W, W, res.rgba);
     console.log(id);
   }

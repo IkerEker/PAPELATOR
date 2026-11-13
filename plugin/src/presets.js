@@ -44,6 +44,8 @@ const PAPER_TYPES = [
   { id: 'pantalla_lcd', name: 'Monitor LCD', group: 'Pantallas', papers: ['pantalla_lcd'] },
   { id: 'pantalla_vieja', name: 'Portátil viejo', group: 'Pantallas', papers: ['pantalla_vieja'] },
   { id: 'pantalla_crt', name: 'Tele de tubo', group: 'Pantallas', papers: ['pantalla_crt'] },
+  { id: 'pantalla_led', name: 'LED gigante', group: 'Pantallas', papers: ['pantalla_led'] },
+  { id: 'pantalla_eink', name: 'Libro electrónico', group: 'Pantallas', papers: ['pantalla_eink'] },
   { id: 'vegetal', name: 'Vegetal', group: 'Translúcidos', papers: ['vegetal', 'vegetal_arrugado'] },
   { id: 'horno', name: 'Papel de horno', group: 'Translúcidos', papers: ['horno', 'encerado', 'pergamino_blanco'] }
 ];

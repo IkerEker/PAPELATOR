@@ -2600,7 +2600,59 @@
  },
  {
   "id": "pantalla_crt",
-  "name": "Televisor de tubo",
+  "name": "Tele de tubo",
+  "group": "Pantallas",
+  "kind": "screen",
+  "material": "screen",
+  "tileMm": [
+   100,
+   100
+  ],
+  "size": [
+   1,
+   1
+  ],
+  "gain": 1,
+  "detailStd": 0,
+  "color": [
+   250,
+   250,
+   250
+  ],
+  "translucency": 0,
+  "rough": 0.0,
+  "grainMm": 0.1,
+  "ageK": 0
+ },
+ {
+  "id": "pantalla_led",
+  "name": "Pantalla LED gigante",
+  "group": "Pantallas",
+  "kind": "screen",
+  "material": "screen",
+  "tileMm": [
+   100,
+   100
+  ],
+  "size": [
+   1,
+   1
+  ],
+  "gain": 1,
+  "detailStd": 0,
+  "color": [
+   250,
+   250,
+   250
+  ],
+  "translucency": 0,
+  "rough": 0.0,
+  "grainMm": 0.1,
+  "ageK": 0
+ },
+ {
+  "id": "pantalla_eink",
+  "name": "Libro electrónico",
   "group": "Pantallas",
   "kind": "screen",
   "material": "screen",
