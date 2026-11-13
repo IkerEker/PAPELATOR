@@ -56,6 +56,12 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   $('s-r-luz').fire('click'); $('s-apply').fire('click'); await sleep(3000);
   console.log('2ª vez:', $('s-status').textContent);
   console.log('layers:', doc.layers.map(l => l.name).join(' | '));
+  // pantalla: se ocultan las secciones de papel y se filtran luz y calidad
+  const gch = $('s-groups').querySelectorAll('.chip'); gch[gch.length - 1].fire('click');
+  $('s-swatches').querySelectorAll('.sw')[1].fire('click'); await sleep(300);
+  console.log('pantalla:', JSON.parse(store['papelator3.state']).paper, 'pliegues', $('s-sec-pliegue').style.display, 'estado', $('s-sec-estado').style.display,
+    'opciones', $('s-screenopts').style.display, 'luces', $('s-luz').querySelectorAll('.chip').length, 'calidades', $('s-calidad').querySelectorAll('.chip').length);
+  $('s-apply').fire('click'); await sleep(3000); console.log('aplicar pantalla:', $('s-status').textContent);
   const st = JSON.parse(store['papelator3.state']); console.log('state', st.paper, st.estado, st.calco, st.color, st.luz, st.calidad, !!st.custom);
   process.exit(0); // fin
 })().catch(e => { console.error('FAIL', e); process.exit(1); });

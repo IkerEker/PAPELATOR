@@ -40,6 +40,10 @@ const PAPER_TYPES = [
   { id: 'caja', name: 'Cartón de caja', group: 'Maderas y cartones', papers: ['caja', 'caja_4', 'caja_kraft_2', 'caja_kraft_3', 'caja_kraft_4', 'caja_reciclado', 'caja_3', 'caja_kraft', 'caja_kraft_5'] },
   { id: 'carton_kraft', name: 'Cartón kraft', group: 'Maderas y cartones', papers: ['carton_kraft', 'carton_kraft_2', 'carton_kraft_3'] },
   { id: 'carton', name: 'Cartón ondulado', group: 'Maderas y cartones', papers: ['corrugado', 'corrugado_fino'] },
+  { id: 'pantalla_oled', name: 'Móvil OLED', group: 'Pantallas', papers: ['pantalla_oled'] },
+  { id: 'pantalla_lcd', name: 'Monitor LCD', group: 'Pantallas', papers: ['pantalla_lcd'] },
+  { id: 'pantalla_vieja', name: 'Portátil viejo', group: 'Pantallas', papers: ['pantalla_vieja'] },
+  { id: 'pantalla_crt', name: 'Tele de tubo', group: 'Pantallas', papers: ['pantalla_crt'] },
   { id: 'vegetal', name: 'Vegetal', group: 'Translúcidos', papers: ['vegetal', 'vegetal_arrugado'] },
   { id: 'horno', name: 'Papel de horno', group: 'Translúcidos', papers: ['horno', 'encerado', 'pergamino_blanco'] }
 ];
@@ -187,6 +191,8 @@ const DEFAULT_STATE = {
   pliegueAmount: 1,                   // cuánto relieve tienen los pliegues
   pliegueWear: 1,                     // cuánto se gastan las aristas (tinta levantada)
   pliegueVar: 0,                      // hoja real dentro del grupo (⟳)
+  screenZoom: 1,                      // pantalla: tamaño del píxel (cerca/lejos)
+  screenBright: 1,                    // pantalla: brillo
   sobre: 'ninguno',                   // vidrio/cristal/plástico delante del papel
   sobreVar: 0,
   sobreDist: 0.25,                    // distancia al papel (0 = pegado · 1 = 4 cm)

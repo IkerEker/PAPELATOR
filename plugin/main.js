@@ -308,7 +308,25 @@ function chip(label, on, onClick, dot) {
   return c;
 }
 // familias: el panel muestra pocas opciones; cada una agrupa variantes reales y ⟳ pasa a la siguiente
-const GROUPS = ['Oficina y escuela', 'Bellas artes', 'Rústicos', 'Maderas y cartones', 'Translúcidos'];
+const GROUPS = ['Oficina y escuela', 'Bellas artes', 'Rústicos', 'Maderas y cartones', 'Translúcidos', 'Pantallas'];
+// Qué tiene sentido según el material elegido: lo que no se puede usar no se enseña.
+function materialOf(id) { const p = papers.filter(x => x.id === id)[0]; return (p && p.material) || 'paper'; }
+function usable(what) {
+  const m = materialOf(state.paper);
+  if (m === 'screen') return ['papel', 'sobre', 'foto', 'general', 'aplicar'].indexOf(what) >= 0;
+  if (m === 'wood' || m === 'carton') return ['pliegues', 'calco', 'color'].indexOf(what) < 0;
+  return true;
+}
+// en pantalla no hay escáner, ni luz de día, ni fotocopia: es una pantalla
+const SCREEN_NO = { escaner: 1, natural: 1, fotocopia: 1 };
+function famUsable(f) { return materialOf(state.paper) !== 'screen' || !SCREEN_NO[f.id]; }
+function fixForMaterial() {
+  if (materialOf(state.paper) !== 'screen') return;
+  const lf = P.LUZ_FAMILIAS.filter(f => f.items.indexOf(state.luz) >= 0)[0];
+  if (lf && SCREEN_NO[lf.id]) state.luz = 'ninguna';
+  const cf = P.CALIDAD_FAMILIAS.filter(f => f.items.indexOf(state.calidad) >= 0)[0];
+  if (cf && SCREEN_NO[cf.id]) state.calidad = 'perfecta';
+}
 function typeOf(paperId) { return P.PAPER_TYPES.filter(t => t.papers.indexOf(paperId) >= 0)[0] || P.PAPER_TYPES[0]; }
 function famOf(list, id) { return list.filter(f => f.items.indexOf(id) >= 0)[0] || null; }
 function nextIn(arr, cur) { const i = arr.indexOf(cur); return arr[(i + 1) % arr.length]; }
@@ -349,11 +367,28 @@ function buildSimple() {
     chipRow(byId('s-pliegue'), P.PLIEGUES, it => state.pliegue === it.id, it => { if (state.pliegue !== it.id) { state.pliegue = it.id; state.pliegueVar = 0; } });
     chipRow(byId('s-calco'), P.CALCO_FAMILIAS, it => it.items.indexOf(state.calco) >= 0, it => pickFam('calco', it));
     chipRow(byId('s-sobre'), P.SOBRES, it => state.sobre === it.id, it => { if (state.sobre !== it.id) { state.sobre = it.id; state.sobreVar = 0; } });
-    chipRow(byId('s-luz'), P.LUZ_FAMILIAS, it => it.items.indexOf(state.luz) >= 0, it => pickFam('luz', it));
-    chipRow(byId('s-calidad'), P.CALIDAD_FAMILIAS, it => it.items.indexOf(state.calidad) >= 0, it => pickFam('calidad', it));
+    fixForMaterial();
+    chipRow(byId('s-luz'), P.LUZ_FAMILIAS.filter(famUsable), it => it.items.indexOf(state.luz) >= 0, it => pickFam('luz', it));
+    chipRow(byId('s-calidad'), P.CALIDAD_FAMILIAS.filter(famUsable), it => it.items.indexOf(state.calidad) >= 0, it => pickFam('calidad', it));
     if (byId('s-impresion')) chipRow(byId('s-impresion'), P.IMPRESIONES, it => state.impresion === it.id, it => { state.impresion = it.id; });
   }
+  function sections() {
+    const show = { 's-sec-color': usable('color'), 's-sec-estado': usable('estado'), 's-sec-pliegue': usable('pliegues'), 's-sec-calco': usable('calco') };
+    Object.keys(show).forEach(id => { const el = byId(id); if (el) el.style.display = show[id] ? 'block' : 'none'; });
+    const scr = materialOf(state.paper) === 'screen';
+    byId('s-scalewrap').style.display = scr ? 'none' : 'block';
+    byId('s-screenopts').style.display = scr ? 'block' : 'none';
+    byId('s-zoom').value = Math.round(state.screenZoom * 100); byId('s-zoomval').textContent = Math.round(state.screenZoom * 100) + '%';
+    byId('s-bright').value = Math.round(state.screenBright * 100); byId('s-brightval').textContent = Math.round(state.screenBright * 100) + '%';
+    // números seguidos aunque falten secciones
+    let n = 0;
+    ['s-sec-papel', 's-sec-color', 's-sec-estado', 's-sec-pliegue', 's-sec-calco', 's-sec-sobre', 's-sec-foto'].forEach(id => {
+      const el = byId(id); if (!el || el.style.display === 'none') return;
+      const num = el.querySelector('.num'); if (num) num.textContent = String(++n);
+    });
+  }
   function sliders() {
+    sections();
     const sc = byId('s-scale'), ex = byId('s-exposure'), ed = byId('s-edad');
     const pa = byId('s-plamt'), pw = byId('s-plwear');
     pa.value = Math.round(state.pliegueAmount * 100); byId('s-plamtval').textContent = Math.round(state.pliegueAmount * 100) + '%';
@@ -385,6 +420,8 @@ function buildSimple() {
   bindSlider('s-edad', 's-edadval', v => { state.edad = v / 100; }, v => v + '%');
   bindSlider('s-plamt', 's-plamtval', v => { state.pliegueAmount = v / 100; }, v => v + '%');
   bindSlider('s-plwear', 's-plwearval', v => { state.pliegueWear = v / 100; }, v => v + '%');
+  bindSlider('s-zoom', 's-zoomval', v => { state.screenZoom = v / 100; }, v => v + '%');
+  bindSlider('s-bright', 's-brightval', v => { state.screenBright = v / 100; }, v => v + '%');
   bindSlider('s-sobretrans', 's-sobretransval', v => { state.sobreTrans = v / 100; }, v => v + '%');
   bindSlider('s-sobredist', 's-sobredistval', v => { state.sobreDist = v / 100; }, v => Math.round(v * 0.4) + ' mm');
   bindSlider('s-calcoamt', 's-calcoval', v => { state.calcoAmount = v / 100; }, v => v + '%');
@@ -437,6 +474,10 @@ function buildSections() {
       { t: 'slider', path: 'intensity', label: 'Intensidad del filtro', min: 0, max: 100, step: 1, fmt: v => v + '%' },
       { t: 'slider', path: 'seed', label: 'Variación (semilla)', min: 1, max: 999, step: 1, fmt: v => '#' + v }
     ] },
+    { id: 'pantalla', title: 'Pantalla', when: () => materialOf(state.paper) === 'screen', items: [
+      { t: 'slider', path: 'screenZoom', label: 'Tamaño del píxel', min: 0.3, max: 4, step: 0.05, fmt: pct },
+      { t: 'slider', path: 'screenBright', label: 'Brillo de la pantalla', min: 0.3, max: 1.6, step: 0.05, fmt: pct }
+    ] },
     { id: 'papel', title: 'Papel', items: [
       { t: 'picker', path: 'paper', label: 'Tipo de papel', options: () => papers.map(p => [p.id, p.group + ' · ' + p.name]) },
       { t: 'text', path: 'color', label: 'Color (hex) o «original»', placeholder: '#f2ead8' },
@@ -445,8 +486,8 @@ function buildSections() {
       { t: 'text', path: 'patternColor', label: 'Color de las líneas impresas (hex, vacío = original)', placeholder: '#6e9ed6' },
       { t: 'slider', path: 'patternOpacity', label: 'Intensidad de las líneas', min: 0, max: 1.5, step: 0.05, fmt: pct }
     ] },
-    { id: 'estado', title: 'Estado e imperfecciones', items: estadoItems },
-    { id: 'pliegues', title: 'Pliegues y arrugas', items: [
+    { id: 'estado', title: 'Estado e imperfecciones', when: () => usable('estado'), items: estadoItems },
+    { id: 'pliegues', title: 'Pliegues y arrugas', when: () => usable('pliegues'), items: [
       { t: 'picker', path: 'pliegue', label: 'Cómo se dobló', options: () => P.PLIEGUES.map(c => [c.id, c.name]) },
       { t: 'slider', path: 'pliegueAmount', label: 'Relieve de los pliegues', min: 0, max: 2.5, step: 0.05, fmt: pct },
       { t: 'slider', path: 'pliegueWear', label: 'Desgaste de las aristas (tinta levantada)', min: 0, max: 3, step: 0.05, fmt: pct },
@@ -461,7 +502,7 @@ function buildSections() {
       { t: 'slider', path: 'sobreScale', label: 'Escala del vidrio', min: 0.25, max: 4, step: 0.05, fmt: pct },
       { t: 'slider', path: 'sobreVar', label: 'Textura concreta', min: 0, max: 14, step: 1, fmt: v => '#' + (v + 1) }
     ] },
-    { id: 'calco', title: 'Calco', items: [
+    { id: 'calco', title: 'Calco', when: () => usable('calco'), items: [
       { t: 'picker', path: 'calco', label: 'Documento de detrás', options: () => P.CALCOS.map(c => [c.id, c.name]) },
       { t: 'slider', path: 'calcoAmount', label: 'Trasluz', min: 0, max: 3, step: 0.05, fmt: pct },
       { t: 'slider', path: 'calcoBleed', label: 'Traspaso de tinta', min: 0, max: 3, step: 0.05, fmt: pct },
@@ -492,10 +533,12 @@ function getPath(path) { return path.split('.').reduce((o, k) => (o ? o[k] : und
 function setPath(path, v) { const ks = path.split('.'); let o = state; for (let i = 0; i < ks.length - 1; i++) o = o[ks[i]]; o[ks[ks.length - 1]] = v; }
 
 function buildPro() {
+  const whens = [];
   const host = byId('p-sections');
   const controls = [];
   buildSections().forEach(sec => {
     const grp = h('div', 'grp'), head = h('div', 'grphead');
+    if (sec.when) whens.push(() => { grp.style.display = sec.when() ? 'block' : 'none'; });
     const tw = h('span', 'tw', ui.open[sec.id] ? '▾' : '▸');
     head.appendChild(tw); head.appendChild(h('span', 'tt', sec.title));
     const body = h('div', 'grpbody' + (ui.open[sec.id] ? '' : ' closed'));
@@ -556,7 +599,7 @@ function buildPro() {
     });
     host.appendChild(grp);
   });
-  const refreshAll = s => controls.forEach(c => { if (s !== c.src) { try { c.set(); } catch (e) { /* aún no montado */ } } });
+  const refreshAll = s => { controls.forEach(c => { if (s !== c.src) { try { c.set(); } catch (e) { /* aún no montado */ } } }); whens.forEach(f => f()); };
   refreshAll();
   refreshers.push(s => { refreshAll(s); const live = byId('p-live'); if (live) live.checked = !!ui.live; });
   byId('p-paper').addEventListener('click', doPaper);

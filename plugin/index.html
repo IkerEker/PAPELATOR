@@ -21,27 +21,35 @@
 
 
     <div class="sec">
-      <div class="sechead"><span class="num">1</span><span class="ttl">Papel</span><span class="mini" id="s-r-papel" title="Otra versión">⟳</span></div>
+      <div id="s-sec-papel" class="sechead"><span class="num">1</span><span class="ttl">Papel</span><span class="mini" id="s-r-papel" title="Otra versión">⟳</span></div>
       <div class="chips small" id="s-groups"></div>
       <div class="swatches" id="s-swatches"></div>
-      <div class="rl"><span>Escala de la textura</span><span class="rv" id="s-scaleval"></span></div>
-      <sp-slider id="s-scale" min="5" max="400" step="1" value="100"></sp-slider>
+      <div id="s-scalewrap">
+        <div class="rl"><span>Escala de la textura</span><span class="rv" id="s-scaleval"></span></div>
+        <sp-slider id="s-scale" min="5" max="400" step="1" value="100"></sp-slider>
+      </div>
+      <div id="s-screenopts">
+        <div class="rl"><span>Tamaño del píxel</span><span class="rv" id="s-zoomval"></span></div>
+        <sp-slider id="s-zoom" min="30" max="400" step="5" value="100"></sp-slider>
+        <div class="rl"><span>Brillo de la pantalla</span><span class="rv" id="s-brightval"></span></div>
+        <sp-slider id="s-bright" min="30" max="160" step="5" value="100"></sp-slider>
+      </div>
     </div>
 
     <div class="sec">
-      <div class="sechead"><span class="num">2</span><span class="ttl">Color del papel</span></div>
+      <div id="s-sec-color" class="sechead"><span class="num">2</span><span class="ttl">Color del papel</span></div>
       <div class="chips" id="s-colors"></div>
     </div>
 
     <div class="sec">
-      <div class="sechead"><span class="num">3</span><span class="ttl">Estado</span><span class="mini" id="s-r-estado" title="Otra versión">⟳</span></div>
+      <div id="s-sec-estado" class="sechead"><span class="num">3</span><span class="ttl">Estado</span><span class="mini" id="s-r-estado" title="Otra versión">⟳</span></div>
       <div class="chips" id="s-estado"></div>
       <div class="rl"><span>Antigüedad</span><span class="rv" id="s-edadval"></span></div>
       <sp-slider id="s-edad" min="0" max="120" step="1" value="0"></sp-slider>
     </div>
 
     <div class="sec">
-      <div class="sechead"><span class="num">4</span><span class="ttl">Pliegues</span><span class="mini" id="s-r-pliegue" title="Otra versión">⟳</span></div>
+      <div id="s-sec-pliegue" class="sechead"><span class="num">4</span><span class="ttl">Pliegues</span><span class="mini" id="s-r-pliegue" title="Otra versión">⟳</span></div>
       <div class="chips" id="s-pliegue"></div>
       <div id="s-plopts">
         <div class="rl"><span>Intensidad</span><span class="rv" id="s-plamtval"></span></div>
@@ -52,7 +60,7 @@
     </div>
 
     <div class="sec">
-      <div class="sechead"><span class="num">5</span><span class="ttl">Calco<span class="note">· lo que hay detrás</span></span><span class="mini" id="s-r-calco" title="Otra versión">⟳</span></div>
+      <div id="s-sec-calco" class="sechead"><span class="num">5</span><span class="ttl">Calco<span class="note">· lo que hay detrás</span></span><span class="mini" id="s-r-calco" title="Otra versión">⟳</span></div>
       <div class="chips" id="s-calco"></div>
       <div id="s-calcoopts">
         <div class="rl"><span>Intensidad del calco</span><span class="rv" id="s-calcoval"></span></div>
@@ -61,7 +69,7 @@
     </div>
 
     <div class="sec">
-      <div class="sechead"><span class="num">6</span><span class="ttl">Sobreponer<span class="note">· delante</span></span><span class="mini" id="s-r-sobre" title="Otra versión">⟳</span></div>
+      <div id="s-sec-sobre" class="sechead"><span class="num">6</span><span class="ttl">Sobreponer<span class="note">· delante</span></span><span class="mini" id="s-r-sobre" title="Otra versión">⟳</span></div>
       <div class="chips" id="s-sobre"></div>
       <div id="s-sobreopts">
         <div class="rl"><span>Distancia al papel</span><span class="rv" id="s-sobredistval"></span></div>
@@ -72,7 +80,7 @@
     </div>
 
     <div class="sec photo">
-      <div class="sechead"><span class="num">7</span><span class="ttl">Al aplicar</span></div>
+      <div id="s-sec-foto" class="sechead"><span class="num">7</span><span class="ttl">Al aplicar</span></div>
       <div class="sublabel"><span class="spacer">Luz</span><span class="mini" id="s-r-luz" title="Otra versión">⟳</span></div>
       <div class="chips" id="s-luz"></div>
       <div class="rl"><span>Más oscura · Más clara</span><span class="rv" id="s-expval"></span></div>

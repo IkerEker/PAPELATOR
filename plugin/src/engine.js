@@ -788,12 +788,237 @@ function applyRelief(S, B) {
   }
 }
 
+// ================================================================ PANTALLA
+// Lo que hay encima se ve EN una pantalla. Cuatro pantallas, de la mejor a la peor:
+//  oled     móvil OLED: subpíxeles en diamante (PenTile: verde en cada píxel, rojo y azul alternos), negro absoluto,
+//           colores saturados, cristal muy brillante; al fotografiarla, bandas de PWM y moiré
+//  lcd      monitor LCD IPS: tira RGB vertical con rejilla negra, negro grisáceo, brillo de IPS en las esquinas
+//  vieja    portátil viejo TN: píxeles gordos, rejilla marcada («screen door»), color de 6 bits con tramado,
+//           el color cambia con el ángulo (arriba lavado, abajo oscuro), azulada, fugas de retroiluminación
+//  crt      televisor de tubo: rejilla de apertura (franjas RGB continuas), líneas de barrido que engordan con el
+//           brillo, resplandor de los fósforos, convergencia imperfecta, pantalla curva y esquinas oscuras
+// Fotografiarla (luz o calidad elegidas) añade lo que pasa al hacer una foto a una pantalla: moiré de colores,
+// bandas del obturador, reflejos en el cristal (lámpara, flash, quien hace la foto) y huellas que sólo se ven
+// en el reflejo.
+const SCREENS = {
+  pantalla_oled: { layout: 'pentile', across: 980, black: 0.0, contrast: 0.06, sat: 0.14, temp: [0.985, 1.0, 1.03], gap: 0.3, glow: 0.12, gloss: 1.0, bands: 0.28, moire: 0.9, bleed: 0, floor: 0.6 },
+  pantalla_lcd: { layout: 'stripe', across: 620, black: 0.07, contrast: 0, sat: 0, temp: [0.965, 1.0, 1.05], gap: 0.14, gapV: 0.1, glow: 0.04, gloss: 0.35, bands: 0.08, moire: 1.0, bleed: 0.1, ipsGlow: 0.12, floor: 0.58 },
+  pantalla_vieja: { layout: 'stripe', across: 360, black: 0.13, contrast: -0.12, sat: -0.12, temp: [0.93, 1.0, 1.1], gap: 0.24, gapV: 0.2, glow: 0.03, gloss: 0.25, bands: 0.18, moire: 0.8, bleed: 0.26, dither: 1, viewAngle: 0.55, floor: 0.42 },
+  pantalla_crt: { layout: 'crt', across: 300, black: 0.035, contrast: 0.08, sat: 0.05, temp: [1.02, 1.0, 0.97], gap: 0.18, glow: 0.55, gloss: 0.8, bands: 0.42, moire: 0.7, bleed: 0, curve: 0.07, converge: 0.22, vig: 0.55, floor: 0.3 }
+};
+function isScreen(st) { const p = paperById(st.paper); return !!(p && p.material === 'screen'); }
+
+async function renderScreen(opts, st, withArt) {
+  const { w, h, ppm, assets } = opts;
+  const prog = opts.onProgress || (async () => {});
+  const art = withArt ? opts.art : null, comps = opts.artComponents || 4;
+  const N = w * h, k = clamp(clamp(def(st.intensity, 50), 0, 100) / 50, 0, 2), kk = Math.min(1.5, k);
+  const S = { w, h, ppm, N, seed: (def(st.seed, 1) | 0) * 7919 + 13, k };
+  const D = SCREENS[st.paper] || SCREENS.pantalla_lcd;
+  const longS = Math.max(w, h);
+  const pitch = st._pitch || Math.max(1.2, longS / D.across * clamp(def(st.screenZoom, 1), 0.3, 4));
+  const bright = clamp(def(st.screenBright, 1), 0.3, 1.6);
+  const r = rng(S.seed * 7 + 5);
+  await prog(0.1, 'Encendiendo la pantalla…');
+  // ---- 1) lo que muestra la pantalla: el arte (sobre blanco) promediado en cada píxel de la pantalla
+  const lw = Math.ceil(w / pitch) + 1, lh = Math.ceil(h / pitch) + 1, LN = lw * lh;
+  const C = [new Float32Array(LN), new Float32Array(LN), new Float32Array(LN)], cnt = new Float32Array(LN);
+  for (let y = 0; y < h; y++) {
+    const ly = (y / pitch) | 0;
+    for (let x = 0; x < w; x++) {
+      const o = ly * lw + ((x / pitch) | 0);
+      let R = 1, G = 1, Bb = 1;
+      if (art) { const s = (y * w + x) * comps, al = comps === 4 ? art[s + 3] / 255 : 1; R = 1 - al + al * art[s] / 255; G = 1 - al + al * art[s + 1] / 255; Bb = 1 - al + al * art[s + 2] / 255; }
+      C[0][o] += R; C[1][o] += G; C[2][o] += Bb; cnt[o]++;
+    }
+  }
+  // ---- 2) cómo reproduce el color cada pantalla
+  const bayer = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+  const blk = D.black * kk, con = D.contrast * kk, sat = D.sat * kk, temp = D.temp.map(t => 1 + (t - 1) * kk);
+  for (let ly = 0; ly < lh; ly++) for (let lx = 0; lx < lw; lx++) {
+    const o = ly * lw + lx, n = cnt[o] || 1;
+    let c0 = C[0][o] / n, c1 = C[1][o] / n, c2 = C[2][o] / n;
+    if (!cnt[o]) c0 = c1 = c2 = 1;
+    const l = c0 * 0.2126 + c1 * 0.7152 + c2 * 0.0722;
+    c0 = l + (c0 - l) * (1 + sat); c1 = l + (c1 - l) * (1 + sat); c2 = l + (c2 - l) * (1 + sat);
+    const cc = [c0, c1, c2];
+    for (let c = 0; c < 3; c++) {
+      let v = clamp(cc[c], 0, 1);
+      v = 0.5 + (v - 0.5) * (1 + con);
+      if (D.viewAngle) {             // TN: el gamma cambia con el ángulo de visión (de arriba a abajo)
+        const t = ly / lh - 0.5, va = D.viewAngle * kk;
+        v = Math.pow(clamp(v, 0, 1), 1 + va * t * 1.6) * (1 - va * 0.25 * t) + va * 0.12 * Math.max(0, -t);
+      }
+      if (D.dither) {                // 6 bits por canal con tramado ordenado (bandas en los degradados)
+        const q = 63 * kk + 255 * (1 - Math.min(1, kk)), th = (bayer[(ly & 3) * 4 + (lx & 3)] + 0.5) / 16 - 0.5;
+        v = Math.round(clamp(v, 0, 1) * q + th) / q;
+      }
+      v = blk + (1 - blk) * clamp(v, 0, 1);
+      cc[c] = clamp(v * temp[c] * bright, 0, 1.3);
+    }
+    C[0][o] = cc[0]; C[1][o] = cc[1]; C[2][o] = cc[2];
+  }
+  // ---- 3) subpíxeles: cada píxel de la pantalla se dibuja con su estructura física
+  await prog(0.3, 'Subpíxeles…');
+  const out = new Uint8ClampedArray(N * 4);
+  const vis = smooth(1.6, 5, pitch) * Math.min(1, kk * 1.2);           // con píxeles muy finos la rejilla se funde
+  const ae = Math.min(0.45, 0.6 / pitch * 3);                          // borde suave (antialias)
+  const bar = (u, a, b) => smooth(a - ae, a + ae, u) * (1 - smooth(b - ae, b + ae, u));
+  const curve = (D.curve || 0) * kk, conv = (D.converge || 0) * kk;
+  const cxw = w / 2, cyh = h / 2;
+  const sampleC = (c, fx, fy) => {   // color del píxel de pantalla (bilineal suave entre píxeles para el CRT)
+    const ix = clamp(fx | 0, 0, lw - 1), iy = clamp(fy | 0, 0, lh - 1);
+    return C[c][iy * lw + ix];
+  };
+  const fl = lerp(1, D.floor, Math.min(1, kk)), expoM = 1 / (fl + (1 - fl) * 0.42);
+  const gG = D.layout === 'stripe' ? 3 / ((1 - D.gap) * (1 - (D.gapV || 0))) : D.layout === 'crt' ? 3 / (1 - D.gap) * 1.25 : 2.6;
+  for (let y = 0; y < h; y++) {
+    if ((y & 511) === 0) await prog(0.3 + 0.35 * y / h, 'Subpíxeles…');
+    for (let x = 0; x < w; x++) {
+      let X = x, Y = y;
+      if (curve) {                   // tubo curvo: barril
+        const u = (x - cxw) / cxw, v = (y - cyh) / cyh, rr = u * u + v * v;
+        X = cxw + u * (1 + curve * rr) * cxw; Y = cyh + v * (1 + curve * rr) * cyh;
+      }
+      const j = (y * w + x) * 4;
+      if (X < 0 || Y < 0 || X >= w || Y >= h) { out[j] = out[j + 1] = out[j + 2] = 6; out[j + 3] = 255; continue; }
+      const sx = X / pitch, sy = Y / pitch, ix = sx | 0, iy = sy | 0, fx = sx - ix, fy = sy - iy;
+      const base = [sampleC(0, sx - conv, sy), sampleC(1, sx, sy), sampleC(2, sx + conv, sy + conv * 0.5)];
+      const m = [0, 0, 0];
+      if (D.layout === 'stripe') {
+        const gv = (D.gapV || 0) / 2, g = D.gap / 2, row = bar(fy, gv, 1 - gv);
+        for (let c = 0; c < 3; c++) { const u = fx * 3 - c; m[c] = bar(u, g, 1 - g) * row; }
+      } else if (D.layout === 'pentile') {
+        // verde en todos los píxeles (punto pequeño a la derecha), rojo/azul alternos (rombo mayor a la izquierda)
+        const dg = Math.hypot((fx - 0.72) / 0.2, (fy - 0.5) / 0.26);
+        m[1] = 1 - smooth(1 - ae * 3, 1 + ae * 3, dg);
+        const dd = (Math.abs(fx - 0.27) + Math.abs(fy - 0.5)) / 0.36;
+        const rb = 1 - smooth(1 - ae * 3, 1 + ae * 3, dd);
+        if (((ix + iy) & 1) === 0) m[0] = rb * 1.9; else m[2] = rb * 1.9;
+      } else {
+        // CRT: franjas de fósforo continuas + línea de barrido gaussiana que engorda con el brillo
+        const l = base[0] * 0.3 + base[1] * 0.59 + base[2] * 0.11;
+        const sig = 0.2 + 0.2 * clamp(l, 0, 1.2);
+        const scan = Math.exp(-((fy - 0.5) * (fy - 0.5)) / (2 * sig * sig));
+        for (let c = 0; c < 3; c++) { const u = fx * 3 - c; m[c] = bar(u, D.gap / 2, 1 - D.gap / 2) * scan; }
+      }
+      // la luz de cada subpíxel se reparte (difusor, desenfoque de la cámara): fondo «f» + pico del subpíxel; la
+      // cámara expone para que el blanco siga siendo blanco (expo), así se ve la rejilla sin oscurecer la imagen
+      for (let c = 0; c < 3; c++) {
+        const sub = base[c] * (fl + (1 - fl) * Math.min(1.9, m[c] * gG)) * expoM;
+        out[j + c] = 255 * lerp(base[c], sub, vis);
+      }
+      out[j + 3] = 255;
+    }
+  }
+  // ---- 4) resplandor (fósforos del CRT, píxeles OLED muy brillantes) y nitidez óptica
+  const tmp = new Float32Array(N), ch = [new Float32Array(N), new Float32Array(N), new Float32Array(N)];
+  for (let o = 0; o < N; o++) { ch[0][o] = out[o * 4]; ch[1][o] = out[o * 4 + 1]; ch[2][o] = out[o * 4 + 2]; }
+  const optic = pitch * 0.08 * (st.luz !== 'ninguna' || (st.calidad || 'perfecta') !== 'perfecta' ? 1.6 : 1);
+  if (D.glow > 0) {
+    const gk = D.glow * kk;
+    for (let c = 0; c < 3; c++) {
+      const g = new Float32Array(ch[c]); gaussBlur(g, w, h, pitch * 2.2, tmp);
+      if (optic > 0.45) gaussBlur(ch[c], w, h, optic, tmp);
+      for (let o = 0; o < N; o++) ch[c][o] += Math.max(0, g[o] - 70) * gk * 0.9;
+    }
+  } else if (optic > 0.45) for (let c = 0; c < 3; c++) gaussBlur(ch[c], w, h, optic, tmp);
+  // ---- 5) defectos del panel: fugas de luz en los bordes (LCD), brillo IPS en esquinas, viñeta del tubo
+  const half = Math.hypot(w, h) / 2, bseed = (r() * 1e5) | 0, bc = longS / 7;
+  const bleedK = (D.bleed || 0) * kk, ipsK = (D.ipsGlow || 0) * kk, vig = (D.vig || 0) * kk;
+  const E = (bleedK || ipsK || vig) ? lowField(w, h, 8, (x, y) => {
+    const u = x / w, v = y / h, de = Math.min(u, v, 1 - u, 1 - v);
+    let add = 0;
+    if (bleedK) add += bleedK * 90 * Math.exp(-de / 0.05) * smooth(0.35, 0.8, fbm2(x / bc, y / bc, bseed));
+    if (ipsK) { const dc = Math.min(Math.hypot(u, v), Math.hypot(1 - u, v), Math.hypot(u, 1 - v), Math.hypot(1 - u, 1 - v)); add += ipsK * 70 * Math.exp(-dc / 0.22); }
+    return add;
+  }) : null;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const o = y * w + x, j = o * 4;
+    let add = E ? E(x, y) : 0, vf = 1;
+    if (vig) { const rx = (x - w / 2) / (w / 2), ry = (y - h / 2) / (h / 2); vf = 1 - vig * Math.pow((rx * rx + ry * ry) / 2, 1.4); }
+    for (let c = 0; c < 3; c++) {
+      const v0 = ch[c][o], darkK = 1 - Math.min(1, v0 / 160);   // las fugas sólo se ven en lo oscuro
+      out[j + c] = (v0 + add * darkK * (c === 2 ? 1.08 : c === 0 ? 0.95 : 1)) * vf;
+    }
+  }
+  if (!withArt) return { rgba: new Uint8Array(out.buffer), S };
+  // ---- 6) vidrio delante, si se eligió
+  await applyOverlay(S, st, out, assets, prog);
+  // ---- 7) fotografiar la pantalla
+  const shot = st.luz !== 'ninguna' || ['movil', 'movil_antiguo', 'analogica'].indexOf(st.calidad) >= 0;
+  if (shot) {
+    await prog(0.85, 'Fotografiando la pantalla…');
+    screenShot(S, st, out, D, pitch, kk);
+  }
+  const cal = ['movil', 'movil_antiguo', 'analogica'].indexOf(st.calidad) >= 0 ? st.calidad : 'perfecta';
+  if (cal !== 'perfecta') quality(S, st, out, cal, k);
+  await prog(1, 'Listo');
+  return { rgba: new Uint8Array(out.buffer) };
+}
+
+function screenShot(S, st, px, D, pitch, kk) {
+  const { w, h } = S, longS = Math.max(w, h), half = Math.hypot(w, h) / 2;
+  const r = rng((S.seed + (def(st.seedFoto, 0) | 0) * 7717) * 11 + 3);
+  // moiré: la rejilla de subpíxeles interfiere con la del sensor → arcos de colores que cambian con el ángulo
+  const mA = D.moire * kk * 0.075 * (0.5 + 0.5 * smooth(9, 2.5, pitch));
+  const per = longS * lerp(0.012, 0.03, r()), th = r() * Math.PI, ca = Math.cos(th), sa = Math.sin(th);
+  const x0 = r() * w, y0 = r() * h, bend = lerp(0.6, 1.6, r());
+  // bandas del obturador (PWM / barrido): horizontales, blandas
+  const bA = D.bands * kk, bPer = h / lerp(2.5, 5.5, r()), bPh = r() * 6.28;
+  // reflejos en el cristal según la luz
+  const luz = st.luz || 'ninguna', gloss = D.gloss;
+  const lamp = luz === 'lampara' || luz === 'foco', flash = luz === 'flash', me = luz === 'sombra';
+  const lx = lerp(0.2, 0.8, r()) * w, ly = lerp(0.15, 0.45, r()) * h;
+  const fx = (0.5 + (r() - 0.5) * 0.15) * w, fy = (0.45 + (r() - 0.5) * 0.15) * h;
+  const sc = longS / 6, ss = (r() * 1e5) | 0, sm = longS / 14;
+  const lightAt = (x, y) => {
+    let veil = 0.03 * kk, refl = 0;
+    if (lamp) {
+      const d = Math.hypot(x - lx, y - ly) / half;
+      refl += (gloss * 0.9 * Math.exp(-Math.pow(d / (0.08 + 0.25 * (1 - gloss)), 2)) + 0.25 * Math.exp(-d / 0.5)) * kk;
+      veil += 0.08 * kk;
+    }
+    if (flash) {
+      const d = Math.hypot(x - fx, y - fy) / half;
+      refl += (gloss * 1.4 * Math.exp(-Math.pow(d / (0.045 + 0.2 * (1 - gloss)), 2)) + 0.35 * Math.exp(-d / 0.3)) * kk;
+      veil += 0.05 * kk;
+    }
+    if (me) {                       // tu propio reflejo: silueta de cabeza y hombros (aclara lo oscuro)
+      const u = (x - w * 0.5) / w, v = (y - h * 0.62) / h;
+      const head = Math.hypot(u / 0.14, (v + 0.12) / 0.18), body = Math.hypot(u / 0.38, (v - 0.32) / 0.3);
+      refl += (smooth(1.2, 0.8, head) + smooth(1.15, 0.85, body)) * 0.22 * kk;
+      veil += 0.12 * kk;
+    }
+    // huellas y grasa en el cristal: sólo se ven donde hay reflejo
+    const smudge = smooth(0.45, 0.8, fbm2(x / sm, y / sm * 0.6, ss)) * 0.8 + 0.2 * fbm2(x / sc, y / sc, ss + 1);
+    return [veil, refl * (0.85 + 0.3 * smudge)];
+  };
+  const FV = lowField(w, h, 6, (x, y) => lightAt(x, y)[0]), FR = lowField(w, h, 6, (x, y) => lightAt(x, y)[1]);
+  for (let y = 0; y < h; y++) {
+    const band = bA ? 1 - bA * Math.pow(0.5 + 0.5 * Math.cos(2 * Math.PI * y / bPer + bPh), 3) : 1;
+    for (let x = 0; x < w; x++) {
+      const j = (y * w + x) * 4;
+      const veil = FV(x, y), refl = FR(x, y);
+      const t = (x - x0) * ca + (y - y0) * sa, q = ((x - x0) * -sa + (y - y0) * ca) / longS;
+      const ph = 2 * Math.PI * (t / per + bend * q * q * 6);
+      for (let c = 0; c < 3; c++) {
+        let v = px[j + c] * band;
+        if (mA) v *= 1 + mA * Math.cos(ph + c * 2.094);
+        v += (255 - v) * Math.min(0.9, refl) + 255 * veil * (1 - v / 255) * 0.6;
+        px[j + c] = v;
+      }
+    }
+  }
+}
+
 // ================================================================ API: PAPEL DE FONDO
 async function renderPaper(opts) {
   const { w, h, ppm, state, assets } = opts;
   const prog = opts.onProgress || (async () => {});
   await catalogs(assets);
   const st = Object.assign({}, P.DEFAULT_STATE, state || {});
+  if (isScreen(st)) return renderScreen(opts, st, false);     // pantalla encendida en blanco, para trabajar encima
   const N = w * h;
   const S = { w, h, ppm, N, seed: (def(st.seed, 1) | 0) * 7919 + 13, k: clamp(def(st.intensity, 50), 0, 100) / 50 };
   // semillas por sección: el botón ⟳ de cada sección cambia sólo lo suyo
@@ -843,6 +1068,8 @@ async function renderFinal(opts) {
   const { w, h, ppm, assets, art, artComponents } = opts;
   const prog = opts.onProgress || (async () => {});
   const st0 = Object.assign({}, P.DEFAULT_STATE, opts.state || {});
+  await catalogs(assets);
+  if (isScreen(st0)) return renderScreen(opts, st0, true);
   const Lsel = LIGHT[st0.luz] || LIGHT.ninguna;
   const kk0 = clamp(clamp(def(st0.intensity, 50), 0, 100) / 50, 0, 2);
   const stF = Object.assign({}, st0, {

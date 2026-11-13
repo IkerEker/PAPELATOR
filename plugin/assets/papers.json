@@ -2519,5 +2519,109 @@
   "ageK": 1.2,
   "rough": 0.06047,
   "grainMm": 0.1914
+ },
+ {
+  "id": "pantalla_oled",
+  "name": "Móvil OLED",
+  "group": "Pantallas",
+  "kind": "screen",
+  "material": "screen",
+  "tileMm": [
+   100,
+   100
+  ],
+  "size": [
+   1,
+   1
+  ],
+  "gain": 1,
+  "detailStd": 0,
+  "color": [
+   250,
+   250,
+   250
+  ],
+  "translucency": 0,
+  "rough": 0.0,
+  "grainMm": 0.1,
+  "ageK": 0
+ },
+ {
+  "id": "pantalla_lcd",
+  "name": "Monitor LCD",
+  "group": "Pantallas",
+  "kind": "screen",
+  "material": "screen",
+  "tileMm": [
+   100,
+   100
+  ],
+  "size": [
+   1,
+   1
+  ],
+  "gain": 1,
+  "detailStd": 0,
+  "color": [
+   250,
+   250,
+   250
+  ],
+  "translucency": 0,
+  "rough": 0.0,
+  "grainMm": 0.1,
+  "ageK": 0
+ },
+ {
+  "id": "pantalla_vieja",
+  "name": "Portátil viejo",
+  "group": "Pantallas",
+  "kind": "screen",
+  "material": "screen",
+  "tileMm": [
+   100,
+   100
+  ],
+  "size": [
+   1,
+   1
+  ],
+  "gain": 1,
+  "detailStd": 0,
+  "color": [
+   250,
+   250,
+   250
+  ],
+  "translucency": 0,
+  "rough": 0.0,
+  "grainMm": 0.1,
+  "ageK": 0
+ },
+ {
+  "id": "pantalla_crt",
+  "name": "Televisor de tubo",
+  "group": "Pantallas",
+  "kind": "screen",
+  "material": "screen",
+  "tileMm": [
+   100,
+   100
+  ],
+  "size": [
+   1,
+   1
+  ],
+  "gain": 1,
+  "detailStd": 0,
+  "color": [
+   250,
+   250,
+   250
+  ],
+  "translucency": 0,
+  "rough": 0.0,
+  "grainMm": 0.1,
+  "ageK": 0
  }
 ]

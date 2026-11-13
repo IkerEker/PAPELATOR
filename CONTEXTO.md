@@ -2,7 +2,7 @@
 
 > Pega o adjunta este archivo al empezar el chat nuevo. Todo el proyecto está en GitHub:
 > **https://github.com/IkerEker/PAPELATOR** (rama `main`, último commit «Una sola ventana con dos pestañas: Presets y Avanzado»).
-> Versión actual del plugin: **3.7.1** (`plugin/manifest.json`). Instalable: `dist/PAPELATOR.ccx`.
+> Versión actual del plugin: **3.9.0** (`plugin/manifest.json`). Instalable: `dist/PAPELATOR.ccx`.
 
 ---
 
@@ -162,6 +162,17 @@ escaner_oficina, movil, movil_antiguo, fotocopia, analogica.
   barril, giro/perspectiva/desenfoque de márgenes más fuertes; fotocopia con curva dura, tóner, rayas de tambor y
   bordes; analógica con grano a dos escalas, halation, difusión, polvo y pelos.
 - Aplicar sobrescribe el resultado anterior si el arte no ha cambiado (huella del compuesto).
+
+## 6d. v3.9 — Pantalla
+- Grupo «Pantallas» en «1 · Papel» con 4 pantallas (de mejor a peor): Móvil OLED (PenTile en diamante, negro absoluto),
+  Monitor LCD (tira RGB, negro grisáceo, brillo IPS), Portátil viejo (TN: píxel gordo, rejilla marcada, 6 bits con
+  tramado, color según el ángulo, fugas de luz), Tele de tubo (rejilla de apertura, líneas de barrido que engordan
+  con el brillo, resplandor, convergencia, pantalla curva). `material: 'screen'` en papers.json; motor `renderScreen`.
+- Con pantalla se ocultan Color, Estado, Pliegues, Calco y la escala; aparecen «Tamaño del píxel» y «Brillo».
+  Luz sin Escáner ni Luz natural; Calidad sin Escáner ni Fotocopia. Madera/cartón ocultan Color, Pliegues y Calco.
+  Los números de sección se renumeran según lo visible. En Avanzado se ocultan los grupos que no aplican.
+- Fotografiar la pantalla (cualquier luz o calidad móvil/analógica): moiré de colores, bandas del obturador,
+  reflejos (lámpara, flash, tu propio reflejo con «Sombra»), huellas que sólo se ven en el reflejo.
 
 ## 7. Pendiente / ideas que no se han hecho
 - Probar todo dentro de Photoshop real (las pruebas son en Node + simulación del DOM de UXP; el usuario es quien lo
