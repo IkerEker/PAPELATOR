@@ -199,6 +199,18 @@ function paperJob() {
 }
 async function doPaper() { await runModal('Papelator · Papel de fondo', paperJob()); }
 
+// Huella del arte (lo que hay debajo, sin las capas de PAPELATOR): si al volver a aplicar es la misma, sólo has
+// cambiado opciones del plugin y se sobrescribe el resultado anterior en vez de crear otra capa.
+const lastApply = {};   // doc.id -> { hash, layerId }
+function artHash(data, w, h) {
+  let a = 2166136261 >>> 0, b = (w * 73856093) ^ (h * 19349663);
+  const n = data.length;
+  for (let i = 0; i < n; i += 4) {
+    const v = data[i] | (data[i + 1] << 8) | (data[i + 2] << 16) | ((data[i + 3] || 0) << 24);
+    a = Math.imul(a ^ v, 16777619) >>> 0; b = (Math.imul(b, 31) + v) | 0;
+  }
+  return a.toString(16) + ':' + (b >>> 0).toString(16) + ':' + w + 'x' + h;
+}
 async function doApply() {
   await runModal('Papelator · Aplicar', async (doc, d, onProgress) => {
     const t0 = Date.now();
@@ -207,14 +219,27 @@ async function doApply() {
     mine.forEach(l => { l.visible = false; });
     await onProgress(0.02, 'Leyendo las capas…');
     const comp = await readComposite(doc, d.w, d.h);
+    const hash = artHash(comp.data, d.w, d.h);
+    const prev = lastApply[doc.id];
+    let reuse = null;
+    if (prev && prev.hash === hash) reuse = allLayers(doc.layers).filter(l => l.id === prev.layerId && l.name === RESULT_NAME)[0] || null;
     const res = await engine.renderFinal({ w: d.w, h: d.h, ppm: d.ppm, state, assets, art: comp.data, artComponents: comp.comps,
       backArt: state.calco === 'documento' ? { data: comp.data, channels: comp.comps } : null, onProgress });
     comp.data = null;
-    const layer = await createLayer(doc, RESULT_NAME);
-    await putFull(doc, layer, res.rgba, d.w, d.h);
-    await moveToTop(doc, layer);
+    let layer;
+    if (reuse) {
+      // mismo arte: se sobrescribe la versión anterior en su sitio
+      layer = reuse;
+      await putFull(doc, layer, res.rgba, d.w, d.h);
+    } else {
+      layer = await createLayer(doc, RESULT_NAME);
+      await putFull(doc, layer, res.rgba, d.w, d.h);
+      await moveToTop(doc, layer);
+    }
+    lastApply[doc.id] = { hash, layerId: layer.id };
     mine.forEach((l, i) => { try { l.visible = vis[i]; } catch (e) { /* capa borrada */ } });
-    setStatus('Aplicado en «' + RESULT_NAME + '» (' + ((Date.now() - t0) / 1000).toFixed(1) + ' s). Ctrl/Cmd+Z lo deshace de una vez.');
+    try { layer.visible = true; } catch (e) { /* nada */ }
+    setStatus((reuse ? 'Actualizado' : 'Aplicado en') + ' «' + RESULT_NAME + '» (' + ((Date.now() - t0) / 1000).toFixed(1) + ' s). Ctrl/Cmd+Z lo deshace de una vez.');
   });
 }
 async function doRemove() {
