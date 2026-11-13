@@ -1053,6 +1053,8 @@ async function applyOverlay(S, st, px, assets, prog) {
   const dist = clamp(def(st.sobreDist, 0.25), 0, 1) * 40;                       // mm entre vidrio y papel
   const refl = clamp(def(st.sobreRefl, 1), 0, 3) * def(cat.refl, 0.35) * k1;
   const dirt = cat.dirt ? clamp(def(st.sobreDirt, 0.25), 0, 1) * k1 : 0;
+  // transparencia: 1 = vidrio limpio; al bajarla el vidrio está gastado (velo lechoso, arañazos, rozaduras)
+  const wear = (1 - clamp(def(st.sobreTrans, 1), 0, 1)) * Math.min(1.3, kk);
   const scale = clamp(def(st.sobreScale, 1), 0.25, 4);
   const sxT = tw / (it.tileMm[0] * scale * ppm), syT = th / (it.tileMm[1] * scale * ppm);   // px de textura por px
   const r = rng((S.seed + (def(st.sobreVar, 0) | 0) * 31) * 7 + 3);
@@ -1091,7 +1093,8 @@ async function applyOverlay(S, st, px, assets, prog) {
     }
   }
   // ---- 2) difusión: el esmerilado (y un poco cualquier vidrio rugoso) desenfoca más cuanto más lejos está el papel
-  const sig = def(cat.frost, 0) * (dist * ppm * 0.11 + 0.15 * ppm) * Math.sqrt(kk);
+  // el vidrio gastado también difunde: microarañazos que abren la luz (más cuanto más lejos está el papel)
+  const sig = (def(cat.frost, 0) + 0.45 * wear * wear) * (dist * ppm * 0.11 + 0.15 * ppm) * Math.sqrt(kk) + wear * wear * 0.3 * ppm;
   if (sig > 0.5) {
     const tmp = new Float32Array(N), ch = new Float32Array(N);
     for (let c = 0; c < 3; c++) {
@@ -1130,6 +1133,36 @@ async function applyOverlay(S, st, px, assets, prog) {
     }
     gaussBlur(haze, hw, hh, 0.8, new Float32Array(hw * hh));
   }
+  // ---- 3b) desgaste: arañazos (líneas finas que dispersan la luz) y rozaduras (zonas mates a manchas)
+  let SC = null, scuff = null;
+  if (wear > 0.01) {
+    SC = new Float32Array(N);
+    const area = (w * h) / (2480 * 3508);
+    // grupos de arañazos paralelos (al limpiar o deslizar algo encima) y arañazos sueltos
+    const groups = Math.round((4 + 22 * wear) * Math.max(0.3, area)), loose = Math.round((30 + 420 * wear) * Math.max(0.3, area));
+    const line = (x0, y0, ang, len, v, curv) => {
+      const steps = Math.max(2, Math.round(len)); let x = x0, y = y0, a = ang;
+      for (let i = 0; i < steps; i++) {
+        const fade = Math.sin(Math.PI * i / steps);            // empiezan y acaban finos
+        const xi = x | 0, yi = y | 0;
+        if (xi >= 0 && yi >= 0 && xi < w && yi < h) { const o = yi * w + xi, vv = v * (0.4 + 0.6 * fade) * (0.6 + 0.4 * r()); if (vv > SC[o]) SC[o] = vv; }
+        a += curv; x += Math.cos(a); y += Math.sin(a);
+      }
+    };
+    for (let g = 0; g < groups; g++) {
+      const cx = r() * w, cy = r() * h, ang = r() * Math.PI, nl = 3 + ((r() * 12) | 0), spread = lerp(3, 18, r()) * ppm;
+      for (let i = 0; i < nl; i++) {
+        const off = (r() - 0.5) * spread, len = lerp(8, 70, Math.pow(r(), 1.5)) * ppm;
+        line(cx - Math.sin(ang) * off + (r() - 0.5) * 10 * ppm, cy + Math.cos(ang) * off + (r() - 0.5) * 10 * ppm, ang + (r() - 0.5) * 0.06, len, lerp(0.35, 1, r()), (r() - 0.5) * 0.0015);
+      }
+    }
+    for (let i = 0; i < loose; i++) line(r() * w, r() * h, r() * Math.PI * 2, lerp(1, 25, Math.pow(r(), 2)) * ppm, lerp(0.2, 0.8, r()), (r() - 0.5) * 0.01);
+    gaussBlur(SC, w, h, Math.max(0.45, 0.04 * ppm), new Float32Array(N));
+    let mx = 0; for (let o = 0; o < N; o += 7) if (SC[o] > mx) mx = SC[o];
+    if (mx > 0) for (let o = 0; o < N; o++) SC[o] = Math.min(1, SC[o] / (mx * 0.55));
+    const cs = 35 * ppm, ss = (S.seed * 13 + 77) | 0;
+    scuff = lowField(w, h, Math.max(4, Math.round(ppm * 2)), (x, y) => smooth(0.3, 0.75, fbm2(x / cs, y / cs, ss)));
+  }
   // ---- 4) tinte del vidrio, malla, reflejos y velo
   const tint = (cat.tint || [0.97, 0.975, 0.975]).map(t => 1 - (1 - t) * k1);
   const mc = it.meshColor || [1, 1, 1];
@@ -1149,6 +1182,11 @@ async function applyOverlay(S, st, px, assets, prog) {
         if (m > 0.01) val = val * (1 - 0.86 * m) + 70 * mc[c] * m;            // alambre de acero (u óxido)
         val += (255 - val) * Math.min(1, rr);                                   // reflejos (pantalla)
         val += (235 - val) * hz;                                                // huellas y polvo
+        if (SC) {
+          const sf = scuff(x, y);
+          val += (226 - val) * Math.min(0.85, wear * (0.32 + 0.3 * sf));            // velo lechoso, desigual
+          val += (250 - val) * Math.min(0.9, SC[y * w + x] * (0.35 + 0.45 * wear)); // arañazos
+        }
         px[j + c] = val;
       }
     }

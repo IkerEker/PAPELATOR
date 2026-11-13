@@ -360,6 +360,7 @@ function buildSimple() {
     pw.value = Math.round(state.pliegueWear * 100); byId('s-plwearval').textContent = Math.round(state.pliegueWear * 100) + '%';
     byId('s-plopts').style.display = state.pliegue && state.pliegue !== 'ninguno' ? 'block' : 'none';
     byId('s-sobreopts').style.display = state.sobre && state.sobre !== 'ninguno' ? 'block' : 'none';
+    byId('s-sobretrans').value = Math.round(state.sobreTrans * 100); byId('s-sobretransval').textContent = Math.round(state.sobreTrans * 100) + '%';
     byId('s-sobredist').value = Math.round(state.sobreDist * 100); byId('s-sobredistval').textContent = Math.round(state.sobreDist * 40) + ' mm';
     byId('s-calcoopts').style.display = state.calco && state.calco !== 'ninguno' ? 'block' : 'none';
     byId('s-calcoamt').value = Math.round(state.calcoAmount * 100); byId('s-calcoval').textContent = Math.round(state.calcoAmount * 100) + '%';
@@ -384,6 +385,7 @@ function buildSimple() {
   bindSlider('s-edad', 's-edadval', v => { state.edad = v / 100; }, v => v + '%');
   bindSlider('s-plamt', 's-plamtval', v => { state.pliegueAmount = v / 100; }, v => v + '%');
   bindSlider('s-plwear', 's-plwearval', v => { state.pliegueWear = v / 100; }, v => v + '%');
+  bindSlider('s-sobretrans', 's-sobretransval', v => { state.sobreTrans = v / 100; }, v => v + '%');
   bindSlider('s-sobredist', 's-sobredistval', v => { state.sobreDist = v / 100; }, v => Math.round(v * 0.4) + ' mm');
   bindSlider('s-calcoamt', 's-calcoval', v => { state.calcoAmount = v / 100; }, v => v + '%');
   // ⟳ de cada sección: otra versión de eso, sin tocar lo demás
@@ -453,6 +455,7 @@ function buildSections() {
     { id: 'sobre', title: 'Sobreponer (vidrio, plástico)', items: [
       { t: 'picker', path: 'sobre', label: 'Qué hay delante', options: () => P.SOBRES.map(c => [c.id, c.name]) },
       { t: 'slider', path: 'sobreDist', label: 'Distancia al papel', min: 0, max: 1, step: 0.01, fmt: v => Math.round(v * 40) + ' mm' },
+      { t: 'slider', path: 'sobreTrans', label: 'Transparencia (gastado, arañado)', min: 0, max: 1, step: 0.01, fmt: pct },
       { t: 'slider', path: 'sobreRefl', label: 'Reflejos', min: 0, max: 3, step: 0.05, fmt: pct },
       { t: 'slider', path: 'sobreDirt', label: 'Huellas y polvo en el vidrio', min: 0, max: 1, step: 0.05, fmt: pct },
       { t: 'slider', path: 'sobreScale', label: 'Escala del vidrio', min: 0.25, max: 4, step: 0.05, fmt: pct },

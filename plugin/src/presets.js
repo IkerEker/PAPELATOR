@@ -190,6 +190,7 @@ const DEFAULT_STATE = {
   sobre: 'ninguno',                   // vidrio/cristal/plástico delante del papel
   sobreVar: 0,
   sobreDist: 0.25,                    // distancia al papel (0 = pegado · 1 = 4 cm)
+  sobreTrans: 1,                      // transparencia (1 = limpio · 0 = gastado, arañado, casi opaco)
   sobreRefl: 1,                       // cuánta luz devuelve
   sobreDirt: 0.25,                    // huellas, grasa y polvo sobre el vidrio
   sobreScale: 1,
