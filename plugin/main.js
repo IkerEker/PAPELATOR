@@ -149,37 +149,72 @@ async function readComposite(doc, w, h, targetW) {
   return { data: full, comps: 4, w, h };
 }
 
-async function runModal(name, fn) {
-  if (busy) { pending = { name, fn }; setStatus('En cola…', 'busy'); return; }
+// Ejecuta una acción en Photoshop como UN solo paso del historial (Ctrl/Cmd+Z la deshace entera).
+// opts.live: actualización automática del papel; si el último paso del historial es nuestra actualización en vivo
+//            anterior, se vuelve a ese punto antes de rehacerla, así 20 cambios de opciones no dejan 20 pasos.
+// Si otro plugin (o un diálogo) tiene Photoshop ocupado, espera y reintenta en vez de fallar.
+const LIVE_NAME = 'Papelator · Papel de fondo (en vivo)';
+let lastLiveState = null;   // { docId, stateId }
+async function runModal(name, fn, opts) {
+  opts = opts || {};
+  if (busy) { pending = { name, fn, opts }; setStatus('En cola…', 'busy'); return; }
   busy = true;
   setStatus('Empezando…', 'busy');
   await tick();
-  try {
-    const doc = activeDoc();
-    const d = checkDoc(doc);
-    await core.executeAsModal(async (ctx) => {
-      let sid = null;
-      try { sid = await ctx.hostControl.suspendHistory({ documentID: doc.id, name: name }); } catch (e) { sid = null; }
-      const onProgress = async (v, msg) => {
-        setStatus(Math.round(v * 100) + '% · ' + msg, 'busy');
-        try { ctx.reportProgress({ value: Math.min(0.99, v), commandName: msg }); } catch (e) { /* sin barra */ }
-        await tick();
-        if (ctx.isCancelled) throw new Error('Cancelado.');
-      };
-      try { await fn(doc, d, onProgress); if (sid !== null) await ctx.hostControl.resumeHistory(sid, true); }
-      catch (e) { if (sid !== null) { try { await ctx.hostControl.resumeHistory(sid, false); } catch (_) { /* nada */ } } throw e; }
-    }, { commandName: name });
-  } catch (e) {
-    console.log('PAPELATOR error', e);
-    const msg = (e && e.message) ? e.message : String(e);
-    setStatus('Error: ' + msg, true);
+  let lastErr = null;
+  for (let attempt = 0; attempt < 12; attempt++) {
+    try {
+      const doc = activeDoc();
+      const d = checkDoc(doc);
+      await core.executeAsModal(async (ctx) => {
+        // en vivo: deshacer nuestra actualización anterior (si sigue siendo el último paso) para reemplazarla
+        if (opts.live && lastLiveState && lastLiveState.docId === doc.id) {
+          try {
+            const hs = doc.historyStates, cur = doc.activeHistoryState;
+            if (cur && cur.id === lastLiveState.stateId && hs && hs.length > 1) {
+              let idx = -1; for (let i = 0; i < hs.length; i++) if (hs[i].id === cur.id) idx = i;
+              if (idx > 0) doc.activeHistoryState = hs[idx - 1];
+            }
+          } catch (e) { /* versión sin historial accesible: se añade un paso más */ }
+        }
+        let sid = null;
+        try { sid = await ctx.hostControl.suspendHistory({ documentID: doc.id, name: opts.live ? LIVE_NAME : name }); } catch (e) { sid = null; }
+        const onProgress = async (v, msg) => {
+          setStatus(Math.round(v * 100) + '% · ' + msg, 'busy');
+          try { ctx.reportProgress({ value: Math.min(0.99, v), commandName: msg }); } catch (e) { /* sin barra */ }
+          await tick();
+          if (ctx.isCancelled) throw new Error('Cancelado.');
+        };
+        try { await fn(doc, d, onProgress); if (sid !== null) await ctx.hostControl.resumeHistory(sid, true); }
+        catch (e) { if (sid !== null) { try { await ctx.hostControl.resumeHistory(sid, false); } catch (_) { /* nada */ } } throw e; }
+        try { const cur = doc.activeHistoryState; lastLiveState = opts.live && cur ? { docId: doc.id, stateId: cur.id } : null; } catch (e) { lastLiveState = null; }
+      }, { commandName: name });
+      lastErr = null;
+      break;
+    } catch (e) {
+      lastErr = e;
+      const msg = String((e && e.message) || e);
+      // Photoshop ocupado por otro plugin o un diálogo: esperar y reintentar
+      if (/modal|busy|ocupad|another plugin|in progress/i.test(msg) && attempt < 11) { setStatus('Photoshop está ocupado, esperando…', 'busy'); await new Promise(r => setTimeout(r, 400)); continue; }
+      break;
+    }
+  }
+  if (lastErr) {
+    console.log('PAPELATOR error', lastErr);
+    setStatus('Error: ' + ((lastErr && lastErr.message) ? lastErr.message : String(lastErr)), true);
     busy = false; pending = null;
     return;
   }
   busy = false;
-  if (pending) { const p = pending; pending = null; runModal(p.name, p.fn); }
+  if (pending) { const p = pending; pending = null; runModal(p.name, p.fn, p.opts); }
 }
 
+// ---------- selección: tras crear capas, vuelve a dejar seleccionadas las que tenías (para seguir pintando donde estabas)
+function rememberSelection(doc) { try { return (doc.activeLayers || []).map(l => l.id); } catch (e) { return []; } }
+function restoreSelection(doc, ids) {
+  if (!ids || !ids.length) return;
+  try { const all = allLayers(doc.layers); all.forEach(l => { const on = ids.indexOf(l.id) >= 0; if (l.selected !== on) l.selected = on; }); } catch (e) { /* versión sin .selected */ }
+}
 // ---------- acciones
 function paperJob() {
   return async (doc, d, onProgress) => {
@@ -193,18 +228,22 @@ function paperJob() {
       mine.forEach((l, i) => { l.visible = vis[i]; });
     }
     const res = await engine.renderPaper({ w: d.w, h: d.h, ppm: d.ppm, state, assets, backArt, onProgress });
-    for (const l of tagged(doc, PAPER_NAME)) await l.delete();
-    const layer = await createLayer(doc, PAPER_NAME);
+    const sel = rememberSelection(doc);
+    const olds = tagged(doc, PAPER_NAME);
+    let layer = olds[0] || null;
+    for (let i = 1; i < olds.length; i++) await olds[i].delete();            // sólo un papel de fondo
+    if (layer) { try { if (layer.locked) layer.locked = false; } catch (e) { /* nada */ } }
+    if (!layer) layer = await createLayer(doc, PAPER_NAME);
     await putFull(doc, layer, res.rgba, d.w, d.h);
     await moveToBottom(doc, layer);
+    try { layer.visible = true; } catch (e) { /* nada */ }
+    restoreSelection(doc, sel.filter(id => id !== layer.id).length ? sel : []);
     setStatus('Papel listo (' + ((Date.now() - t0) / 1000).toFixed(1) + ' s). Trabaja encima y pulsa «Aplicar» al terminar.');
   };
 }
-async function doPaper() { await runModal('Papelator · Papel de fondo', paperJob()); }
+async function doPaper() { lastLiveState = null; await runModal('Papelator · Papel de fondo', paperJob()); }
 
-// Huella del arte (lo que hay debajo, sin las capas de PAPELATOR): si al volver a aplicar es la misma, sólo has
-// cambiado opciones del plugin y se sobrescribe el resultado anterior en vez de crear otra capa.
-const lastApply = {};   // doc.id -> { hash, layerId }
+// Huella del arte (lo que hay debajo): si al volver a aplicar es la misma, sólo has cambiado opciones del plugin.
 function artHash(data, w, h) {
   let a = 2166136261 >>> 0, b = (w * 73856093) ^ (h * 19349663);
   const n = data.length;
@@ -214,38 +253,73 @@ function artHash(data, w, h) {
   }
   return a.toString(16) + ':' + (b >>> 0).toString(16) + ':' + w + 'x' + h;
 }
+// Aplicar lee lo que se ve (sin el papel de fondo) y pone el resultado ENCIMA, en una capa nueva.
+//  · Si sólo has cambiado opciones del plugin desde el último Aplicar (el arte es el mismo y nuestra capa de
+//    resultado sigue intacta), se reescribe esa capa en su sitio.
+//  · Si has tocado el resultado (lo has fusionado con Ctrl/Cmd+E, pintado encima…) o el arte, ese resultado pasa a
+//    ser parte de tu imagen: se lee tal cual y el nuevo resultado se genera encima, en otra capa.
+const lastApply = {};   // doc.id -> { hash, layerId, sample }
+const SAMPLE_STEP = 97;
+function sampleOf(data, comps) {
+  const n = Math.floor(data.length / comps / SAMPLE_STEP), out = new Uint8Array(n * 3);
+  for (let i = 0; i < n; i++) { const o = i * SAMPLE_STEP * comps; out[i * 3] = data[o]; out[i * 3 + 1] = data[o + 1]; out[i * 3 + 2] = data[o + 2]; }
+  return out;
+}
+async function layerIntact(doc, layer, prev, w, h) {
+  try {
+    const r = await imaging.getPixels({ documentID: doc.id, layerID: layer.id, componentSize: 8, colorSpace: 'RGB' });
+    const idt = r.imageData, sb = r.sourceBounds || { left: 0, top: 0, right: idt.width, bottom: idt.height };
+    if (idt.width !== w || idt.height !== h || sb.left !== 0 || sb.top !== 0) { idt.dispose(); return false; }
+    const data = await idt.getData({ chunky: true }), comps = idt.components; idt.dispose();
+    const smp = sampleOf(data, comps), ref = prev.sample;
+    if (!ref || smp.length !== ref.length) return false;
+    let bad = 0; for (let i = 0; i < smp.length; i++) if (Math.abs(smp[i] - ref[i]) > 3) bad++;
+    return bad < smp.length * 0.002;
+  } catch (e) { return false; }
+}
 async function doApply() {
+  lastLiveState = null;
   await runModal('Papelator · Aplicar', async (doc, d, onProgress) => {
     const t0 = Date.now();
-    // para leer sólo tu arte se ocultan un momento las capas de PAPELATOR; al terminar todo queda tal cual estaba
-    const mine = tagged(doc), vis = mine.map(l => l.visible);
-    mine.forEach(l => { l.visible = false; });
-    await onProgress(0.02, 'Leyendo las capas…');
-    const comp = await readComposite(doc, d.w, d.h);
-    const hash = artHash(comp.data, d.w, d.h);
+    const sel = rememberSelection(doc);
+    await onProgress(0.01, 'Leyendo las capas…');
+    // ¿el resultado anterior sigue intacto? (si lo has fusionado o pintado, ya es parte de tu imagen)
     const prev = lastApply[doc.id];
-    let reuse = null;
-    if (prev && prev.hash === hash) reuse = allLayers(doc.layers).filter(l => l.id === prev.layerId && l.name === RESULT_NAME)[0] || null;
+    let prevLayer = null;
+    if (prev) {
+      const cand = allLayers(doc.layers).filter(l => l.id === prev.layerId)[0];
+      if (cand && cand.name === RESULT_NAME && await layerIntact(doc, cand, prev, d.w, d.h)) prevLayer = cand;
+    }
+    // se ocultan un momento el papel de fondo y el resultado intacto anterior para leer sólo tu imagen
+    const hide = tagged(doc, PAPER_NAME).concat(prevLayer ? [prevLayer] : []);
+    const vis = hide.map(l => l.visible);
+    hide.forEach(l => { l.visible = false; });
+    const comp = await readComposite(doc, d.w, d.h);
+    hide.forEach((l, i) => { try { l.visible = vis[i]; } catch (e) { /* capa borrada */ } });
+    const hash = artHash(comp.data, d.w, d.h);
+    const reuse = prevLayer && prev.hash === hash ? prevLayer : null;
     const res = await engine.renderFinal({ w: d.w, h: d.h, ppm: d.ppm, state, assets, art: comp.data, artComponents: comp.comps,
       backArt: state.calco === 'documento' ? { data: comp.data, channels: comp.comps } : null, onProgress });
     comp.data = null;
     let layer;
     if (reuse) {
-      // mismo arte: se sobrescribe la versión anterior en su sitio
-      layer = reuse;
+      layer = reuse;                                   // mismo arte: se reescribe la versión anterior en su sitio
+      try { if (layer.locked) layer.locked = false; } catch (e) { /* nada */ }
       await putFull(doc, layer, res.rgba, d.w, d.h);
     } else {
-      layer = await createLayer(doc, RESULT_NAME);
+      layer = await createLayer(doc, RESULT_NAME);     // nuevo resultado, encima de todo
       await putFull(doc, layer, res.rgba, d.w, d.h);
       await moveToTop(doc, layer);
     }
-    lastApply[doc.id] = { hash, layerId: layer.id };
-    mine.forEach((l, i) => { try { l.visible = vis[i]; } catch (e) { /* capa borrada */ } });
     try { layer.visible = true; } catch (e) { /* nada */ }
+    lastApply[doc.id] = { hash, layerId: layer.id, sample: sampleOf(res.rgba, 4) };
+    // queda seleccionado el resultado: así Ctrl/Cmd+E lo fusiona directamente con la capa de debajo
+    restoreSelection(doc, [layer.id]);
     setStatus((reuse ? 'Actualizado' : 'Aplicado en') + ' «' + RESULT_NAME + '» (' + ((Date.now() - t0) / 1000).toFixed(1) + ' s). Ctrl/Cmd+Z lo deshace de una vez.');
   });
 }
 async function doRemove() {
+  lastLiveState = null;
   await runModal('Papelator · Quitar papel', async (doc) => {
     const old = tagged(doc, PAPER_NAME);
     for (const l of old) await l.delete();
@@ -256,7 +330,7 @@ function liveUpdate() {
   const doc = activeDoc(); if (!doc) return;
   let has = false;
   try { has = tagged(doc, PAPER_NAME).filter(l => l.visible).length > 0; } catch (e) { has = false; }
-  if (has) runModal('Papelator · Papel de fondo', paperJob());
+  if (has) runModal('Papelator · Papel de fondo', paperJob(), { live: true });
 }
 
 // =============================================================== miniatura

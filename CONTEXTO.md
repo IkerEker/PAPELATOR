@@ -2,7 +2,7 @@
 
 > Pega o adjunta este archivo al empezar el chat nuevo. Todo el proyecto está en GitHub:
 > **https://github.com/IkerEker/PAPELATOR** (rama `main`, último commit «Una sola ventana con dos pestañas: Presets y Avanzado»).
-> Versión actual del plugin: **3.12.0** (`plugin/manifest.json`). Instalable: `dist/PAPELATOR.ccx`.
+> Versión actual del plugin: **3.12.1** (`plugin/manifest.json`). Instalable: `dist/PAPELATOR.ccx`.
 
 ---
 
@@ -195,6 +195,14 @@ escaner_oficina, movil, movil_antiguo, fotocopia, analogica.
   perspectiva, barril, descentrado y acercamiento (sólo recorta), con la zona enfocada cada vez más pequeña.
   Funciona con cualquier calidad (también Perfecta) y en pantallas; ⟳ de Luz/Calidad cambia la dirección.
 - Pliegues: «Arrugado» (16 hojas: arrugas suaves y pliegues sueltos) y «Muy arrugado» (13 hojas densas).
+
+## 6h. v3.12.1 — historial y convivencia con otros plugins
+- Cada acción = un paso del historial. «En vivo» reemplaza su propio paso anterior (no llena el historial).
+- Si Photoshop está ocupado por otro plugin o un diálogo, espera y reintenta (hasta ~5 s) en vez de dar error.
+- Papel de fondo: reutiliza su capa y devuelve la selección a la capa en la que estabas.
+- Aplicar: si el resultado anterior sigue intacto y el arte no ha cambiado → lo reescribe; si lo has fusionado
+  (Ctrl/Cmd+E) o pintado, se trata como parte de tu imagen y el nuevo se genera encima, en otra capa. El resultado
+  queda seleccionado (Ctrl/Cmd+E lo fusiona con la de debajo).
 
 ## 7. Pendiente / ideas que no se han hecho
 - Probar todo dentro de Photoshop real (las pruebas son en Node + simulación del DOM de UXP; el usuario es quien lo
