@@ -986,6 +986,7 @@ async function renderScreen(opts, st, withArt) {
   if (shot) { await prog(0.85, 'Fotografiando la pantalla…'); screenShot(S, st, out, D, pitch, kk); }
   const cal = ['movil', 'movil_antiguo', 'analogica'].indexOf(st.calidad) >= 0 ? st.calidad : 'perfecta';
   if (cal !== 'perfecta') quality(S, st, out, cal, k);
+  else if (def(st.encuadre, 0) > 0) captureGeometry(S, st, out, {}, k);
   await prog(1, 'Listo');
   return { rgba: new Uint8Array(out.buffer) };
 }
@@ -1586,7 +1587,7 @@ function photo(S, st, px, B, paper) {
       }
     }
   }
-  if (cal === 'perfecta') return;
+  if (cal === 'perfecta') { if (def(st.encuadre, 0) > 0) captureGeometry(S, st, px, {}, k); return; }
   quality(S, st, px, cal, k);
 }
 
@@ -1785,7 +1786,12 @@ function quality(S, st, px, cal, k) {
 function captureGeometry(S, st, px, Q, k) {
   const { w, h, N } = S;
   const kk = Math.min(1.6, k);
-  const rot = (Q.rot || 0) * kk, persp = (Q.persp || 0) * kk, barrel = (Q.barrel || 0) * kk, edge = (Q.edge || 0) * kk * Math.max(w, h) / 2000;
+  // Encuadre (0 = de frente): cuanto más alto, la cámara está más girada e inclinada, descentrada y más cerca;
+  // sólo se recorta (nunca se inventa lo que queda fuera), así que al máximo lo del centro casi se sale del plano.
+  // curva suave: los primeros tramos tuercen poco, el final ya es una foto muy mala
+  const enc = clamp(def(st.encuadre, 0), 0, 1), ep = Math.pow(enc, 1.7), e2 = ep * ep;
+  const rot = (Q.rot || 0) * kk + 11 * ep, persp = (Q.persp || 0) * kk + 0.3 * ep,
+    barrel = (Q.barrel || 0) * kk + 0.04 * ep, edge = ((Q.edge || 0) * kk + 8 * Math.pow(enc, 1.2)) * Math.max(w, h) / 2000;
   if (rot <= 0 && persp <= 0 && edge <= 0 && barrel <= 0) return;
   const r = rng((S.seed + (def(st.seedFoto, 0) | 0) * 7717) * 3 + 41);
   const th = (r() < 0.5 ? -1 : 1) * rot * (0.6 + 0.4 * r()) * Math.PI / 180;
@@ -1800,14 +1806,20 @@ function captureGeometry(S, st, px, Q, k) {
     out[0] = xs / ww * z; out[1] = ys / ww * z;
   };
   const t = [0, 0];
-  let m = 1;
-  for (let i = 0; i <= 8; i++) for (const [u, v] of [[-1 + i / 4, -1], [-1 + i / 4, 1], [-1, -1 + i / 4], [1, -1 + i / 4]]) { map(u, v, 1, t); m = Math.max(m, Math.abs(t[0]), Math.abs(t[1])); }
-  const z = 0.998 / m;
+  // descentrado (hacia dónde apunta la cámara) y acercamiento extra
+  const oa = r() * Math.PI * 2, offX = Math.cos(oa) * 0.3 * ep, offY = Math.sin(oa) * 0.3 * ep;
+  let z = 1;
+  for (let i = 0; i <= 16; i++) for (const [u, v] of [[-1 + i / 8, -1], [-1 + i / 8, 1], [-1, -1 + i / 8], [1, -1 + i / 8]]) {
+    map(u, v, 1, t);
+    if (Math.abs(t[0]) > 1e-6) z = Math.min(z, (1 - Math.abs(offX)) / Math.abs(t[0]));
+    if (Math.abs(t[1]) > 1e-6) z = Math.min(z, (1 - Math.abs(offY)) / Math.abs(t[1]));
+  }
+  z *= 0.998 * (1 - 0.2 * e2);
   if (rot > 0 || persp > 0 || barrel > 0) {
     const src = new Uint8ClampedArray(px);
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
       map((2 * x + 1) / w - 1, (2 * y + 1) / h - 1, z, t);
-      let sx = (t[0] + 1) * w / 2 - 0.5, sy = (t[1] + 1) * h / 2 - 0.5;
+      let sx = (t[0] + offX + 1) * w / 2 - 0.5, sy = (t[1] + offY + 1) * h / 2 - 0.5;
       sx = sx < 0 ? 0 : sx > w - 1.001 ? w - 1.001 : sx; sy = sy < 0 ? 0 : sy > h - 1.001 ? h - 1.001 : sy;
       const ix = sx | 0, iy = sy | 0, fx = sx - ix, fy = sy - iy, a = (iy * w + ix) * 4, b = a + 4, c = a + w * 4, d = c + 4;
       const j = (y * w + x) * 4;
@@ -1824,7 +1836,8 @@ function captureGeometry(S, st, px, Q, k) {
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
       const u = (2 * x + 1) / w - 1, v = (2 * y + 1) / h - 1;
       const far = persp > 0 ? (pxk * u + pyk * v) / pn * 0.45 : 0;
-      const m2 = smooth(0.4, 1.15, Math.sqrt(u * u * 0.8 + v * v * 0.8) + far);
+      // zona enfocada: más pequeña cuanto peor el encuadre, y desplazada hacia donde está más cerca
+      const m2 = smooth(0.4 - 0.32 * enc, 1.15 - 0.45 * enc, Math.sqrt(u * u * 0.8 + v * v * 0.8) + far * (1 + 1.5 * enc));
       if (m2 <= 0) continue;
       const o = y * w + x, j = o * 4;
       for (let q = 0; q < 3; q++) {

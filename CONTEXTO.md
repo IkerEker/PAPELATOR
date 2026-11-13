@@ -2,7 +2,7 @@
 
 > Pega o adjunta este archivo al empezar el chat nuevo. Todo el proyecto está en GitHub:
 > **https://github.com/IkerEker/PAPELATOR** (rama `main`, último commit «Una sola ventana con dos pestañas: Presets y Avanzado»).
-> Versión actual del plugin: **3.11.0** (`plugin/manifest.json`). Instalable: `dist/PAPELATOR.ccx`.
+> Versión actual del plugin: **3.12.0** (`plugin/manifest.json`). Instalable: `dist/PAPELATOR.ccx`.
 
 ---
 
@@ -189,6 +189,12 @@ escaner_oficina, movil, movil_antiguo, fotocopia, analogica.
 - Avanzado: cada control aparece sólo si sirve (líneas impresas sólo en papeles con patrón, sliders de pliegue/calco/
   vidrio sólo si hay pliegue/calco/vidrio, tinta y textura ocultas en pantalla).
 - Prueba de la interfaz real en navegador: `tools/test/layout2.js` (main.js con UXP simulado).
+
+## 6g. v3.12 — encuadre y muy arrugado
+- Slider **Encuadre** bajo Calidad (y en Avanzado › Fotografía): 0 = de frente; al subir, giro (hasta 11°),
+  perspectiva, barril, descentrado y acercamiento (sólo recorta), con la zona enfocada cada vez más pequeña.
+  Funciona con cualquier calidad (también Perfecta) y en pantallas; ⟳ de Luz/Calidad cambia la dirección.
+- Pliegues: «Arrugado» (16 hojas: arrugas suaves y pliegues sueltos) y «Muy arrugado» (13 hojas densas).
 
 ## 7. Pendiente / ideas que no se han hecho
 - Probar todo dentro de Photoshop real (las pruebas son en Node + simulación del DOM de UXP; el usuario es quien lo

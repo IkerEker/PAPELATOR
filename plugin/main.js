@@ -43,7 +43,7 @@ let state = merge(clone(P.DEFAULT_STATE), loadJSON('papelator3.state'));
 // v4: la intensidad global ya no está en el panel principal; vuelve a la de referencia
 if ((state.version | 0) < 4) { state.intensity = 50; state.version = 4; }
 const CLEAN = { estado: 'nuevo', edad: 0, custom: null, pliegue: 'ninguno', pliegueVar: 0, calco: 'ninguno', sobre: 'ninguno', sobreVar: 0,
-  luz: 'ninguna', calidad: 'perfecta', exposure: 0 };
+  luz: 'ninguna', calidad: 'perfecta', exposure: 0, encuadre: 0 };
 Object.assign(state, CLEAN);
 if (P.PLIEGUE_ALIAS[state.pliegue]) { state.pliegue = P.PLIEGUE_ALIAS[state.pliegue]; state.pliegueVar = 0; }
 if (!P.PLIEGUES.some(x => x.id === state.pliegue)) state.pliegue = 'ninguno';
@@ -447,6 +447,7 @@ function buildSimple() {
     pa.value = Math.round(state.pliegueAmount * 100); byId('s-plamtval').textContent = Math.round(state.pliegueAmount * 100) + '%';
     pw.value = Math.round(state.pliegueWear * 100); byId('s-plwearval').textContent = Math.round(state.pliegueWear * 100) + '%';
     byId('s-plopts').style.display = state.pliegue && state.pliegue !== 'ninguno' ? 'block' : 'none';
+    byId('s-enc').value = Math.round(state.encuadre * 100); byId('s-encval').textContent = Math.round(state.encuadre * 100) + '%';
     byId('s-sobreopts').style.display = state.sobre && state.sobre !== 'ninguno' ? 'block' : 'none';
     byId('s-sobretrans').value = Math.round(state.sobreTrans * 100); byId('s-sobretransval').textContent = Math.round(state.sobreTrans * 100) + '%';
     byId('s-sobredist').value = Math.round(state.sobreDist * 100); byId('s-sobredistval').textContent = Math.round(state.sobreDist * 40) + ' mm';
@@ -475,6 +476,7 @@ function buildSimple() {
   bindSlider('s-plwear', 's-plwearval', v => { state.pliegueWear = v / 100; }, v => v + '%');
   bindSlider('s-zoom', 's-zoomval', v => { state.screenZoom = v / 100; }, v => v + '%');
   bindSlider('s-bright', 's-brightval', v => { state.screenBright = v / 100; }, v => v + '%');
+  bindSlider('s-enc', 's-encval', v => { state.encuadre = v / 100; }, v => v + '%');
   bindSlider('s-sobretrans', 's-sobretransval', v => { state.sobreTrans = v / 100; }, v => v + '%');
   bindSlider('s-sobredist', 's-sobredistval', v => { state.sobreDist = v / 100; }, v => Math.round(v * 0.4) + ' mm');
   bindSlider('s-calcoamt', 's-calcoval', v => { state.calcoAmount = v / 100; }, v => v + '%');
@@ -575,7 +577,8 @@ function buildSections() {
     { id: 'foto', title: 'Fotografía', items: [
       { t: 'picker', path: 'luz', label: 'Luz', options: () => P.LUCES.map(c => [c.id, c.name]) },
       { t: 'slider', path: 'exposure', label: 'Más oscura · Más clara', min: -1, max: 1, step: 0.05, fmt: v => (v > 0 ? '+' : '') + Math.round(v * 100) },
-      { t: 'picker', path: 'calidad', label: 'Calidad', options: () => P.CALIDADES.map(c => [c.id, c.name]) }
+      { t: 'picker', path: 'calidad', label: 'Calidad', options: () => P.CALIDADES.map(c => [c.id, c.name]) },
+      { t: 'slider', path: 'encuadre', label: 'Encuadre (de frente → torcido, descentrado, desenfocado)', min: 0, max: 1, step: 0.01, fmt: pct }
     ] }
   ];
 }

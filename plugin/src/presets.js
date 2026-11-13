@@ -81,7 +81,8 @@ const PLIEGUES = [
   { id: '4', name: '4 veces', group: '4' },
   { id: '5', name: '5 veces', group: '5' },
   { id: '6', name: '6 veces', group: '6' },
-  { id: 'arrugado', name: 'Arrugado', group: 'arrugado' }
+  { id: 'arrugado', name: 'Arrugado', group: 'arrugado' },
+  { id: 'muy_arrugado', name: 'Muy arrugado', group: 'muy_arrugado' }
 ];
 // estados antiguos guardados -> nuevos
 const PLIEGUE_ALIAS = { mitad: '1', mitad_gastado: '1', cuatro: '2', cuatro_gastado: '2', seis: '3', ocho: '4', nueve: '4', acordeon: '4',
@@ -215,6 +216,7 @@ const DEFAULT_STATE = {
   luz: 'ninguna',
   exposure: 0,
   calidad: 'perfecta',
+  encuadre: 0,                        // 0 = foto de frente · 1 = torcida, descentrada y mal enfocada
   hideOriginals: false
 };
 

@@ -455,7 +455,7 @@
     "gain": 682.81,
     "strength": 0.1117,
     "src": 55,
-    "norm": 1.108
+    "norm": 0.882
    },
    {
     "file": "parrugado_1.png",
@@ -464,7 +464,7 @@
     "gain": 858.534,
     "strength": 0.0867,
     "src": 56,
-    "norm": 1.258
+    "norm": 1.001
    },
    {
     "file": "parrugado_2.png",
@@ -473,7 +473,7 @@
     "gain": 689.286,
     "strength": 0.0931,
     "src": 57,
-    "norm": 1.214
+    "norm": 0.966
    },
    {
     "file": "parrugado_3.png",
@@ -482,7 +482,7 @@
     "gain": 507.961,
     "strength": 0.1441,
     "src": 65,
-    "norm": 0.976
+    "norm": 0.777
    },
    {
     "file": "parrugado_4.png",
@@ -491,7 +491,7 @@
     "gain": 729.18,
     "strength": 0.0974,
     "src": 67,
-    "norm": 1.187
+    "norm": 0.945
    },
    {
     "file": "parrugado_5.png",
@@ -500,7 +500,7 @@
     "gain": 533.316,
     "strength": 0.1372,
     "src": 68,
-    "norm": 1.0
+    "norm": 0.796
    },
    {
     "file": "parrugado_6.png",
@@ -509,7 +509,7 @@
     "gain": 849.91,
     "strength": 0.075,
     "src": 51,
-    "norm": 1.353
+    "norm": 1.077
    },
    {
     "file": "parrugado_7.png",
@@ -518,7 +518,7 @@
     "gain": 996.408,
     "strength": 0.0788,
     "src": 52,
-    "norm": 1.32
+    "norm": 1.05
    },
    {
     "file": "parrugado_8.png",
@@ -527,7 +527,7 @@
     "gain": 1385.502,
     "strength": 0.0518,
     "src": 64,
-    "norm": 1.4
+    "norm": 1.296
    },
    {
     "file": "parrugado_9.png",
@@ -536,7 +536,7 @@
     "gain": 1038.055,
     "strength": 0.0726,
     "src": 69,
-    "norm": 1.375
+    "norm": 1.094
    },
    {
     "file": "parrugado_10.png",
@@ -545,7 +545,7 @@
     "gain": 994.908,
     "strength": 0.0881,
     "src": 70,
-    "norm": 1.248
+    "norm": 0.993
    },
    {
     "file": "parrugado_11.png",
@@ -554,7 +554,7 @@
     "gain": 939.681,
     "strength": 0.0872,
     "src": 76,
-    "norm": 1.254
+    "norm": 0.999
    },
    {
     "file": "parrugado_12.png",
@@ -563,7 +563,7 @@
     "gain": 1014.919,
     "strength": 0.0775,
     "src": 77,
-    "norm": 1.331
+    "norm": 1.059
    },
    {
     "file": "parrugado_13.png",
@@ -572,7 +572,7 @@
     "gain": 981.52,
     "strength": 0.0762,
     "src": 78,
-    "norm": 1.342
+    "norm": 1.068
    },
    {
     "file": "parrugado_14.png",
@@ -581,7 +581,7 @@
     "gain": 799.175,
     "strength": 0.0846,
     "src": 80,
-    "norm": 1.273
+    "norm": 1.014
    },
    {
     "file": "parrugado_15.png",
@@ -590,8 +590,12 @@
     "gain": 636.343,
     "strength": 0.1215,
     "src": 58,
-    "norm": 1.063
-   },
+    "norm": 0.846
+   }
+  ]
+ },
+ "muy_arrugado": {
+  "items": [
    {
     "file": "parrugado_16.png",
     "w": 1055,
@@ -599,7 +603,7 @@
     "gain": 479.403,
     "strength": 0.1825,
     "src": 59,
-    "norm": 0.867
+    "norm": 1.151
    },
    {
     "file": "parrugado_17.png",
@@ -608,7 +612,7 @@
     "gain": 258.557,
     "strength": 0.2287,
     "src": 60,
-    "norm": 0.775
+    "norm": 1.028
    },
    {
     "file": "parrugado_18.png",
@@ -617,7 +621,7 @@
     "gain": 262.39,
     "strength": 0.2789,
     "src": 61,
-    "norm": 0.75
+    "norm": 0.931
    },
    {
     "file": "parrugado_19.png",
@@ -626,7 +630,7 @@
     "gain": 248.291,
     "strength": 0.2625,
     "src": 63,
-    "norm": 0.75
+    "norm": 0.96
    },
    {
     "file": "parrugado_20.png",
@@ -635,7 +639,7 @@
     "gain": 455.972,
     "strength": 0.2062,
     "src": 66,
-    "norm": 0.816
+    "norm": 1.083
    },
    {
     "file": "parrugado_21.png",
@@ -644,7 +648,7 @@
     "gain": 317.314,
     "strength": 0.2707,
     "src": 71,
-    "norm": 0.75
+    "norm": 0.945
    },
    {
     "file": "parrugado_22.png",
@@ -653,7 +657,7 @@
     "gain": 415.706,
     "strength": 0.2238,
     "src": 72,
-    "norm": 0.783
+    "norm": 1.04
    },
    {
     "file": "parrugado_23.png",
@@ -662,7 +666,7 @@
     "gain": 364.419,
     "strength": 0.2659,
     "src": 73,
-    "norm": 0.75
+    "norm": 0.954
    },
    {
     "file": "parrugado_24.png",
@@ -671,7 +675,7 @@
     "gain": 363.145,
     "strength": 0.2419,
     "src": 79,
-    "norm": 0.753
+    "norm": 1.0
    },
    {
     "file": "parrugado_25.png",
@@ -680,7 +684,7 @@
     "gain": 312.535,
     "strength": 0.1614,
     "src": 54,
-    "norm": 0.922
+    "norm": 1.224
    },
    {
     "file": "parrugado_26.png",
@@ -689,7 +693,7 @@
     "gain": 318.667,
     "strength": 0.2295,
     "src": 62,
-    "norm": 0.773
+    "norm": 1.027
    },
    {
     "file": "parrugado_27.png",
@@ -698,7 +702,7 @@
     "gain": 245.336,
     "strength": 0.2755,
     "src": 74,
-    "norm": 0.75
+    "norm": 0.937
    },
    {
     "file": "parrugado_28.png",
@@ -707,7 +711,7 @@
     "gain": 208.388,
     "strength": 0.2517,
     "src": 75,
-    "norm": 0.75
+    "norm": 0.98
    }
   ]
  }
