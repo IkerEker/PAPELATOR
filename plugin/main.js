@@ -45,7 +45,7 @@ if ((state.version | 0) < 4) { state.intensity = 50; state.version = 4; }
 if (P.PLIEGUE_ALIAS[state.pliegue]) { state.pliegue = P.PLIEGUE_ALIAS[state.pliegue]; state.pliegueVar = 0; }
 if (!P.PLIEGUES.some(x => x.id === state.pliegue)) state.pliegue = 'ninguno';
 const ui = merge({ live: true, group: null, tab: 'simple', open: { general: true, papel: true } }, loadJSON('papelator2.ui'));
-let papers = [], imperfCats = {}, foldCats = {}, calcoCats = {};
+let papers = [], imperfCats = {}, foldCats = {}, calcoCats = {}, overlayCats = {};
 
 const refreshers = [];
 let thumbTimer = null, liveTimer = null;
@@ -283,7 +283,7 @@ function chip(label, on, onClick, dot) {
   return c;
 }
 // familias: el panel muestra pocas opciones; cada una agrupa variantes reales y ⟳ pasa a la siguiente
-const GROUPS = ['Oficina y escuela', 'Bellas artes', 'Rústicos', 'Translúcidos'];
+const GROUPS = ['Oficina y escuela', 'Bellas artes', 'Rústicos', 'Maderas y cartones', 'Translúcidos'];
 function typeOf(paperId) { return P.PAPER_TYPES.filter(t => t.papers.indexOf(paperId) >= 0)[0] || P.PAPER_TYPES[0]; }
 function famOf(list, id) { return list.filter(f => f.items.indexOf(id) >= 0)[0] || null; }
 function nextIn(arr, cur) { const i = arr.indexOf(cur); return arr[(i + 1) % arr.length]; }
@@ -323,6 +323,7 @@ function buildSimple() {
     });
     chipRow(byId('s-pliegue'), P.PLIEGUES, it => state.pliegue === it.id, it => { if (state.pliegue !== it.id) { state.pliegue = it.id; state.pliegueVar = 0; } });
     chipRow(byId('s-calco'), P.CALCO_FAMILIAS, it => it.items.indexOf(state.calco) >= 0, it => pickFam('calco', it));
+    chipRow(byId('s-sobre'), P.SOBRES, it => state.sobre === it.id, it => { if (state.sobre !== it.id) { state.sobre = it.id; state.sobreVar = 0; } });
     chipRow(byId('s-luz'), P.LUZ_FAMILIAS, it => it.items.indexOf(state.luz) >= 0, it => pickFam('luz', it));
     chipRow(byId('s-calidad'), P.CALIDAD_FAMILIAS, it => it.items.indexOf(state.calidad) >= 0, it => pickFam('calidad', it));
     if (byId('s-impresion')) chipRow(byId('s-impresion'), P.IMPRESIONES, it => state.impresion === it.id, it => { state.impresion = it.id; });
@@ -333,6 +334,8 @@ function buildSimple() {
     pa.value = Math.round(state.pliegueAmount * 100); byId('s-plamtval').textContent = Math.round(state.pliegueAmount * 100) + '%';
     pw.value = Math.round(state.pliegueWear * 100); byId('s-plwearval').textContent = Math.round(state.pliegueWear * 100) + '%';
     byId('s-plopts').style.display = state.pliegue && state.pliegue !== 'ninguno' ? 'block' : 'none';
+    byId('s-sobreopts').style.display = state.sobre && state.sobre !== 'ninguno' ? 'block' : 'none';
+    byId('s-sobredist').value = Math.round(state.sobreDist * 100); byId('s-sobredistval').textContent = Math.round(state.sobreDist * 40) + ' mm';
     byId('s-calcoopts').style.display = state.calco && state.calco !== 'ninguno' ? 'block' : 'none';
     byId('s-calcoamt').value = Math.round(state.calcoAmount * 100); byId('s-calcoval').textContent = Math.round(state.calcoAmount * 100) + '%';
     ed.value = Math.round(state.edad * 100); byId('s-edadval').textContent = Math.round(state.edad * 100) + '%';
@@ -356,9 +359,11 @@ function buildSimple() {
   bindSlider('s-edad', 's-edadval', v => { state.edad = v / 100; }, v => v + '%');
   bindSlider('s-plamt', 's-plamtval', v => { state.pliegueAmount = v / 100; }, v => v + '%');
   bindSlider('s-plwear', 's-plwearval', v => { state.pliegueWear = v / 100; }, v => v + '%');
+  bindSlider('s-sobredist', 's-sobredistval', v => { state.sobreDist = v / 100; }, v => Math.round(v * 0.4) + ' mm');
   bindSlider('s-calcoamt', 's-calcoval', v => { state.calcoAmount = v / 100; }, v => v + '%');
   // ⟳ de cada sección: otra versión de eso, sin tocar lo demás
   const dice = (id, fn) => { const el = byId(id); if (el) el.addEventListener('click', () => { fn(); changed({ source: 'simple' }); }); };
+  dice('s-r-sobre', () => { const c = overlayCats[state.sobre]; const n = c && c.items ? c.items.length : 1; state.sobreVar = ((state.sobreVar | 0) + 1) % n; });
   dice('s-r-papel', () => { state.paper = nextIn(typeOf(state.paper).papers, state.paper); state.seedPaper = (state.seedPaper | 0) + 1; });
   dice('s-r-estado', () => { const f = famOf(P.ESTADO_FAMILIAS, state.estado); if (f && !state.custom) state.estado = nextIn(f.items, state.estado); state.seedEstado = (state.seedEstado | 0) + 1; });
   dice('s-r-pliegue', () => {
@@ -419,6 +424,14 @@ function buildSections() {
       { t: 'slider', path: 'pliegueAmount', label: 'Relieve de los pliegues', min: 0, max: 2.5, step: 0.05, fmt: pct },
       { t: 'slider', path: 'pliegueWear', label: 'Desgaste de las aristas (tinta levantada)', min: 0, max: 3, step: 0.05, fmt: pct },
       { t: 'slider', path: 'pliegueVar', label: 'Hoja real del grupo', min: 0, max: 28, step: 1, fmt: v => '#' + (v + 1) }
+    ] },
+    { id: 'sobre', title: 'Sobreponer (vidrio, plástico)', items: [
+      { t: 'picker', path: 'sobre', label: 'Qué hay delante', options: () => P.SOBRES.map(c => [c.id, c.name]) },
+      { t: 'slider', path: 'sobreDist', label: 'Distancia al papel', min: 0, max: 1, step: 0.01, fmt: v => Math.round(v * 40) + ' mm' },
+      { t: 'slider', path: 'sobreRefl', label: 'Reflejos', min: 0, max: 3, step: 0.05, fmt: pct },
+      { t: 'slider', path: 'sobreDirt', label: 'Huellas y polvo en el vidrio', min: 0, max: 1, step: 0.05, fmt: pct },
+      { t: 'slider', path: 'sobreScale', label: 'Escala del vidrio', min: 0.25, max: 4, step: 0.05, fmt: pct },
+      { t: 'slider', path: 'sobreVar', label: 'Textura concreta', min: 0, max: 14, step: 1, fmt: v => '#' + (v + 1) }
     ] },
     { id: 'calco', title: 'Calco', items: [
       { t: 'picker', path: 'calco', label: 'Documento de detrás', options: () => P.CALCOS.map(c => [c.id, c.name]) },
@@ -546,7 +559,7 @@ let ready = null;
 function init() {
   if (!ready) ready = (async () => {
     const cat = await engine.catalogs(assets);
-    papers = cat.papers; imperfCats = cat.imperf; foldCats = cat.folds || {}; calcoCats = cat.calco || {};
+    papers = cat.papers; imperfCats = cat.imperf; foldCats = cat.folds || {}; calcoCats = cat.calco || {}; overlayCats = cat.overlays || {};
     if (!papers.filter(p => p.id === state.paper).length) state.paper = papers[0].id;
   })();
   return ready;

@@ -2,7 +2,7 @@
 
 > Pega o adjunta este archivo al empezar el chat nuevo. Todo el proyecto está en GitHub:
 > **https://github.com/IkerEker/PAPELATOR** (rama `main`, último commit «Una sola ventana con dos pestañas: Presets y Avanzado»).
-> Versión actual del plugin: **3.5.0** (`plugin/manifest.json`). Instalable: `dist/PAPELATOR.ccx`.
+> Versión actual del plugin: **3.6.0** (`plugin/manifest.json`). Instalable: `dist/PAPELATOR.ccx`.
 
 ---
 
@@ -141,6 +141,15 @@ escaner_oficina, movil, movil_antiguo, fotocopia, analogica.
    panel principal; pliegues sin luces quemadas.
 7. v3.4.1: Aplicar deja las capas tal cual; papeles bien catalogados.
 8. v3.5.0: **una sola ventana con dos pestañas** (Presets / Avanzado).
+
+## 6b. v3.6.0 — maderas, cartones y Sobreponer
+- `NUEVAS_NUEVAS/` (subido por el usuario): 31 fotos → 29 fondos (2 duplicados) en el grupo «Maderas y cartones»:
+  Madera (4), OSB (7), Aglomerado (6), Cartón de caja (9), Cartón kraft (3) + Cartón ondulado (2, ya existía).
+  `material: wood|carton` en papers.json: sin pliegues, sin calco y sin imperfecciones de papel (MATERIAL_NO en el motor).
+- `SOBREPONER/`: 49 vidrios/plásticos sacados de `IkerEker/NEONIZADOR` (TEXTURAS_02 y TEXTURAS_04; los demás de
+  ese repo —humo, fuego, VHS, mármol…— no se usan aquí). 7 tipos (acanalado 8, ondulado 6, martillado 6, armado 7,
+  esmerilado 3, lluvia 4, plástico 15). Sección «6 · Sobreponer» con ⟳ y slider **Distancia al papel** (0–40 mm);
+  en Avanzado: reflejos, huellas/polvo, escala y textura concreta. Sólo actúa al **Aplicar** (va delante del papel).
 
 ## 7. Pendiente / ideas que no se han hecho
 - Probar todo dentro de Photoshop real (las pruebas son en Node + simulación del DOM de UXP; el usuario es quien lo

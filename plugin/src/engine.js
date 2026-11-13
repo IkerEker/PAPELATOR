@@ -86,6 +86,7 @@ async function catalogs(assets) {
     cache.imperf = await assets.json('imperf.json');
     cache.calco = await assets.json('calco.json');
     try { cache.folds = await assets.json('folds.json'); } catch (e) { cache.folds = {}; }
+    try { cache.overlays = await assets.json('overlays.json'); } catch (e) { cache.overlays = {}; }
   }
   return cache;
 }
@@ -225,6 +226,15 @@ function lowField(w, h, step, fn) {
 function fbm2(x, y, seed) { return vnoise(x, y, seed) * 0.57 + vnoise(x * 2.07, y * 2.07, seed + 1) * 0.29 + vnoise(x * 4.3, y * 4.3, seed + 2) * 0.14; }
 
 // ================================================================ IMPERFECCIONES
+// Qué le puede pasar a cada material. La madera no se dobla, no transparenta y no coge marcas propias del papel
+// (foxing, fibras, hendiduras de escritura, goma…); el cartón casi todo menos lo de papel fino.
+const MATERIAL_NO = {
+  wood: { fibras: 1, nodulos: 1, descamacion: 1, foxing: 1, escritura: 1, mecano: 1, sello_seco: 1, goma: 1, matasellos: 1, manchado: 1,
+    clip_huella: 1, pinza: 1, arruguita: 1, media_luna: 1, grapa_marca: 1, cockle: 1 },
+  carton: { fibras: 1, nodulos: 1, escritura: 1, mecano: 1, goma: 1, arruguita: 1 }
+};
+function materialOf(st) { const p = paperById(st.paper); return (p && p.material) || 'paper'; }
+function allowed(st, cid) { const no = MATERIAL_NO[materialOf(st)]; return !no || !no[cid]; }
 function estadoCounts(st) {
   if (st.custom && typeof st.custom === 'object') return st.custom;
   const e = P.ESTADOS.filter(x => x.id === st.estado)[0] || P.ESTADOS[0];
@@ -385,7 +395,7 @@ async function genAging(S, st, assets, B, paper, counts) {
   // nunca blanquea ni azulea el papel.
   let sheet = null, sheet2 = null, sOp = 0, flipX = false, flipY = false, hiA = [1, 1, 1], hiB = [1, 1, 1];
   const scat = cache.imperf.manchado;
-  if (scat && (edad > 0.15 || manchado > 0)) {
+  if (scat && (edad > 0.15 || manchado > 0) && allowed(st, 'manchado')) {
     const ia = (r() * scat.items.length) | 0, ib = (ia + 1 + ((r() * (scat.items.length - 1)) | 0)) % scat.items.length;
     sheet = await loadImg(assets, 'imperf/' + scat.items[ia].file);
     sheet2 = await loadImg(assets, 'imperf/' + scat.items[ib].file);
@@ -451,7 +461,7 @@ async function genAging(S, st, assets, B, paper, counts) {
 function genShape(S, st, B, counts) {
   const { w, h, ppm, N } = S;
   const kk = clamp(S.k, 0, 2);
-  const cock = (def(counts.cockle, 0) + clamp(def(st.edad, 0), 0, 1) * 0.25) * kk;
+  const cock = allowed(st, 'cockle') ? (def(counts.cockle, 0) + clamp(def(st.edad, 0), 0, 1) * 0.25) * kk : 0;
   const r = rng(S.seedE * 17 + 3);
   const s1 = (r() * 1e6) | 0, s2 = (r() * 1e6) | 0;
   const along = h >= w;   // la fibra suele ir a lo largo de la hoja
@@ -481,6 +491,7 @@ function genShape(S, st, B, counts) {
 const FOLD_LIGHT = { ninguna: 1, escaner: 0.8, dia: 1, ventana: 1.2, foco: 1, flash: 0.75, sombra: 1, lampara: 1.12 };
 function cubic(a, b, c, d, t) { return b + 0.5 * t * (c - a + t * (2 * a - 5 * b + 4 * c - d + t * (3 * (b - c) + d - a))); }
 async function genFolds(S, st, assets, B) {
+  if (materialOf(st) !== 'paper') return null;      // madera y cartón no se doblan como el papel
   const pid = st.pliegue || 'ninguno';
   const pre = (P.PLIEGUES || []).filter(p => p.id === pid)[0];
   const cat = cache.folds && pre && pre.group ? cache.folds[pre.group] : null;
@@ -577,7 +588,7 @@ async function genEstado(S, st, assets, B) {
     'huella_grasa', 'goma', 'escritura', 'mecano', 'sello_seco', 'arruguita', 'media_luna', 'pinza', 'clip_huella', 'grapa_marca', 'grapa_agujero'];
   for (const cid of order) {
     let n = counts[cid]; const C = cats[cid];
-    if (!n || !C) continue;
+    if (!n || !C || !allowed(st, cid)) continue;
     const op0 = C.opacity * opK;
     const base = { absorb: def(C.absorb, 0), erode: def(C.erode, 0), cellPx: def(C.cellMm, 5) * ppm, cockle: def(C.cockle, 0) };
     if (C.kind === 'stamp') {
@@ -677,7 +688,7 @@ function calcoFile(info, key, st) {
 }
 async function genCalco(S, st, assets, B, paper, backArt) {
   const id = st.calco;
-  if (!id || id === 'ninguno') return;
+  if (!id || id === 'ninguno' || materialOf(st) !== 'paper') return;   // madera y cartón no transparentan
   const { w, h, ppm, N } = S;
   const k = S.k;
   const amount = clamp(def(st.calcoAmount, 1), 0, 3) * clamp(k, 0, 2) * def(st._calcoBoost, 1);
@@ -1016,9 +1027,132 @@ async function renderFinal(opts) {
   for (let x = 0; x < w; x++) for (const y of [0, h - 1]) { const j = (y * w + x) * 4, jj = ((y === 0 ? 1 : h - 2) * w + clamp(x, 1, w - 2)) * 4; out[j] = out[jj]; out[j + 1] = out[jj + 1]; out[j + 2] = out[jj + 2]; out[j + 3] = 255; }
   for (let y = 0; y < h; y++) for (const x of [0, w - 1]) { const j = (y * w + x) * 4, jj = (y * w + (x === 0 ? 1 : w - 2)) * 4; out[j] = out[jj]; out[j + 1] = out[jj + 1]; out[j + 2] = out[jj + 2]; out[j + 3] = 255; }
   await prog(0.82, 'Fotografiando…');
+  await applyOverlay(S, st, out, assets, prog);
   photo(S, st, out, B, paper);
   await prog(1, 'Listo');
   return { rgba: new Uint8Array(out.buffer) };
+}
+
+// ================================================================ SOBREPONER (vidrio, cristal, plástico delante)
+// El vidrio está a una DISTANCIA del papel (slider): lo de detrás se ve desviado en proporción a la pendiente del
+// vidrio por esa distancia (refracción). Pegado al papel apenas deforma; al alejarlo, cada caña de un acanalado
+// comprime e invierte la imagen, cada gota de lluvia es una lentecita, y el esmerilado desenfoca cada vez más.
+// Encima, el vidrio devuelve luz (reflejos de la propia foto de la textura), tiñe un poco, y puede llevar malla
+// metálica (armado) y suciedad (huellas, grasa, polvo).
+async function applyOverlay(S, st, px, assets, prog) {
+  const fam = st.sobre || 'ninguno';
+  const cat = cache.overlays && cache.overlays[fam];
+  if (!cat || !cat.items || !cat.items.length) return;
+  const { w, h, ppm, N } = S;
+  const kk = clamp(S.k, 0, 2), k1 = Math.min(1, kk);
+  if (kk <= 0) return;
+  const n = cat.items.length, it = cat.items[(((def(st.sobreVar, 0) | 0) % n) + n) % n];
+  const RI = await loadImg(assets, 'overlays/' + it.r), NI = await loadImg(assets, 'overlays/' + it.n);
+  const MI = it.m ? await loadImg(assets, 'overlays/' + it.m) : null;
+  const tw = RI.width, th = RI.height;
+  const dist = clamp(def(st.sobreDist, 0.25), 0, 1) * 40;                       // mm entre vidrio y papel
+  const refl = clamp(def(st.sobreRefl, 1), 0, 3) * def(cat.refl, 0.35) * k1;
+  const dirt = cat.dirt ? clamp(def(st.sobreDirt, 0.25), 0, 1) * k1 : 0;
+  const scale = clamp(def(st.sobreScale, 1), 0.25, 4);
+  const sxT = tw / (it.tileMm[0] * scale * ppm), syT = th / (it.tileMm[1] * scale * ppm);   // px de textura por px
+  const r = rng((S.seed + (def(st.sobreVar, 0) | 0) * 31) * 7 + 3);
+  const ox = r() * tw, oy = r() * th;
+  const wrap = (v, m) => { v %= m; return v < 0 ? v + m : v; };
+  const bil = (img, ch, u, v) => {
+    u = wrap(u, img.width); v = wrap(v, img.height);
+    const W = img.width, Hh = img.height, c = img.channels, d = img.data;
+    const x0 = u | 0, y0 = v | 0, x1 = x0 + 1 < W ? x0 + 1 : 0, y1 = y0 + 1 < Hh ? y0 + 1 : 0, fx = u - x0, fy = v - y0;
+    const a = d[(y0 * W + x0) * c + ch], b = d[(y0 * W + x1) * c + ch], e = d[(y1 * W + x0) * c + ch], f = d[(y1 * W + x1) * c + ch];
+    return ((a + (b - a) * fx) * (1 - fy) + (e + (f - e) * fx) * fy) / 255;
+  };
+  await prog(0.84, 'Vidrio delante…');
+  // ---- 1) refracción: lo de detrás, desviado (con una pizca de dispersión de color en el vidrio)
+  const D = dist * ppm * 0.55 * def(cat.refr, 0.6) * Math.sqrt(kk);
+  const disp = fam === 'plastico' ? 0 : 0.012;
+  if (D > 0.05) {
+    const src = new Uint8ClampedArray(px);
+    const samp = (sx, sy, c) => {
+      sx = sx < 0 ? 0 : sx > w - 1.001 ? w - 1.001 : sx; sy = sy < 0 ? 0 : sy > h - 1.001 ? h - 1.001 : sy;
+      const ix = sx | 0, iy = sy | 0, fx = sx - ix, fy = sy - iy, o = (iy * w + ix) * 4 + c;
+      return (src[o] * (1 - fx) + src[o + 4] * fx) * (1 - fy) + (src[o + w * 4] * (1 - fx) + src[o + w * 4 + 4] * fx) * fy;
+    };
+    for (let y = 0; y < h; y++) {
+      if ((y & 511) === 0) await prog(0.84 + 0.04 * y / h, 'Vidrio delante…');
+      const v = oy + y * syT;
+      for (let x = 0; x < w; x++) {
+        const u = ox + x * sxT;
+        const gx = (bil(NI, 0, u, v) * 255 - 128) / 126, gy = (bil(NI, 1, u, v) * 255 - 128) / 126;
+        const j = (y * w + x) * 4;
+        for (let c = 0; c < 3; c++) {
+          const dk = D * (1 + (c - 1) * disp);
+          px[j + c] = samp(x - gx * dk, y - gy * dk, c);
+        }
+      }
+    }
+  }
+  // ---- 2) difusión: el esmerilado (y un poco cualquier vidrio rugoso) desenfoca más cuanto más lejos está el papel
+  const sig = def(cat.frost, 0) * (dist * ppm * 0.11 + 0.15 * ppm) * Math.sqrt(kk);
+  if (sig > 0.5) {
+    const tmp = new Float32Array(N), ch = new Float32Array(N);
+    for (let c = 0; c < 3; c++) {
+      for (let o = 0; o < N; o++) ch[o] = px[o * 4 + c];
+      gaussBlur(ch, w, h, sig, tmp);
+      for (let o = 0; o < N; o++) px[o * 4 + c] = ch[o];
+    }
+  }
+  // ---- 3) suciedad sobre el vidrio: huellas de dedos, grasa y polvo (difunden luz: velo claro)
+  let haze = null, hw = 0, hh = 0;
+  const hf = 4;
+  if (dirt > 0 && cache.imperf) {
+    hw = Math.ceil(w / hf); hh = Math.ceil(h / hf); haze = new Float32Array(hw * hh);
+    const pmm = ppm / hf;
+    const stamp = async (cid, count, mmA, mmB, strength) => {
+      const C = cache.imperf[cid]; if (!C || !C.items) return;
+      for (let i = 0; i < count; i++) {
+        const itm = C.items[(r() * C.items.length) | 0], img = await loadImg(assets, 'imperf/' + itm.file);
+        const sizePx = lerp(mmA, mmB, r()) * pmm, sc = sizePx / Math.max(img.width, img.height);
+        const cx = r() * hw, cy = r() * hh, rot = r() * 6.283, ca = Math.cos(rot), sa = Math.sin(rot), st2 = strength * lerp(0.5, 1, r());
+        const ext = Math.ceil(sizePx * 0.75);
+        for (let yy = Math.max(0, (cy - ext) | 0); yy < Math.min(hh, cy + ext); yy++) for (let xx = Math.max(0, (cx - ext) | 0); xx < Math.min(hw, cx + ext); xx++) {
+          const dx = (xx - cx) / sc, dy = (yy - cy) / sc;
+          const u = dx * ca + dy * sa + img.width / 2, v = -dx * sa + dy * ca + img.height / 2;
+          if (u < 0 || v < 0 || u >= img.width - 1 || v >= img.height - 1) continue;
+          const o = ((v | 0) * img.width + (u | 0)) * img.channels;
+          const dd = 1 - (img.data[o] + img.data[o + (img.channels > 1 ? 1 : 0)] + img.data[o + (img.channels > 2 ? 2 : 0)]) / 765;
+          haze[yy * hw + xx] += dd * st2;
+        }
+      }
+    };
+    await stamp('huella_grasa', Math.round(2 + 6 * dirt), 16, 24, 1.6);      // dedos
+    await stamp('grasa', Math.round(1 + 2 * dirt), 40, 80, 0.5);            // limpiado a medias
+    for (let i = 0, nd = Math.round(400 * dirt * (w * h) / (2480 * 3508)); i < nd; i++) {   // motas de polvo
+      const xx = (r() * hw) | 0, yy = (r() * hh) | 0; haze[yy * hw + xx] += lerp(0.3, 1, r());
+    }
+    gaussBlur(haze, hw, hh, 0.8, new Float32Array(hw * hh));
+  }
+  // ---- 4) tinte del vidrio, malla, reflejos y velo
+  const tint = (cat.tint || [0.97, 0.975, 0.975]).map(t => 1 - (1 - t) * k1);
+  const mc = it.meshColor || [1, 1, 1];
+  const veil = 0.02 * k1 + 0.05 * def(cat.frost, 0) * k1;
+  for (let y = 0; y < h; y++) {
+    const v = oy + y * syT;
+    for (let x = 0; x < w; x++) {
+      const u = ox + x * sxT, j = (y * w + x) * 4;
+      let rr = bil(RI, 0, u, v);
+      rr = rr * refl;
+      const m = MI ? bil(MI, 0, u, v) * k1 : 0;
+      let hz = 0;
+      if (haze) { const hx = Math.min(hw - 1, (x / hf) | 0), hy = Math.min(hh - 1, (y / hf) | 0); hz = Math.min(1, haze[hy * hw + hx]) * dirt * 0.32; }
+      for (let c = 0; c < 3; c++) {
+        let val = px[j + c] * tint[c];
+        val += (200 - val) * veil;
+        if (m > 0.01) val = val * (1 - 0.86 * m) + 70 * mc[c] * m;            // alambre de acero (u óxido)
+        val += (255 - val) * Math.min(1, rr);                                   // reflejos (pantalla)
+        val += (235 - val) * hz;                                                // huellas y polvo
+        px[j + c] = val;
+      }
+    }
+  }
 }
 
 // ================================================================ FOTOGRAFÍA

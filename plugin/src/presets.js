@@ -33,7 +33,13 @@ const PAPER_TYPES = [
   { id: 'reciclado', name: 'Reciclado', group: 'Rústicos', papers: ['reciclado', 'reciclado_motas', 'reciclado_gris'] },
   { id: 'hecho_mano', name: 'Hecho a mano', group: 'Rústicos', papers: ['hecho_mano', 'hecho_mano_fibroso', 'hecho_mano_grumos'] },
   { id: 'pergamino', name: 'Pergamino', group: 'Rústicos', papers: ['pergamino', 'pergamino_oscuro'] },
-  { id: 'carton', name: 'Cartón', group: 'Rústicos', papers: ['corrugado', 'corrugado_fino'] },
+
+  { id: 'madera', name: 'Madera', group: 'Maderas y cartones', papers: ['madera', 'madera_vetas', 'madera_clara', 'madera_nudos'] },
+  { id: 'osb', name: 'OSB', group: 'Maderas y cartones', papers: ['osb', 'osb_realista', 'osb_prensado', 'osb_detalle', 'osb_detalle2', 'osb_fino', 'osb_viejo'] },
+  { id: 'aglomerado', name: 'Aglomerado', group: 'Maderas y cartones', papers: ['aglomerado', 'aglomerado_marron', 'aglomerado_granular', 'aglomerado_uniforme', 'particulas', 'virutas'] },
+  { id: 'caja', name: 'Cartón de caja', group: 'Maderas y cartones', papers: ['caja', 'caja_4', 'caja_kraft_2', 'caja_kraft_3', 'caja_kraft_4', 'caja_reciclado', 'caja_3', 'caja_kraft', 'caja_kraft_5'] },
+  { id: 'carton_kraft', name: 'Cartón kraft', group: 'Maderas y cartones', papers: ['carton_kraft', 'carton_kraft_2', 'carton_kraft_3'] },
+  { id: 'carton', name: 'Cartón ondulado', group: 'Maderas y cartones', papers: ['corrugado', 'corrugado_fino'] },
   { id: 'vegetal', name: 'Vegetal', group: 'Translúcidos', papers: ['vegetal', 'vegetal_arrugado'] },
   { id: 'horno', name: 'Papel de horno', group: 'Translúcidos', papers: ['horno', 'encerado', 'pergamino_blanco'] }
 ];
@@ -147,6 +153,18 @@ const CALIDAD_FAMILIAS = [
   { id: 'analogica', name: 'Analógica', items: ['analogica'] }
 ];
 
+// Sobreponer: lo que va delante del documento. ⟳ recorre las texturas reales de cada tipo.
+const SOBRES = [
+  { id: 'ninguno', name: 'Nada' },
+  { id: 'acanalado', name: 'Acanalado' },
+  { id: 'ondulado', name: 'Ondulado' },
+  { id: 'martillado', name: 'Martillado' },
+  { id: 'armado', name: 'Armado' },
+  { id: 'esmerilado', name: 'Esmerilado' },
+  { id: 'lluvia', name: 'Lluvia' },
+  { id: 'plastico', name: 'Plástico' }
+];
+
 const DEFAULT_STATE = {
   version: 4,
   seed: 11,
@@ -169,6 +187,12 @@ const DEFAULT_STATE = {
   pliegueAmount: 1,                   // cuánto relieve tienen los pliegues
   pliegueWear: 1,                     // cuánto se gastan las aristas (tinta levantada)
   pliegueVar: 0,                      // hoja real dentro del grupo (⟳)
+  sobre: 'ninguno',                   // vidrio/cristal/plástico delante del papel
+  sobreVar: 0,
+  sobreDist: 0.25,                    // distancia al papel (0 = pegado · 1 = 4 cm)
+  sobreRefl: 1,                       // cuánta luz devuelve
+  sobreDirt: 0.25,                    // huellas, grasa y polvo sobre el vidrio
+  sobreScale: 1,
   calco: 'ninguno',
   calcoAmount: 1,
   calcoBleed: 1,
@@ -185,4 +209,4 @@ const DEFAULT_STATE = {
   hideOriginals: false
 };
 
-module.exports = { COLORS, PAPER_TYPES, ESTADO_FAMILIAS, CALCO_FAMILIAS, LUZ_FAMILIAS, CALIDAD_FAMILIAS, PLIEGUE_ALIAS, ESTADOS, PLIEGUES, CALCOS, IMPRESIONES, LUCES, CALIDADES, DEFAULT_STATE };
+module.exports = { COLORS, SOBRES, PAPER_TYPES, ESTADO_FAMILIAS, CALCO_FAMILIAS, LUZ_FAMILIAS, CALIDAD_FAMILIAS, PLIEGUE_ALIAS, ESTADOS, PLIEGUES, CALCOS, IMPRESIONES, LUCES, CALIDADES, DEFAULT_STATE };

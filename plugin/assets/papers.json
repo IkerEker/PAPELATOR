@@ -1246,7 +1246,7 @@
  {
   "id": "corrugado",
   "name": "Cartón corrugado",
-  "group": "Rústicos",
+  "group": "Maderas y cartones",
   "kind": "color",
   "source": "Textura de cartón corrugado kraft-2.png",
   "tileMm": [
@@ -1275,12 +1275,13 @@
   "grainMm": 0.8936,
   "ageK": 1.2,
   "reliefAdj": 0.7,
-  "mix": "x"
+  "mix": "x",
+  "material": "carton"
  },
  {
   "id": "corrugado_fino",
   "name": "Cartón corrugado fino",
-  "group": "Rústicos",
+  "group": "Maderas y cartones",
   "kind": "color",
   "source": "Textura de cartón corrugado kraft unerquicklich.png",
   "tileMm": [
@@ -1309,7 +1310,8 @@
   "grainMm": 0.7943,
   "ageK": 1.2,
   "reliefAdj": 0.55,
-  "mix": "x"
+  "mix": "x",
+  "material": "carton"
  },
  {
   "id": "periodico",
@@ -1534,5 +1536,988 @@
   "grainMm": 0.05,
   "ageK": 1.1,
   "reliefAdj": 0.6
+ },
+ {
+  "id": "madera",
+  "name": "Madera de abedul",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Textura de madera de abedul claro.png",
+  "tileMm": [
+   277.51,
+   277.51
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 707.679,
+  "detailStd": 0.0389,
+  "color": [
+   223,
+   189,
+   146
+  ],
+  "translucency": 0.0,
+  "bytes": 1061326,
+  "chroma": 4,
+  "seam": [
+   0.9,
+   0.99
+  ],
+  "material": "wood",
+  "ageK": 0.55,
+  "reliefAdj": 0.8,
+  "rough": 0.03394,
+  "grainMm": 0.4785
+ },
+ {
+  "id": "madera_vetas",
+  "name": "Madera de vetas onduladas",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Textura de madera clara con vetas onduladas.png",
+  "tileMm": [
+   277.51,
+   277.51
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 704.941,
+  "detailStd": 0.039,
+  "color": [
+   231,
+   197,
+   151
+  ],
+  "translucency": 0.0,
+  "bytes": 1039639,
+  "chroma": 4,
+  "seam": [
+   0.82,
+   0.96
+  ],
+  "material": "wood",
+  "ageK": 0.55,
+  "reliefAdj": 0.8,
+  "rough": 0.03105,
+  "grainMm": 0.4785
+ },
+ {
+  "id": "madera_clara",
+  "name": "Madera clara",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Textura de madera clara y natural-1.png",
+  "tileMm": [
+   277.51,
+   277.51
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 535.444,
+  "detailStd": 0.0514,
+  "color": [
+   219,
+   188,
+   147
+  ],
+  "translucency": 0.0,
+  "bytes": 962343,
+  "chroma": 4,
+  "seam": [
+   0.93,
+   0.87
+  ],
+  "material": "wood",
+  "ageK": 0.55,
+  "reliefAdj": 0.8,
+  "rough": 0.04132,
+  "grainMm": 0.7177
+ },
+ {
+  "id": "madera_nudos",
+  "name": "Madera de abedul con nudos",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Textura natural de madera de abedul-2.png",
+  "tileMm": [
+   277.51,
+   277.51
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 605.578,
+  "detailStd": 0.0454,
+  "color": [
+   230,
+   192,
+   145
+  ],
+  "translucency": 0.0,
+  "bytes": 970073,
+  "chroma": 4,
+  "seam": [
+   0.84,
+   0.85
+  ],
+  "material": "wood",
+  "ageK": 0.55,
+  "reliefAdj": 0.8,
+  "rough": 0.03739,
+  "grainMm": 0.7177
+ },
+ {
+  "id": "osb",
+  "name": "OSB",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Textura de tablero OSB de madera natural.png",
+  "tileMm": [
+   388.52,
+   388.52
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 134.884,
+  "detailStd": 0.2039,
+  "color": [
+   206,
+   157,
+   97
+  ],
+  "translucency": 0.0,
+  "bytes": 1217465,
+  "chroma": 3,
+  "seam": [
+   0.94,
+   0.91
+  ],
+  "material": "wood",
+  "ageK": 0.55,
+  "reliefAdj": 0.8,
+  "rough": 0.17457,
+  "grainMm": 0.6699
+ },
+ {
+  "id": "osb_prensado",
+  "name": "OSB prensado",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Textura de tablero OSB de madera prensada.png",
+  "tileMm": [
+   388.52,
+   388.52
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 132.444,
+  "detailStd": 0.2076,
+  "color": [
+   212,
+   150,
+   73
+  ],
+  "translucency": 0.0,
+  "bytes": 1182471,
+  "chroma": 3,
+  "seam": [
+   0.85,
+   0.84
+  ],
+  "material": "wood",
+  "ageK": 0.55,
+  "reliefAdj": 0.8,
+  "rough": 0.17717,
+  "grainMm": 0.6699
+ },
+ {
+  "id": "osb_detalle",
+  "name": "OSB de virutas grandes",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Textura detallada de tablero OSB de madera.png",
+  "tileMm": [
+   388.52,
+   388.52
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 134.4,
+  "detailStd": 0.2046,
+  "color": [
+   197,
+   148,
+   94
+  ],
+  "translucency": 0.0,
+  "bytes": 1199292,
+  "chroma": 3,
+  "seam": [
+   0.85,
+   1.03
+  ],
+  "material": "wood",
+  "ageK": 0.55,
+  "reliefAdj": 0.8,
+  "rough": 0.17529,
+  "grainMm": 0.6699
+ },
+ {
+  "id": "osb_detalle2",
+  "name": "OSB de virutas grandes II",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Textura detallada de tablero OSB de madera (1).png",
+  "tileMm": [
+   388.52,
+   388.52
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 122.614,
+  "detailStd": 0.2243,
+  "color": [
+   197,
+   140,
+   81
+  ],
+  "translucency": 0.0,
+  "bytes": 1211019,
+  "chroma": 3,
+  "seam": [
+   0.85,
+   0.91
+  ],
+  "material": "wood",
+  "ageK": 0.55,
+  "reliefAdj": 0.8,
+  "rough": 0.19044,
+  "grainMm": 0.6699
+ },
+ {
+  "id": "osb_fino",
+  "name": "OSB de virutas finas",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Textura detallada de tablero OSB.png",
+  "tileMm": [
+   388.52,
+   388.52
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 118.976,
+  "detailStd": 0.2311,
+  "color": [
+   209,
+   152,
+   88
+  ],
+  "translucency": 0.0,
+  "bytes": 1216603,
+  "chroma": 3,
+  "seam": [
+   1.0,
+   0.97
+  ],
+  "material": "wood",
+  "ageK": 0.55,
+  "reliefAdj": 0.8,
+  "rough": 0.20366,
+  "grainMm": 0.6699
+ },
+ {
+  "id": "osb_realista",
+  "name": "OSB natural",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Textura realista de tablero OSB de madera.png",
+  "tileMm": [
+   388.52,
+   388.52
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 150.192,
+  "detailStd": 0.1831,
+  "color": [
+   200,
+   146,
+   79
+  ],
+  "translucency": 0.0,
+  "bytes": 1157129,
+  "chroma": 3,
+  "seam": [
+   0.91,
+   0.88
+  ],
+  "material": "wood",
+  "ageK": 0.55,
+  "reliefAdj": 0.8,
+  "rough": 0.14787,
+  "grainMm": 0.6699
+ },
+ {
+  "id": "osb_viejo",
+  "name": "OSB a la intemperie",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Gemini_Generated_Image_bpp2f4bpp2f4bpp2.jpg",
+  "tileMm": [
+   572.46,
+   572.46
+  ],
+  "size": [
+   1954,
+   1954
+  ],
+  "gain": 74.874,
+  "detailStd": 0.3673,
+  "color": [
+   174,
+   138,
+   102
+  ],
+  "translucency": 0.0,
+  "bytes": 3158429,
+  "chroma": 3,
+  "seam": [
+   0.97,
+   0.95
+  ],
+  "material": "wood",
+  "ageK": 0.55,
+  "reliefAdj": 0.8,
+  "rough": 0.26514,
+  "grainMm": 0.5859
+ },
+ {
+  "id": "aglomerado",
+  "name": "Aglomerado",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Textura realista de aglomerado de madera.png",
+  "tileMm": [
+   138.76,
+   138.76
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 153.107,
+  "detailStd": 0.1796,
+  "color": [
+   200,
+   156,
+   106
+  ],
+  "translucency": 0.0,
+  "bytes": 1177706,
+  "chroma": 3,
+  "seam": [
+   0.87,
+   0.92
+  ],
+  "material": "wood",
+  "ageK": 0.55,
+  "reliefAdj": 0.8,
+  "rough": 0.17527,
+  "grainMm": 0.2392
+ },
+ {
+  "id": "aglomerado_marron",
+  "name": "Aglomerado marrón",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Textura de aglomerado de madera marrón.png",
+  "tileMm": [
+   138.76,
+   138.76
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 135.856,
+  "detailStd": 0.2024,
+  "color": [
+   185,
+   138,
+   89
+  ],
+  "translucency": 0.0,
+  "bytes": 1174333,
+  "chroma": 3,
+  "seam": [
+   0.95,
+   0.96
+  ],
+  "material": "wood",
+  "ageK": 0.55,
+  "reliefAdj": 0.8,
+  "rough": 0.19518,
+  "grainMm": 0.2392
+ },
+ {
+  "id": "aglomerado_granular",
+  "name": "Aglomerado granular",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Textura granular de aglomerado de madera.png",
+  "tileMm": [
+   138.76,
+   138.76
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 169.265,
+  "detailStd": 0.1625,
+  "color": [
+   198,
+   151,
+   96
+  ],
+  "translucency": 0.0,
+  "bytes": 1197709,
+  "chroma": 3,
+  "seam": [
+   0.89,
+   0.9
+  ],
+  "material": "wood",
+  "ageK": 0.55,
+  "reliefAdj": 0.8,
+  "rough": 0.15786,
+  "grainMm": 0.2392
+ },
+ {
+  "id": "aglomerado_uniforme",
+  "name": "Aglomerado uniforme",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Textura uniforme de aglomerado de madera.png",
+  "tileMm": [
+   138.76,
+   138.76
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 154.251,
+  "detailStd": 0.1783,
+  "color": [
+   195,
+   156,
+   110
+  ],
+  "translucency": 0.0,
+  "bytes": 1208566,
+  "chroma": 3,
+  "seam": [
+   0.94,
+   0.96
+  ],
+  "material": "wood",
+  "ageK": 0.55,
+  "reliefAdj": 0.8,
+  "rough": 0.17359,
+  "grainMm": 0.2392
+ },
+ {
+  "id": "particulas",
+  "name": "Tablero de partículas",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Textura uniforme de tablero de partículas de madera.png",
+  "tileMm": [
+   138.76,
+   138.76
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 142.586,
+  "detailStd": 0.1929,
+  "color": [
+   198,
+   152,
+   104
+  ],
+  "translucency": 0.0,
+  "bytes": 1199201,
+  "chroma": 3,
+  "seam": [
+   0.97,
+   0.94
+  ],
+  "material": "wood",
+  "ageK": 0.55,
+  "reliefAdj": 0.8,
+  "rough": 0.18785,
+  "grainMm": 0.2392
+ },
+ {
+  "id": "virutas",
+  "name": "Virutas prensadas",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Textura uniforme de virutas de madera.png",
+  "tileMm": [
+   138.76,
+   138.76
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 143.397,
+  "detailStd": 0.1918,
+  "color": [
+   196,
+   155,
+   104
+  ],
+  "translucency": 0.0,
+  "bytes": 1203668,
+  "chroma": 3,
+  "seam": [
+   0.92,
+   0.98
+  ],
+  "material": "wood",
+  "ageK": 0.55,
+  "reliefAdj": 0.8,
+  "rough": 0.18524,
+  "grainMm": 0.2392
+ },
+ {
+  "id": "caja",
+  "name": "Cartón de caja",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Textura de cartón corrugado marrón.png",
+  "tileMm": [
+   158.51,
+   155.5
+  ],
+  "size": [
+   1160,
+   1138
+  ],
+  "gain": 228.08,
+  "detailStd": 0.1206,
+  "color": [
+   169,
+   127,
+   84
+  ],
+  "translucency": 0.0,
+  "bytes": 1060211,
+  "chroma": 4,
+  "seam": [
+   0.88,
+   0.96
+  ],
+  "material": "carton",
+  "ageK": 1.2,
+  "mix": "x",
+  "rough": 0.10726,
+  "grainMm": 0.2733
+ },
+ {
+  "id": "caja_3",
+  "name": "Cartón de caja III",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Textura de cartón corrugado marrón (2).png",
+  "tileMm": [
+   148.01,
+   148.01
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 388.319,
+  "detailStd": 0.0708,
+  "color": [
+   182,
+   132,
+   82
+  ],
+  "translucency": 0.0,
+  "bytes": 1182664,
+  "chroma": 3,
+  "seam": [
+   0.86,
+   0.99
+  ],
+  "material": "carton",
+  "ageK": 1.2,
+  "mix": "x",
+  "rough": 0.06752,
+  "grainMm": 0.2552
+ },
+ {
+  "id": "caja_4",
+  "name": "Cartón de caja IV",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Textura de cartón corrugado marrón (3).png",
+  "tileMm": [
+   149.91,
+   145.26
+  ],
+  "size": [
+   1160,
+   1124
+  ],
+  "gain": 304.011,
+  "detailStd": 0.0905,
+  "color": [
+   179,
+   132,
+   84
+  ],
+  "translucency": 0.0,
+  "bytes": 1054664,
+  "chroma": 4,
+  "seam": [
+   0.95,
+   0.88
+  ],
+  "material": "carton",
+  "ageK": 1.2,
+  "mix": "x",
+  "rough": 0.0815,
+  "grainMm": 0.2585
+ },
+ {
+  "id": "caja_kraft",
+  "name": "Cartón de caja kraft",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Textura de cartón corrugado kraft.png",
+  "tileMm": [
+   148.01,
+   148.01
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 401.296,
+  "detailStd": 0.0685,
+  "color": [
+   187,
+   136,
+   83
+  ],
+  "translucency": 0.0,
+  "bytes": 1218511,
+  "chroma": 3,
+  "seam": [
+   0.86,
+   0.92
+  ],
+  "material": "carton",
+  "ageK": 1.2,
+  "mix": "x",
+  "rough": 0.06591,
+  "grainMm": 0.2552
+ },
+ {
+  "id": "caja_kraft_2",
+  "name": "Cartón de caja kraft II",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Textura de cartón kraft corrugado.png",
+  "tileMm": [
+   178.06,
+   145.67
+  ],
+  "size": [
+   1160,
+   949
+  ],
+  "gain": 346.417,
+  "detailStd": 0.0794,
+  "color": [
+   185,
+   134,
+   86
+  ],
+  "translucency": 0.0,
+  "bytes": 911058,
+  "chroma": 4,
+  "seam": [
+   0.89,
+   0.9
+  ],
+  "material": "carton",
+  "ageK": 1.2,
+  "mix": "x",
+  "rough": 0.07288,
+  "grainMm": 0.307
+ },
+ {
+  "id": "caja_kraft_3",
+  "name": "Cartón de caja kraft III",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Textura de cartón kraft corrugado (1).png",
+  "tileMm": [
+   169.81,
+   132.34
+  ],
+  "size": [
+   1160,
+   904
+  ],
+  "gain": 303.409,
+  "detailStd": 0.0906,
+  "color": [
+   176,
+   126,
+   79
+  ],
+  "translucency": 0.0,
+  "bytes": 865594,
+  "chroma": 4,
+  "seam": [
+   0.88,
+   0.95
+  ],
+  "material": "carton",
+  "ageK": 1.2,
+  "mix": "x",
+  "rough": 0.08361,
+  "grainMm": 0.2928
+ },
+ {
+  "id": "caja_kraft_4",
+  "name": "Cartón de caja kraft IV",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Textura de cartón kraft corrugado (2).png",
+  "tileMm": [
+   149.48,
+   135.69
+  ],
+  "size": [
+   1160,
+   1053
+  ],
+  "gain": 348.435,
+  "detailStd": 0.0789,
+  "color": [
+   174,
+   126,
+   79
+  ],
+  "translucency": 0.0,
+  "bytes": 1029428,
+  "chroma": 4,
+  "seam": [
+   0.88,
+   1.08
+  ],
+  "material": "carton",
+  "ageK": 1.2,
+  "mix": "x",
+  "rough": 0.07325,
+  "grainMm": 0.2577
+ },
+ {
+  "id": "caja_kraft_5",
+  "name": "Cartón de caja kraft V",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Textura de cartón kraft corrugado (3).png",
+  "tileMm": [
+   148.01,
+   148.01
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 351.092,
+  "detailStd": 0.0783,
+  "color": [
+   181,
+   134,
+   86
+  ],
+  "translucency": 0.0,
+  "bytes": 1200576,
+  "chroma": 3,
+  "seam": [
+   0.94,
+   0.97
+  ],
+  "material": "carton",
+  "ageK": 1.2,
+  "mix": "x",
+  "rough": 0.07643,
+  "grainMm": 0.2552
+ },
+ {
+  "id": "caja_reciclado",
+  "name": "Cartón de caja reciclado",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "ROT:NUEVAS_NUEVAS/Textura de cartón corrugado reciclado.png",
+  "tileMm": [
+   186.42,
+   147.21
+  ],
+  "size": [
+   1160,
+   916
+  ],
+  "gain": 371.151,
+  "detailStd": 0.0741,
+  "color": [
+   195,
+   143,
+   87
+  ],
+  "translucency": 0.0,
+  "bytes": 882572,
+  "chroma": 4,
+  "seam": [
+   0.93,
+   0.92
+  ],
+  "material": "carton",
+  "ageK": 1.2,
+  "mix": "x",
+  "rough": 0.06831,
+  "grainMm": 0.3214
+ },
+ {
+  "id": "carton_kraft",
+  "name": "Cartón kraft liso",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Textura uniforme de cartón kraft marrón.png",
+  "tileMm": [
+   111.0,
+   111.0
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 468.705,
+  "detailStd": 0.0587,
+  "color": [
+   174,
+   124,
+   77
+  ],
+  "translucency": 0.0,
+  "bytes": 1146992,
+  "chroma": 4,
+  "seam": [
+   0.89,
+   0.96
+  ],
+  "material": "carton",
+  "ageK": 1.2,
+  "rough": 0.05746,
+  "grainMm": 0.1914
+ },
+ {
+  "id": "carton_kraft_2",
+  "name": "Cartón kraft liso II",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Textura uniforme de cartón kraft marrón (1).png",
+  "tileMm": [
+   111.0,
+   111.0
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 395.116,
+  "detailStd": 0.0696,
+  "color": [
+   173,
+   120,
+   71
+  ],
+  "translucency": 0.0,
+  "bytes": 1156867,
+  "chroma": 4,
+  "seam": [
+   0.91,
+   0.92
+  ],
+  "material": "carton",
+  "ageK": 1.2,
+  "rough": 0.06841,
+  "grainMm": 0.1914
+ },
+ {
+  "id": "carton_kraft_3",
+  "name": "Cartón kraft liso III",
+  "group": "Maderas y cartones",
+  "kind": "color",
+  "source": "NUEVAS_NUEVAS/Textura uniforme de cartón kraft marrón (2).png",
+  "tileMm": [
+   111.0,
+   111.0
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 444.53,
+  "detailStd": 0.0619,
+  "color": [
+   172,
+   124,
+   80
+  ],
+  "translucency": 0.0,
+  "bytes": 1148628,
+  "chroma": 4,
+  "seam": [
+   0.84,
+   0.89
+  ],
+  "material": "carton",
+  "ageK": 1.2,
+  "rough": 0.06047,
+  "grainMm": 0.1914
  }
 ]
