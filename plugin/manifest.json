@@ -2,7 +2,7 @@
   "manifestVersion": 5,
   "id": "com.ikereker.papelator",
   "name": "PAPELATOR",
-  "version": "3.0.0",
+  "version": "3.5.0",
   "main": "index.html",
   "host": {
     "app": "PS",
@@ -19,7 +19,7 @@
         "default": "PAPELATOR"
       },
       "minimumSize": {
-        "width": 250,
+        "width": 260,
         "height": 420
       },
       "maximumSize": {
@@ -27,55 +27,18 @@
         "height": 2000
       },
       "preferredDockedSize": {
-        "width": 300,
-        "height": 760
+        "width": 310,
+        "height": 800
       },
       "preferredFloatingSize": {
-        "width": 320,
-        "height": 800
+        "width": 330,
+        "height": 840
       },
       "icons": [
         {
           "width": 23,
           "height": 23,
           "path": "icons/panel.png",
-          "scale": [
-            1,
-            2
-          ],
-          "theme": [
-            "all"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "panel",
-      "id": "papelatorAjustes",
-      "label": {
-        "default": "PAPELATOR · Ajustes"
-      },
-      "minimumSize": {
-        "width": 260,
-        "height": 420
-      },
-      "maximumSize": {
-        "width": 700,
-        "height": 2000
-      },
-      "preferredDockedSize": {
-        "width": 320,
-        "height": 820
-      },
-      "preferredFloatingSize": {
-        "width": 340,
-        "height": 860
-      },
-      "icons": [
-        {
-          "width": 23,
-          "height": 23,
-          "path": "icons/panel2.png",
           "scale": [
             1,
             2

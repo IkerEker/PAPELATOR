@@ -40,8 +40,12 @@ function loadJSON(key) { try { const s = localStorage.getItem(key); return s ? J
 function saveJSON(key, v) { try { localStorage.setItem(key, JSON.stringify(v)); } catch (e) { /* sin almacenamiento */ } }
 
 let state = merge(clone(P.DEFAULT_STATE), loadJSON('papelator3.state'));
-const ui = merge({ live: true, group: null, open: { general: true, papel: true } }, loadJSON('papelator2.ui'));
-let papers = [], imperfCats = {};
+// v4: la intensidad global ya no está en el panel principal; vuelve a la de referencia
+if ((state.version | 0) < 4) { state.intensity = 50; state.version = 4; }
+if (P.PLIEGUE_ALIAS[state.pliegue]) { state.pliegue = P.PLIEGUE_ALIAS[state.pliegue]; state.pliegueVar = 0; }
+if (!P.PLIEGUES.some(x => x.id === state.pliegue)) state.pliegue = 'ninguno';
+const ui = merge({ live: true, group: null, tab: 'simple', open: { general: true, papel: true } }, loadJSON('papelator2.ui'));
+let papers = [], imperfCats = {}, foldCats = {}, calcoCats = {};
 
 const refreshers = [];
 let thumbTimer = null, liveTimer = null;
@@ -198,7 +202,8 @@ async function doPaper() { await runModal('Papelator · Papel de fondo', paperJo
 async function doApply() {
   await runModal('Papelator · Aplicar', async (doc, d, onProgress) => {
     const t0 = Date.now();
-    const mine = tagged(doc);
+    // para leer sólo tu arte se ocultan un momento las capas de PAPELATOR; al terminar todo queda tal cual estaba
+    const mine = tagged(doc), vis = mine.map(l => l.visible);
     mine.forEach(l => { l.visible = false; });
     await onProgress(0.02, 'Leyendo las capas…');
     const comp = await readComposite(doc, d.w, d.h);
@@ -208,8 +213,7 @@ async function doApply() {
     const layer = await createLayer(doc, RESULT_NAME);
     await putFull(doc, layer, res.rgba, d.w, d.h);
     await moveToTop(doc, layer);
-    if (state.hideOriginals) { const top = doc.layers; for (let i = 0; i < top.length; i++) if (top[i].id !== layer.id) top[i].visible = false; }
-    else mine.forEach(l => { if (l.name === PAPER_NAME) l.visible = true; });
+    mine.forEach((l, i) => { try { l.visible = vis[i]; } catch (e) { /* capa borrada */ } });
     setStatus('Aplicado en «' + RESULT_NAME + '» (' + ((Date.now() - t0) / 1000).toFixed(1) + ' s). Ctrl/Cmd+Z lo deshace de una vez.');
   });
 }
@@ -278,51 +282,67 @@ function chip(label, on, onClick, dot) {
   c.addEventListener('click', onClick);
   return c;
 }
-const GROUPS = ['Patrones', 'Bellas artes', 'Rústicos', 'Técnicos'];
-function paperGroup(id) { const p = papers.filter(x => x.id === id)[0]; return p ? p.group : GROUPS[0]; }
+// familias: el panel muestra pocas opciones; cada una agrupa variantes reales y ⟳ pasa a la siguiente
+const GROUPS = ['Oficina y escuela', 'Bellas artes', 'Rústicos', 'Translúcidos'];
+function typeOf(paperId) { return P.PAPER_TYPES.filter(t => t.papers.indexOf(paperId) >= 0)[0] || P.PAPER_TYPES[0]; }
+function famOf(list, id) { return list.filter(f => f.items.indexOf(id) >= 0)[0] || null; }
+function nextIn(arr, cur) { const i = arr.indexOf(cur); return arr[(i + 1) % arr.length]; }
 
 // =============================================================== PANEL 1 · PRESETS
 function buildSimple() {
   const groupsEl = byId('s-groups'), swEl = byId('s-swatches');
-  if (!ui.group) ui.group = paperGroup(state.paper);
+  if (!ui.group || GROUPS.indexOf(ui.group) < 0) ui.group = typeOf(state.paper).group;
   function renderGroups() {
     groupsEl.innerHTML = '';
     GROUPS.forEach(g => groupsEl.appendChild(chip(g, g === ui.group, () => { ui.group = g; saveJSON('papelator2.ui', ui); renderGroups(); renderSwatches(); })));
   }
   function renderSwatches() {
     swEl.innerHTML = '';
-    papers.filter(p => p.group === ui.group).forEach(p => {
-      const d = h('div', 'sw' + (p.id === state.paper ? ' on' : ''));
-      const img = h('img', 'img'); img.src = 'assets/swatches/' + p.id + '.png';
-      d.appendChild(img); d.appendChild(h('div', 'lbl', p.name));
-      d.dataset.id = p.id;
-      d.addEventListener('click', () => { state.paper = p.id; changed({ source: 'simple' }); });
+    const cur = typeOf(state.paper);
+    P.PAPER_TYPES.filter(t => t.group === ui.group).forEach(t => {
+      const on = t.id === cur.id;
+      const shown = on ? state.paper : t.papers[0];
+      const d = h('div', 'sw' + (on ? ' on' : ''));
+      const img = h('img', 'img'); img.src = 'assets/swatches/' + shown + '.png';
+      d.appendChild(img); d.appendChild(h('div', 'lbl', t.name + (t.papers.length > 1 && on ? ' · ' + (t.papers.indexOf(state.paper) + 1) + '/' + t.papers.length : '')));
+      d.addEventListener('click', () => { if (!on) state.paper = t.papers[0]; changed({ source: 'simple' }); });
       swEl.appendChild(d);
     });
   }
-  function chipRow(el, list, get, set, dotFn) {
+  function chipRow(el, list, isOn, set, dotFn) {
     el.innerHTML = '';
-    list.forEach(it => el.appendChild(chip(it.name, get() === it.id, () => { set(it.id); changed({ source: 'simple' }); }, dotFn ? dotFn(it) : null)));
+    list.forEach(it => el.appendChild(chip(it.name, isOn(it), () => { set(it); changed({ source: 'simple' }); }, dotFn ? dotFn(it) : null)));
   }
+  // familia elegida: si ya estás en ella se conserva la variante; si no, la primera
+  const pickFam = (key, it) => { if (it.items.indexOf(state[key]) < 0) state[key] = it.items[0]; };
   function renderChips() {
-    chipRow(byId('s-colors'), P.COLORS, () => state.color, v => { state.color = v; }, it => it.hex || 'transparent');
-    chipRow(byId('s-estado'), P.ESTADOS, () => (state.custom ? 'custom' : state.estado), v => { state.estado = v; state.custom = null; const e = P.ESTADOS.filter(x => x.id === v)[0]; if (e) state.edad = e.edad; });
-    chipRow(byId('s-calco'), P.CALCOS, () => state.calco, v => { state.calco = v; });
-    chipRow(byId('s-luz'), P.LUCES, () => state.luz, v => { state.luz = v; });
-    chipRow(byId('s-calidad'), P.CALIDADES, () => state.calidad, v => { state.calidad = v; });
-    chipRow(byId('s-impresion'), P.IMPRESIONES, () => state.impresion, v => { state.impresion = v; });
+    chipRow(byId('s-colors'), P.COLORS, it => state.color === it.id, it => { state.color = it.id; }, it => it.hex || 'transparent');
+    chipRow(byId('s-estado'), P.ESTADO_FAMILIAS, it => !state.custom && it.items.indexOf(state.estado) >= 0, it => {
+      state.custom = null; pickFam('estado', it);
+      const e = P.ESTADOS.filter(x => x.id === state.estado)[0]; if (e) state.edad = e.edad;
+    });
+    chipRow(byId('s-pliegue'), P.PLIEGUES, it => state.pliegue === it.id, it => { if (state.pliegue !== it.id) { state.pliegue = it.id; state.pliegueVar = 0; } });
+    chipRow(byId('s-calco'), P.CALCO_FAMILIAS, it => it.items.indexOf(state.calco) >= 0, it => pickFam('calco', it));
+    chipRow(byId('s-luz'), P.LUZ_FAMILIAS, it => it.items.indexOf(state.luz) >= 0, it => pickFam('luz', it));
+    chipRow(byId('s-calidad'), P.CALIDAD_FAMILIAS, it => it.items.indexOf(state.calidad) >= 0, it => pickFam('calidad', it));
+    if (byId('s-impresion')) chipRow(byId('s-impresion'), P.IMPRESIONES, it => state.impresion === it.id, it => { state.impresion = it.id; });
   }
   function sliders() {
-    const it = byId('s-intensity'), sc = byId('s-scale'), ex = byId('s-exposure'), ed = byId('s-edad');
+    const sc = byId('s-scale'), ex = byId('s-exposure'), ed = byId('s-edad');
+    const pa = byId('s-plamt'), pw = byId('s-plwear');
+    pa.value = Math.round(state.pliegueAmount * 100); byId('s-plamtval').textContent = Math.round(state.pliegueAmount * 100) + '%';
+    pw.value = Math.round(state.pliegueWear * 100); byId('s-plwearval').textContent = Math.round(state.pliegueWear * 100) + '%';
+    byId('s-plopts').style.display = state.pliegue && state.pliegue !== 'ninguno' ? 'block' : 'none';
+    byId('s-calcoopts').style.display = state.calco && state.calco !== 'ninguno' ? 'block' : 'none';
+    byId('s-calcoamt').value = Math.round(state.calcoAmount * 100); byId('s-calcoval').textContent = Math.round(state.calcoAmount * 100) + '%';
     ed.value = Math.round(state.edad * 100); byId('s-edadval').textContent = Math.round(state.edad * 100) + '%';
-    it.value = state.intensity; byId('s-intval').textContent = state.intensity + '%';
     sc.value = Math.round(state.scale * 100); byId('s-scaleval').textContent = Math.round(state.scale * 100) + '%';
     ex.value = Math.round(state.exposure * 100); byId('s-expval').textContent = (state.exposure > 0 ? '+' : '') + Math.round(state.exposure * 100);
   }
   renderGroups(); renderSwatches(); renderChips(); sliders();
   const live = byId('s-live'); live.checked = !!ui.live;
   refreshers.push(src => {
-    if (src !== 'simple') { const g = paperGroup(state.paper); if (g !== ui.group) { ui.group = g; renderGroups(); } }
+    if (src !== 'simple') { const g = typeOf(state.paper).group; if (g !== ui.group) { ui.group = g; renderGroups(); } }
     renderSwatches(); renderChips(); sliders();
     live.checked = !!ui.live;
   });
@@ -331,10 +351,30 @@ function buildSimple() {
     el.addEventListener('input', e => { byId(valId).textContent = fmt(Number(e.target.value)); });
     el.addEventListener('change', e => { apply(Number(e.target.value)); changed({ source: 'slider' }); });
   };
-  bindSlider('s-intensity', 's-intval', v => { state.intensity = v; }, v => v + '%');
   bindSlider('s-scale', 's-scaleval', v => { state.scale = v / 100; }, v => v + '%');
   bindSlider('s-exposure', 's-expval', v => { state.exposure = v / 100; }, v => (v > 0 ? '+' : '') + v);
   bindSlider('s-edad', 's-edadval', v => { state.edad = v / 100; }, v => v + '%');
+  bindSlider('s-plamt', 's-plamtval', v => { state.pliegueAmount = v / 100; }, v => v + '%');
+  bindSlider('s-plwear', 's-plwearval', v => { state.pliegueWear = v / 100; }, v => v + '%');
+  bindSlider('s-calcoamt', 's-calcoval', v => { state.calcoAmount = v / 100; }, v => v + '%');
+  // ⟳ de cada sección: otra versión de eso, sin tocar lo demás
+  const dice = (id, fn) => { const el = byId(id); if (el) el.addEventListener('click', () => { fn(); changed({ source: 'simple' }); }); };
+  dice('s-r-papel', () => { state.paper = nextIn(typeOf(state.paper).papers, state.paper); state.seedPaper = (state.seedPaper | 0) + 1; });
+  dice('s-r-estado', () => { const f = famOf(P.ESTADO_FAMILIAS, state.estado); if (f && !state.custom) state.estado = nextIn(f.items, state.estado); state.seedEstado = (state.seedEstado | 0) + 1; });
+  dice('s-r-pliegue', () => {
+    const pre = P.PLIEGUES.filter(p => p.id === state.pliegue)[0];
+    const cat = pre && foldCats[pre.group];
+    const n = cat ? cat.items.length : 1;
+    state.pliegueVar = ((state.pliegueVar | 0) + 1) % n;
+  });
+  dice('s-r-calco', () => {
+    // primero las variantes del mismo calco (p. ej. otra nota a rotulador); al acabarlas, el siguiente de la familia
+    const f = famOf(P.CALCO_FAMILIAS, state.calco), info = calcoCats[state.calco] || {}, n = (info.inks || []).length;
+    state.seedCalco = (state.seedCalco | 0) + 1;
+    if (f && (!n || state.seedCalco % n === 0)) state.calco = nextIn(f.items, state.calco);
+  });
+  dice('s-r-luz', () => { const f = famOf(P.LUZ_FAMILIAS, state.luz); if (f) state.luz = nextIn(f.items, state.luz); state.seedFoto = (state.seedFoto | 0) + 1; });
+  dice('s-r-calidad', () => { const f = famOf(P.CALIDAD_FAMILIAS, state.calidad); if (f) state.calidad = nextIn(f.items, state.calidad); state.seedFoto = (state.seedFoto | 0) + 1; });
   byId('s-paper').addEventListener('click', doPaper);
   byId('s-apply').addEventListener('click', doApply);
   byId('s-remove').addEventListener('click', doRemove);
@@ -374,6 +414,12 @@ function buildSections() {
       { t: 'slider', path: 'patternOpacity', label: 'Intensidad de las líneas', min: 0, max: 1.5, step: 0.05, fmt: pct }
     ] },
     { id: 'estado', title: 'Estado e imperfecciones', items: estadoItems },
+    { id: 'pliegues', title: 'Pliegues y arrugas', items: [
+      { t: 'picker', path: 'pliegue', label: 'Cómo se dobló', options: () => P.PLIEGUES.map(c => [c.id, c.name]) },
+      { t: 'slider', path: 'pliegueAmount', label: 'Relieve de los pliegues', min: 0, max: 2.5, step: 0.05, fmt: pct },
+      { t: 'slider', path: 'pliegueWear', label: 'Desgaste de las aristas (tinta levantada)', min: 0, max: 3, step: 0.05, fmt: pct },
+      { t: 'slider', path: 'pliegueVar', label: 'Hoja real del grupo', min: 0, max: 28, step: 1, fmt: v => '#' + (v + 1) }
+    ] },
     { id: 'calco', title: 'Calco', items: [
       { t: 'picker', path: 'calco', label: 'Documento de detrás', options: () => P.CALCOS.map(c => [c.id, c.name]) },
       { t: 'slider', path: 'calcoAmount', label: 'Trasluz', min: 0, max: 3, step: 0.05, fmt: pct },
@@ -387,7 +433,7 @@ function buildSections() {
       { t: 'slider', path: 'grain', label: 'Deformación por el grano del papel', min: 0, max: 4, step: 0.05, fmt: pct },
       { t: 'slider', path: 'inkAge', label: 'Envejecimiento de la tinta', min: 0, max: 2, step: 0.05, fmt: pct },
       { t: 'slider', path: 'absorb', label: 'Absorción (huecos en el grano)', min: 0, max: 3, step: 0.05, fmt: pct },
-      { t: 'check', path: 'hideOriginals', label: 'Ocultar las capas originales al aplicar' }
+
     ] },
     { id: 'foto', title: 'Fotografía', items: [
       { t: 'picker', path: 'luz', label: 'Luz', options: () => P.LUCES.map(c => [c.id, c.name]) },
@@ -481,14 +527,26 @@ function buildPro() {
 }
 
 // =============================================================== arranque
+const appRoot = document.getElementById('app');
 simpleRoot = document.getElementById('simple');
 proRoot = document.getElementById('pro');
-proRoot.style.display = 'none';
+// pestañas: primero los presets, luego las opciones avanzadas (comparten estado y botones)
+function showTab(t) {
+  ui.tab = t === 'pro' ? 'pro' : 'simple'; saveJSON('papelator2.ui', ui);
+  simpleRoot.style.display = ui.tab === 'simple' ? 'flex' : 'none';
+  proRoot.style.display = ui.tab === 'pro' ? 'flex' : 'none';
+  const ts = document.getElementById('tab-simple'), tp = document.getElementById('tab-pro');
+  if (ts) ts.className = 'tab' + (ui.tab === 'simple' ? ' on' : '');
+  if (tp) tp.className = 'tab' + (ui.tab === 'pro' ? ' on' : '');
+  if (ui.tab === 'pro') updateThumbs();
+}
+document.getElementById('tab-simple').addEventListener('click', () => showTab('simple'));
+document.getElementById('tab-pro').addEventListener('click', () => showTab('pro'));
 let ready = null;
 function init() {
   if (!ready) ready = (async () => {
     const cat = await engine.catalogs(assets);
-    papers = cat.papers; imperfCats = cat.imperf;
+    papers = cat.papers; imperfCats = cat.imperf; foldCats = cat.folds || {}; calcoCats = cat.calco || {};
     if (!papers.filter(p => p.id === state.paper).length) state.paper = papers[0].id;
   })();
   return ready;
@@ -511,7 +569,6 @@ function fitHeights() {
 function attach(root, arg) {
   const node = arg && arg.node ? arg.node : arg;
   if (node && typeof node.appendChild === 'function' && root.parentNode !== node && node !== root) { try { node.appendChild(root); } catch (e) { /* queda en el body */ } }
-  root.style.display = 'flex';
   if (shown.indexOf(root) < 0) shown.push(root);
   fitHeights(); setTimeout(fitHeights, 50); setTimeout(fitHeights, 400);
 }
@@ -519,8 +576,10 @@ try { if (typeof window !== 'undefined') window.addEventListener('resize', fitHe
 setInterval(fitHeights, 400);
 uxp.entrypoints.setup({
   panels: {
-    papelator: { show(arg) { attach(simpleRoot, arg); if (!builtSimple) { builtSimple = true; init().then(() => { buildSimple(); updateThumbs(); }).catch(e => setStatus('No se pudieron cargar las texturas: ' + e.message, true)); } } },
-    papelatorAjustes: { show(arg) { attach(proRoot, arg); if (!builtPro) { builtPro = true; init().then(() => { buildPro(); updateThumbs(); }).catch(e => setStatus('No se pudieron cargar las texturas: ' + e.message, true)); } } }
+    papelator: { show(arg) {
+      attach(appRoot, arg); showTab(ui.tab || 'simple');
+      if (!builtSimple) { builtSimple = builtPro = true; init().then(() => { buildSimple(); buildPro(); updateThumbs(); }).catch(e => setStatus('No se pudieron cargar las texturas: ' + e.message, true)); }
+    } }
   }
 });
 try {

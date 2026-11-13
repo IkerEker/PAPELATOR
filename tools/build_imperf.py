@@ -7,7 +7,7 @@ from scipy import ndimage
 from PIL import Image
 from imperf_lib import *
 
-IDX = dict(json.load(open('/tmp/claude-0/-home-claude/7670252d-a654-52b9-a1b1-4f0466e0fd73/scratchpad/sheets/imp_index.json')))
+IDX = dict(json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'indices', 'imp_index.json'))))
 def src(i): return IDX[i]
 
 # mode: multiply (color), relief (surco/relieve), grease (oscurece leve + translúcido + brillo),

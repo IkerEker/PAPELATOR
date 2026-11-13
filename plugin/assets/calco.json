@@ -11,8 +11,20 @@
   "pressure": "apuntes_presion.png"
  },
  "rotulador": {
-  "ink": "rotulador.png",
-  "pool": "rotulador_charcos.png"
+  "inks": [
+   "rotulador_0.png",
+   "rotulador_1.png",
+   "rotulador_2.png",
+   "rotulador_3.png"
+  ],
+  "pools": [
+   "rotulador_charcos_0.png",
+   "rotulador_charcos_1.png",
+   "rotulador_charcos_2.png",
+   "rotulador_charcos_3.png"
+  ],
+  "ink": "rotulador_0.png",
+  "pool": "rotulador_charcos_0.png"
  },
  "_size": [
   1240,

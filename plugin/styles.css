@@ -7,7 +7,15 @@ body {
   font-size: var(--uxp-host-font-size, 12px);
   background-color: transparent;
 }
-.root { display: flex; flex-direction: column; height: 100%; width: 100%; overflow: hidden; }
+.app { display: flex; flex-direction: column; height: 100%; width: 100%; overflow: hidden; }
+.root { display: flex; flex-direction: column; flex: 1 1 0; min-height: 0; width: 100%; overflow: hidden; }
+/* pestañas: Presets · Avanzado */
+.tabs { display: flex; flex-direction: row; flex: 0 0 auto; padding: 6px 10px 0 10px;
+  border-bottom: 1px solid var(--uxp-host-border-color, rgba(128,128,128,0.4)); }
+.tab { padding: 5px 12px 6px 12px; margin-right: 4px; cursor: pointer; opacity: 0.6; font-size: 12px;
+  border-bottom: 2px solid transparent; }
+.tab:hover { opacity: 0.9; }
+.tab.on { opacity: 1; font-weight: bold; border-bottom: 2px solid var(--uxp-host-text-color, #d8d8d8); }
 /* zona con desplazamiento + pie fijo con los botones (siempre visibles) */
 .scroll { flex: 1 1 0; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 10px 12px 14px 12px; }
 .footer { flex: 0 0 auto; padding: 8px 12px 10px 12px; border-top: 1px solid var(--uxp-host-border-color, rgba(128,128,128,0.4));
@@ -33,7 +41,10 @@ body {
 .thumbnote { font-size: 10px; opacity: 0.6; margin-top: 4px; }
 
 .sec { margin-top: 10px; }
-.sechead { font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; opacity: 0.75; margin-bottom: 6px; }
+.sechead { font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; opacity: 0.75; margin-bottom: 6px; display: flex; flex-direction: row; align-items: center; }
+.sublabel { display: flex; flex-direction: row; align-items: center; }
+.mini { font-size: 13px; line-height: 13px; padding: 2px 5px; border-radius: 4px; cursor: pointer; opacity: 0.85; letter-spacing: 0; text-transform: none; }
+.mini:hover { background-color: rgba(128,128,128,0.3); opacity: 1; }
 
 .chips { display: flex; flex-direction: row; flex-wrap: wrap; }
 .chip {

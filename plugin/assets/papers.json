@@ -2,7 +2,7 @@
  {
   "id": "rayado",
   "name": "Rayado",
-  "group": "Patrones",
+  "group": "Oficina y escuela",
   "kind": "pattern",
   "source": "Papel rayado azul minimalista.png",
   "periods": [
@@ -38,7 +38,7 @@
  {
   "id": "rayado_tenue",
   "name": "Rayado tenue",
-  "group": "Patrones",
+  "group": "Oficina y escuela",
   "kind": "pattern",
   "source": "Textura de papel rayado azul tenue.png",
   "periods": [
@@ -73,8 +73,8 @@
  },
  {
   "id": "cuadricula",
-  "name": "Cuadriculado grande",
-  "group": "Patrones",
+  "name": "Cuadriculado 5 mm",
+  "group": "Oficina y escuela",
   "kind": "pattern",
   "source": "Papel milimetrado azul sobre blanco.png",
   "periods": [
@@ -109,8 +109,8 @@
  },
  {
   "id": "cuadricula_clara",
-  "name": "Cuadriculado claro",
-  "group": "Patrones",
+  "name": "Cuadriculado 5 mm claro",
+  "group": "Oficina y escuela",
   "kind": "pattern",
   "source": "Papel cuadriculado azul claro.png",
   "periods": [
@@ -146,7 +146,7 @@
  {
   "id": "milimetrado",
   "name": "Milimetrado azul y rojo",
-  "group": "Patrones",
+  "group": "Oficina y escuela",
   "kind": "pattern",
   "source": "Papel cuadriculado técnico azul y rojo.png",
   "periods": [
@@ -154,12 +154,12 @@
    9.776253700256348
   ],
   "tileMm": [
-   112.31,
-   104.23
+   100.0,
+   100.0
   ],
   "size": [
-   1098,
-   1019
+   1200,
+   1200
   ],
   "gain": 1738.692,
   "detailStd": 0.0158,
@@ -177,12 +177,13 @@
   "rough": 0.01434,
   "grainMm": 0.2046,
   "ageK": 1.0,
-  "reliefAdj": 1.0
+  "reliefAdj": 1.0,
+  "grid": "1/5/10 mm"
  },
  {
   "id": "milimetrado_naranja",
   "name": "Milimetrado naranja",
-  "group": "Patrones",
+  "group": "Oficina y escuela",
   "kind": "pattern",
   "source": "Papel cuadriculado naranja uniforme.png",
   "periods": [
@@ -190,12 +191,12 @@
    10.43066120147705
   ],
   "tileMm": [
-   100.09,
-   100.09
+   100.0,
+   100.0
   ],
   "size": [
-   1044,
-   1044
+   1200,
+   1200
   ],
   "gain": 1752.423,
   "detailStd": 0.0157,
@@ -213,12 +214,13 @@
   "rough": 0.01249,
   "grainMm": 0.1917,
   "ageK": 1.0,
-  "reliefAdj": 1.0
+  "reliefAdj": 1.0,
+  "grid": "1/5/10 mm"
  },
  {
   "id": "milimetrado_azul",
   "name": "Milimetrado azul",
-  "group": "Patrones",
+  "group": "Oficina y escuela",
   "kind": "pattern",
   "source": "Cuadrícula de papel milimetrado azul.png",
   "periods": [
@@ -226,12 +228,12 @@
    10.354161262512207
   ],
   "tileMm": [
-   100.83,
-   100.83
+   100.0,
+   100.0
   ],
   "size": [
-   1044,
-   1044
+   1200,
+   1200
   ],
   "gain": 1723.615,
   "detailStd": 0.016,
@@ -249,12 +251,13 @@
   "rough": 0.01347,
   "grainMm": 0.1932,
   "ageK": 1.0,
-  "reliefAdj": 1.0
+  "reliefAdj": 1.0,
+  "grid": "1/5/10 mm"
  },
  {
   "id": "punteado",
   "name": "Punteado",
-  "group": "Patrones",
+  "group": "Oficina y escuela",
   "kind": "pattern",
   "source": "Textura de papel punteado minimalista.png",
   "periods": [
@@ -290,7 +293,7 @@
  {
   "id": "punteado_suave",
   "name": "Punteado suave",
-  "group": "Patrones",
+  "group": "Oficina y escuela",
   "kind": "pattern",
   "source": "Textura de papel cuadriculado punteado.png",
   "periods": [
@@ -326,7 +329,7 @@
  {
   "id": "isometrico",
   "name": "Isométrico",
-  "group": "Patrones",
+  "group": "Oficina y escuela",
   "kind": "pattern",
   "source": "Papel cuadriculado isométrico azul pálido (1).png",
   "periods": [
@@ -362,7 +365,7 @@
  {
   "id": "triangular",
   "name": "Isométrico triangular",
-  "group": "Patrones",
+  "group": "Oficina y escuela",
   "kind": "pattern",
   "source": "Papel milimetrado triangular azul pálido.png",
   "periods": [
@@ -398,7 +401,7 @@
  {
   "id": "pentagrama",
   "name": "Pentagrama",
-  "group": "Patrones",
+  "group": "Oficina y escuela",
   "kind": "pattern",
   "source": "Papel pautado musical minimalista.png",
   "periods": [
@@ -438,8 +441,8 @@
   "kind": "neutral",
   "source": "Textura de papel acuarela blanco rugoso.png",
   "tileMm": [
-   111.0,
-   111.0
+   72.15,
+   72.15
   ],
   "size": [
    1160,
@@ -459,7 +462,7 @@
    0.99
   ],
   "rough": 0.05303,
-  "grainMm": 0.1914,
+  "grainMm": 0.1244,
   "ageK": 0.7,
   "reliefAdj": 1.0
  },
@@ -470,8 +473,8 @@
   "kind": "neutral",
   "source": "Textura de papel acuarela blanco.png",
   "tileMm": [
-   111.0,
-   111.0
+   72.15,
+   72.15
   ],
   "size": [
    1160,
@@ -491,7 +494,7 @@
    0.98
   ],
   "rough": 0.05427,
-  "grainMm": 0.1914,
+  "grainMm": 0.1244,
   "ageK": 0.7,
   "reliefAdj": 1.0
  },
@@ -529,7 +532,7 @@
  },
  {
   "id": "acuarela_satinada",
-  "name": "Acuarela satinada",
+  "name": "Acuarela satinada (grano fino)",
   "group": "Bellas artes",
   "kind": "neutral",
   "source": "Textura uniforme de papel acuarela blanco cálido.png",
@@ -561,8 +564,8 @@
  },
  {
   "id": "bristol",
-  "name": "Vitela / Bristol",
-  "group": "Bellas artes",
+  "name": "Folio liso",
+  "group": "Oficina y escuela",
   "kind": "neutral",
   "source": "Textura de papel blanco uniforme.png",
   "tileMm": [
@@ -594,7 +597,7 @@
  {
   "id": "folio",
   "name": "Folio blanco",
-  "group": "Bellas artes",
+  "group": "Oficina y escuela",
   "kind": "neutral",
   "source": "Textura sutil de papel blanco.png",
   "tileMm": [
@@ -625,8 +628,8 @@
  },
  {
   "id": "papel_fino",
-  "name": "Papel blanco fino",
-  "group": "Bellas artes",
+  "name": "Folio fino",
+  "group": "Oficina y escuela",
   "kind": "neutral",
   "source": "Textura de papel blanco fino.png",
   "tileMm": [
@@ -685,7 +688,8 @@
   "rough": 0.02858,
   "grainMm": 0.1914,
   "ageK": 1.0,
-  "reliefAdj": 1.0
+  "reliefAdj": 1.0,
+  "mix": "none"
  },
  {
   "id": "verjurado_marfil",
@@ -717,7 +721,8 @@
   "rough": 0.03157,
   "grainMm": 0.1754,
   "ageK": 1.0,
-  "reliefAdj": 1.0
+  "reliefAdj": 1.0,
+  "mix": "none"
  },
  {
   "id": "algodon",
@@ -1208,8 +1213,8 @@
  },
  {
   "id": "pergamino_blanco",
-  "name": "Pergamino blanco",
-  "group": "Rústicos",
+  "name": "Papel de horno blanco (pergamino de cocina)",
+  "group": "Translúcidos",
   "kind": "neutral",
   "source": "Textura de pergamino blanco arrugado.png",
   "tileMm": [
@@ -1269,7 +1274,8 @@
   "rough": 0.09399,
   "grainMm": 0.8936,
   "ageK": 1.2,
-  "reliefAdj": 0.7
+  "reliefAdj": 0.7,
+  "mix": "x"
  },
  {
   "id": "corrugado_fino",
@@ -1302,12 +1308,13 @@
   "rough": 0.13986,
   "grainMm": 0.7943,
   "ageK": 1.2,
-  "reliefAdj": 0.55
+  "reliefAdj": 0.55,
+  "mix": "x"
  },
  {
   "id": "periodico",
   "name": "Periódico",
-  "group": "Técnicos",
+  "group": "Oficina y escuela",
   "kind": "neutral",
   "source": "Textura uniforme de papel de periódico.png",
   "tileMm": [
@@ -1339,7 +1346,7 @@
  {
   "id": "periodico_gris",
   "name": "Periódico gris",
-  "group": "Técnicos",
+  "group": "Oficina y escuela",
   "kind": "neutral",
   "source": "Textura uniforme de papel de periódico (2).png",
   "tileMm": [
@@ -1371,7 +1378,7 @@
  {
   "id": "vegetal",
   "name": "Vegetal / cebolla",
-  "group": "Técnicos",
+  "group": "Translúcidos",
   "kind": "neutral",
   "source": "Papel translúcido texturizado en blanco roto-2.png",
   "tileMm": [
@@ -1403,7 +1410,7 @@
  {
   "id": "vegetal_arrugado",
   "name": "Vegetal arrugado",
-  "group": "Técnicos",
+  "group": "Translúcidos",
   "kind": "neutral",
   "source": "Textura arrugada de papel translúcido blanco.png",
   "tileMm": [
@@ -1434,8 +1441,8 @@
  },
  {
   "id": "encerado",
-  "name": "Encerado",
-  "group": "Técnicos",
+  "name": "Papel encerado",
+  "group": "Translúcidos",
   "kind": "neutral",
   "source": "Textura de papel encerado arrugado (1).png",
   "tileMm": [
@@ -1467,7 +1474,7 @@
  {
   "id": "horno",
   "name": "Papel de horno",
-  "group": "Técnicos",
+  "group": "Translúcidos",
   "kind": "neutral",
   "source": "Textura de papel de horno arrugado.png",
   "tileMm": [
@@ -1499,7 +1506,7 @@
  {
   "id": "cartulina_gris",
   "name": "Cartulina gris",
-  "group": "Técnicos",
+  "group": "Bellas artes",
   "kind": "neutral",
   "source": "Textura de papel gris uniforme.png",
   "tileMm": [

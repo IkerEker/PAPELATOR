@@ -5,7 +5,12 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- ===================== PANEL 1 · PRESETS ===================== -->
+  <div id="app" class="app">
+   <div class="tabs">
+    <div class="tab on" id="tab-simple">Presets</div>
+    <div class="tab" id="tab-pro">Avanzado</div>
+   </div>
+  <!-- ===================== PESTAÑA 1 · PRESETS ===================== -->
   <div id="simple" class="root">
    <div class="scroll">
     <div class="brand">
@@ -14,15 +19,9 @@
       <div class="iconbtn" id="s-dice" title="Nueva variación">⟳</div>
     </div>
 
-    <div class="intens">
-      <div class="rl"><span>Intensidad del filtro</span><span class="rv" id="s-intval"></span></div>
-      <sp-slider id="s-intensity" min="0" max="100" step="1" value="50"></sp-slider>
-    </div>
-
-    <div class="thumbwrap"><img id="s-thumb" class="thumb" alt=""><div class="thumbnote" id="s-thumbnote"></div></div>
 
     <div class="sec">
-      <div class="sechead">1 · Papel</div>
+      <div class="sechead">1 · Papel<span class="spacer"></span><span class="mini" id="s-r-papel" title="Otra versión">⟳</span></div>
       <div class="chips small" id="s-groups"></div>
       <div class="swatches" id="s-swatches"></div>
       <div class="rl"><span>Escala de la textura</span><span class="rv" id="s-scaleval"></span></div>
@@ -35,26 +34,39 @@
     </div>
 
     <div class="sec">
-      <div class="sechead">3 · Estado</div>
+      <div class="sechead">3 · Estado<span class="spacer"></span><span class="mini" id="s-r-estado" title="Otra versión">⟳</span></div>
       <div class="chips" id="s-estado"></div>
       <div class="rl"><span>Antigüedad</span><span class="rv" id="s-edadval"></span></div>
       <sp-slider id="s-edad" min="0" max="120" step="1" value="0"></sp-slider>
     </div>
 
     <div class="sec">
-      <div class="sechead">4 · Calco (lo que hay detrás)</div>
+      <div class="sechead">4 · Pliegues<span class="spacer"></span><span class="mini" id="s-r-pliegue" title="Otra versión">⟳</span></div>
+      <div class="chips" id="s-pliegue"></div>
+      <div id="s-plopts">
+        <div class="rl"><span>Intensidad</span><span class="rv" id="s-plamtval"></span></div>
+        <sp-slider id="s-plamt" min="0" max="250" step="5" value="100"></sp-slider>
+        <div class="rl"><span>Bordes desgastados</span><span class="rv" id="s-plwearval"></span></div>
+        <sp-slider id="s-plwear" min="0" max="300" step="5" value="100"></sp-slider>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sechead">5 · Calco (lo que hay detrás)<span class="spacer"></span><span class="mini" id="s-r-calco" title="Otra versión">⟳</span></div>
       <div class="chips" id="s-calco"></div>
+      <div id="s-calcoopts">
+        <div class="rl"><span>Intensidad del calco</span><span class="rv" id="s-calcoval"></span></div>
+        <sp-slider id="s-calcoamt" min="0" max="250" step="5" value="100"></sp-slider>
+      </div>
     </div>
 
     <div class="sec photo">
-      <div class="sechead">5 · Al aplicar</div>
-      <div class="sublabel">Impresión</div>
-      <div class="chips" id="s-impresion"></div>
-      <div class="sublabel">Luz</div>
+      <div class="sechead">6 · Al aplicar</div>
+      <div class="sublabel">Luz<span class="spacer"></span><span class="mini" id="s-r-luz" title="Otra versión">⟳</span></div>
       <div class="chips" id="s-luz"></div>
       <div class="rl"><span>Más oscura · Más clara</span><span class="rv" id="s-expval"></span></div>
       <sp-slider id="s-exposure" min="-100" max="100" step="5" value="0"></sp-slider>
-      <div class="sublabel">Calidad</div>
+      <div class="sublabel">Calidad<span class="spacer"></span><span class="mini" id="s-r-calidad" title="Otra versión">⟳</span></div>
       <div class="chips" id="s-calidad"></div>
     </div>
 
@@ -74,11 +86,11 @@
    </div>
   </div>
 
-  <!-- ===================== PANEL 2 · AJUSTES ===================== -->
+  <!-- ===================== PESTAÑA 2 · AVANZADO ===================== -->
   <div id="pro" class="root">
    <div class="scroll">
     <div class="brand">
-      <span class="logo">PAPELATOR</span><span class="sub">ajustes</span>
+      <span class="logo">PAPELATOR</span><span class="sub">avanzado</span>
       <span class="spacer"></span>
       <div class="iconbtn" id="p-reset" title="Restablecer ajustes">↺</div>
     </div>
@@ -99,6 +111,7 @@
    </div>
   </div>
 
+  </div>
   <script src="main.js"></script>
 </body>
 </html>
