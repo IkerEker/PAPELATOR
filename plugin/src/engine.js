@@ -820,7 +820,7 @@ async function renderScreen(opts, st, withArt) {
   const prog = opts.onProgress || (async () => {});
   const art = withArt ? opts.art : null, comps = opts.artComponents || 4;
   const N = w * h, k = clamp(clamp(def(st.intensity, 50), 0, 100) / 50, 0, 2), kk = Math.min(1.5, k), k1 = Math.min(1, kk);
-  const S = { w, h, ppm, N, seed: (def(st.seed, 1) | 0) * 7919 + 13, k };
+  const S = { w, h, ppm, N, seed: (def(st.seed, 1) | 0) * 7919 + 13 + (def(st.seedPaper, 0) | 0) * 104729, k };
   const D = SCREENS[st.paper] || SCREENS.pantalla_lcd;
   const longS = Math.max(w, h);
   const pitch = st._pitch || Math.max(1.2, longS / D.across * clamp(def(st.screenZoom, 1), 0.3, 4));
@@ -1007,7 +1007,8 @@ function screenShot(S, st, px, D, pitch, kk) {
   const fseed = (r() * 1e5) | 0, fsc = longS / 3;
   const MA = mA ? lowField(w, h, 8, (x, y) => mA * smooth(0.2, 0.75, fbm2(x / fsc, y / fsc, fseed))) : null;
   // bandas del obturador (PWM / barrido): horizontales, con una más marcada
-  const bA = def(D.bands, 0) * kk, bPer = h / lerp(2.5, 6, r()), bPh = r() * 6.28;
+  const bA = def(D.bands, 0) * kk * lerp(0.7, 1.25, r()), bPer = h / lerp(1.8, 7.5, r()), bPh = r() * 6.28;
+  const bTilt = (r() - 0.5) * 0.12, bSharp = lerp(2, 5, r()), bBig = lerp(0.3, 0.9, r()), bWob = lerp(0, 0.025, r()) * h, bWf = lerp(1, 3, r()) / w;
   // reflejos en el cristal según la luz
   const lamp = luz === 'lampara' || luz === 'foco', flash = luz === 'flash', me = luz === 'sombra', day = luz === 'dia' || luz === 'ventana';
   const lx = lerp(0.2, 0.8, r()) * w, ly = lerp(0.15, 0.45, r()) * h;
@@ -1036,9 +1037,11 @@ function screenShot(S, st, px, D, pitch, kk) {
     return 1;
   }) : null;
   for (let y = 0; y < h; y++) {
-    const ph0 = 2 * Math.PI * y / bPer + bPh, bw = 0.5 + 0.5 * Math.cos(ph0);
-    const band = bA ? 1 - bA * Math.pow(bw, 3) - bA * 0.6 * Math.pow(0.5 + 0.5 * Math.cos(ph0 * 0.5), 12) : 1;
     for (let x = 0; x < w; x++) {
+      // las bandas no son rectas del todo: algo inclinadas y onduladas, distintas en cada versión
+      const yb = y + x * bTilt + Math.sin(x * bWf * 6.283) * bWob;
+      const ph0 = 2 * Math.PI * yb / bPer + bPh;
+      const band = bA ? 1 - bA * Math.pow(0.5 + 0.5 * Math.cos(ph0), bSharp) - bA * bBig * Math.pow(0.5 + 0.5 * Math.cos(ph0 * 0.5), 12) : 1;
       const j = (y * w + x) * 4;
       const veil = FV(x, y), refl = FR(x, y), ma = MA ? MA(x, y) : 0;
       let p0 = 0, p1 = 0;
