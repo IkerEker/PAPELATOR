@@ -139,8 +139,8 @@ const ESTADOS = [
 const BORDES = [
   { id: 'ninguno', name: 'Sin borde' },
   { id: 'limpio', name: 'Corte limpio' },
-  { id: 'rasgado', name: 'Rasgado' },
-  { id: 'quemado', name: 'Quemado' }
+  { id: 'gastado', name: 'Gastado' },
+  { id: 'rasgado', name: 'Rasgado' }
 ];
 // tipo de papel (PAPER_TYPES) -> familia de borde
 const BORDE_FAM = {
@@ -156,12 +156,12 @@ const BORDE_FAM = {
 const BORDE_NO = {};
 // qué hace el slider de desgaste en cada borde (lo que se cuenta en el panel)
 const BORDE_DESC = {
-  limpio: 'canto nítido; con desgaste, pelusa, muescas, esquinas redondeadas, orejas dobladas y algún desgarro',
-  rasgado: { _: 'a mano; con desgaste, más lados y más irregular', periodico: 'fibra corta y gris; con desgaste, más lados',
-    acuarela: 'barbas de algodón; con desgaste, más lados', washi: 'fibras largas sueltas; con desgaste, más lados',
-    kraft: 'fibra marrón; con desgaste, más lados', gris: 'se abre en capas y enseña el alma clara',
-    carton: 'se ven las ondas de dentro', vegetal: 'nítido, con el filo blanquecino', pergamino: 'quebradizo' },
-  quemado: 'filo carbonizado y chamuscado; con desgaste, más hondo y con agujeros'
+  limpio: 'canto nítido; con desgaste, orejas dobladas',
+  gastado: 'cantos viejos con muescas y desconchones, esquinas gastadas',
+  rasgado: { _: 'a mano; con desgaste, más lados y más irregular', cuaderno: 'arrancada de la espiral; con desgaste, más lados',
+    periodico: 'fibra corta; con desgaste, más lados', acuarela: 'fibra de algodón; con desgaste, más lados', washi: 'fibras largas sueltas',
+    kraft: 'fibra larga marrón', gris: 'se abre en capas y enseña el alma clara', carton: 'la cara arrancada deja ver las ondas',
+    vegetal: 'nítido, con el filo blanquecino', pergamino: 'quebradizo, a desconchones' }
 };
 
 // Pliegues: número de veces que se dobló (líneas de pliegue que se ven) o arrugado. ⟳ recorre las hojas reales

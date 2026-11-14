@@ -1,0 +1,431 @@
+{
+ "ppm": 20.0,
+ "strips": {
+  "blanco": {
+   "w": 3056,
+   "h": 48,
+   "edge": 20,
+   "core": false,
+   "mm": 152.8
+  },
+  "bisel": {
+   "w": 4462,
+   "h": 66,
+   "edge": 22,
+   "core": true,
+   "mm": 223.1
+  },
+  "periodico": {
+   "w": 3840,
+   "h": 59,
+   "edge": 26,
+   "core": false,
+   "mm": 192.0
+  },
+  "acuarela": {
+   "w": 6348,
+   "h": 52,
+   "edge": 14,
+   "core": false,
+   "mm": 317.4
+  },
+  "washi": {
+   "w": 3840,
+   "h": 156,
+   "edge": 81,
+   "core": false,
+   "mm": 192.0
+  },
+  "artesanal": {
+   "w": 2312,
+   "h": 113,
+   "edge": 60,
+   "core": false,
+   "mm": 115.6
+  },
+  "kraft": {
+   "w": 4232,
+   "h": 88,
+   "edge": 44,
+   "core": true,
+   "mm": 211.6
+  },
+  "gris": {
+   "w": 3312,
+   "h": 85,
+   "edge": 16,
+   "core": true,
+   "mm": 165.6
+  },
+  "vegetal": {
+   "w": 1528,
+   "h": 30,
+   "edge": 7,
+   "core": true,
+   "mm": 76.4
+  },
+  "viejo": {
+   "w": 3448,
+   "h": 81,
+   "edge": 13,
+   "core": false,
+   "mm": 172.4
+  },
+  "viejo_roto": {
+   "w": 4624,
+   "h": 139,
+   "edge": 28,
+   "core": false,
+   "mm": 231.2
+  },
+  "espiral": {
+   "w": 10235,
+   "h": 340,
+   "edge": 80,
+   "core": false,
+   "mm": 511.8
+  },
+  "carton_roto": {
+   "w": 20713,
+   "h": 318,
+   "edge": 32,
+   "core": true,
+   "mm": 1035.7
+  },
+  "carton": {
+   "w": 6760,
+   "h": 81,
+   "edge": 9,
+   "core": true,
+   "mm": 338.0
+  }
+ },
+ "corners": {
+  "oreja": [
+   {
+    "id": "esq_oreja_1",
+    "size": 561,
+    "origin": 23.4,
+    "leg": 20.0,
+    "flap": true,
+    "src": "Collage de esquinas de papel plegadas.png"
+   },
+   {
+    "id": "esq_oreja_2",
+    "size": 597,
+    "origin": 46.4,
+    "leg": 20.0,
+    "flap": true,
+    "src": "Collage de esquinas de papel plegadas.png"
+   },
+   {
+    "id": "esq_oreja_3",
+    "size": 553,
+    "origin": 14.2,
+    "leg": 20.0,
+    "flap": true,
+    "src": "Collage de esquinas de papel plegadas.png"
+   },
+   {
+    "id": "esq_oreja_4",
+    "size": 591,
+    "origin": 47.8,
+    "leg": 20.0,
+    "flap": true,
+    "src": "Esquinas de papel plegadas sobre verde.png"
+   },
+   {
+    "id": "esq_oreja_5",
+    "size": 561,
+    "origin": 22.5,
+    "leg": 20.0,
+    "flap": true,
+    "src": "Esquinas de papel plegadas sobre verde.png"
+   },
+   {
+    "id": "esq_oreja_6",
+    "size": 556,
+    "origin": 16.9,
+    "leg": 20.0,
+    "flap": true,
+    "src": "Esquinas de papel plegadas sobre verde.png"
+   },
+   {
+    "id": "esq_oreja_7",
+    "size": 590,
+    "origin": 45.4,
+    "leg": 20.0,
+    "flap": true,
+    "src": "Tres esquinas de papel dobladas (1).png"
+   },
+   {
+    "id": "esq_oreja_8",
+    "size": 563,
+    "origin": 25.7,
+    "leg": 20.0,
+    "flap": true,
+    "src": "Tres esquinas de papel dobladas (1).png"
+   },
+   {
+    "id": "esq_oreja_9",
+    "size": 554,
+    "origin": 15.8,
+    "leg": 20.0,
+    "flap": true,
+    "src": "Tres esquinas de papel dobladas (1).png"
+   },
+   {
+    "id": "esq_oreja_10",
+    "size": 553,
+    "origin": 13.6,
+    "leg": 20.0,
+    "flap": true,
+    "src": "Tres esquinas de papel dobladas.png"
+   },
+   {
+    "id": "esq_oreja_11",
+    "size": 563,
+    "origin": 23.7,
+    "leg": 20.0,
+    "flap": true,
+    "src": "Tres esquinas de papel dobladas.png"
+   },
+   {
+    "id": "esq_oreja_12",
+    "size": 581,
+    "origin": 42.7,
+    "leg": 20.0,
+    "flap": true,
+    "src": "Tres esquinas de papel dobladas.png"
+   }
+  ],
+  "oreja_rota": [
+   {
+    "id": "esq_oreja_rota_1",
+    "size": 551,
+    "origin": 11.5,
+    "leg": 20.0,
+    "flap": true,
+    "src": "Esquinas de papel rasgado sobre verde auxiliar.png"
+   },
+   {
+    "id": "esq_oreja_rota_2",
+    "size": 551,
+    "origin": 11.4,
+    "leg": 20.0,
+    "flap": true,
+    "src": "Esquinas de papel rasgado sobre verde croma.png"
+   },
+   {
+    "id": "esq_oreja_rota_3",
+    "size": 552,
+    "origin": 12.5,
+    "leg": 20.0,
+    "flap": true,
+    "src": "Esquinas de papel rasgado sobre verde.png"
+   },
+   {
+    "id": "esq_oreja_rota_4",
+    "size": 551,
+    "origin": 12.5,
+    "leg": 20.0,
+    "flap": true,
+    "src": "Esquinas de papel rasgado sobre verde.png"
+   },
+   {
+    "id": "esq_oreja_rota_5",
+    "size": 555,
+    "origin": 14.9,
+    "leg": 20.0,
+    "flap": true,
+    "src": "Gemini_Generated_Image_efun1zefun1zefun.jpg"
+   },
+   {
+    "id": "esq_oreja_rota_6",
+    "size": 553,
+    "origin": 13.9,
+    "leg": 20.0,
+    "flap": true,
+    "src": "Gemini_Generated_Image_efun1zefun1zefun.jpg"
+   },
+   {
+    "id": "esq_oreja_rota_7",
+    "size": 554,
+    "origin": 14.5,
+    "leg": 20.0,
+    "flap": true,
+    "src": "Gemini_Generated_Image_o174zgo174zgo174.jpg"
+   },
+   {
+    "id": "esq_oreja_rota_8",
+    "size": 554,
+    "origin": 14.1,
+    "leg": 20.0,
+    "flap": true,
+    "src": "Gemini_Generated_Image_o174zgo174zgo174.jpg"
+   }
+  ],
+  "vieja": [
+   {
+    "id": "esq_vieja_1",
+    "size": 553,
+    "origin": 13.3,
+    "leg": 20.0,
+    "flap": false,
+    "src": "Cuatro esquinas de papel envejecido (1).png"
+   },
+   {
+    "id": "esq_vieja_2",
+    "size": 552,
+    "origin": 13.2,
+    "leg": 20.0,
+    "flap": false,
+    "src": "Cuatro esquinas de papel envejecido (1).png"
+   },
+   {
+    "id": "esq_vieja_3",
+    "size": 555,
+    "origin": 16.5,
+    "leg": 20.0,
+    "flap": false,
+    "src": "Cuatro esquinas de papel envejecido (1).png"
+   },
+   {
+    "id": "esq_vieja_4",
+    "size": 551,
+    "origin": 12.5,
+    "leg": 20.0,
+    "flap": false,
+    "src": "Cuatro esquinas de papel envejecido (1).png"
+   },
+   {
+    "id": "esq_vieja_5",
+    "size": 558,
+    "origin": 18.4,
+    "leg": 20.0,
+    "flap": false,
+    "src": "Cuatro esquinas de papel envejecido.png"
+   },
+   {
+    "id": "esq_vieja_6",
+    "size": 555,
+    "origin": 16.8,
+    "leg": 20.0,
+    "flap": false,
+    "src": "Cuatro esquinas de papel envejecido.png"
+   },
+   {
+    "id": "esq_vieja_7",
+    "size": 553,
+    "origin": 14.7,
+    "leg": 20.0,
+    "flap": false,
+    "src": "Cuatro esquinas de papel envejecido.png"
+   },
+   {
+    "id": "esq_vieja_8",
+    "size": 551,
+    "origin": 12.0,
+    "leg": 20.0,
+    "flap": false,
+    "src": "Cuatro esquinas de papel envejecido.png"
+   },
+   {
+    "id": "esq_vieja_9",
+    "size": 555,
+    "origin": 16.4,
+    "leg": 20.0,
+    "flap": false,
+    "src": "Cuatro esquinas de papel envejecido.png"
+   },
+   {
+    "id": "esq_vieja_10",
+    "size": 553,
+    "origin": 12.9,
+    "leg": 20.0,
+    "flap": false,
+    "src": "Esquinas de papel vintage sobre verde.png"
+   },
+   {
+    "id": "esq_vieja_11",
+    "size": 565,
+    "origin": 26.4,
+    "leg": 20.0,
+    "flap": false,
+    "src": "Esquinas de papel vintage sobre verde.png"
+   },
+   {
+    "id": "esq_vieja_12",
+    "size": 562,
+    "origin": 22.8,
+    "leg": 20.0,
+    "flap": false,
+    "src": "Esquinas de papel vintage sobre verde.png"
+   },
+   {
+    "id": "esq_vieja_13",
+    "size": 560,
+    "origin": 21.6,
+    "leg": 20.0,
+    "flap": false,
+    "src": "Fragmentos de papel envejecido en cuadrícula.png"
+   },
+   {
+    "id": "esq_vieja_14",
+    "size": 565,
+    "origin": 25.1,
+    "leg": 20.0,
+    "flap": false,
+    "src": "Gemini_Generated_Image_9hbxex9hbxex9hbx.jpg"
+   },
+   {
+    "id": "esq_vieja_15",
+    "size": 563,
+    "origin": 23.5,
+    "leg": 20.0,
+    "flap": false,
+    "src": "Gemini_Generated_Image_9hbxex9hbxex9hbx.jpg"
+   },
+   {
+    "id": "esq_vieja_16",
+    "size": 553,
+    "origin": 13.5,
+    "leg": 20.0,
+    "flap": false,
+    "src": "Gemini_Generated_Image_9hbxex9hbxex9hbx.jpg"
+   },
+   {
+    "id": "esq_vieja_17",
+    "size": 560,
+    "origin": 20.7,
+    "leg": 20.0,
+    "flap": false,
+    "src": "Gemini_Generated_Image_fcpm14fcpm14fcpm.jpg"
+   },
+   {
+    "id": "esq_vieja_18",
+    "size": 568,
+    "origin": 30.4,
+    "leg": 20.0,
+    "flap": false,
+    "src": "Gemini_Generated_Image_fcpm14fcpm14fcpm.jpg"
+   },
+   {
+    "id": "esq_vieja_19",
+    "size": 559,
+    "origin": 19.8,
+    "leg": 20.0,
+    "flap": false,
+    "src": "Gemini_Generated_Image_jivhbpjivhbpjivh.jpg"
+   },
+   {
+    "id": "esq_vieja_20",
+    "size": 566,
+    "origin": 26.0,
+    "leg": 20.0,
+    "flap": false,
+    "src": "Gemini_Generated_Image_jivhbpjivhbpjivh.jpg"
+   }
+  ]
+ }
+}

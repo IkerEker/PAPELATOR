@@ -2,7 +2,7 @@
 
 > Pega o adjunta este archivo al empezar el chat nuevo. Todo el proyecto está en GitHub:
 > **https://github.com/IkerEker/PAPELATOR** (rama `main`, último commit «Una sola ventana con dos pestañas: Presets y Avanzado»).
-> Versión actual del plugin: **3.16.0** (`plugin/manifest.json`). Instalable: `dist/PAPELATOR.ccx`.
+> Versión actual del plugin: **3.17.0** (`plugin/manifest.json`). Instalable: `dist/PAPELATOR.ccx`.
 
 ---
 
@@ -278,6 +278,26 @@ v3.16 lo rehace entero, procedural y a escala real (engine.js, `genBorde`, `BORD
   cambio se vuelven a insertar las tarjetas visibles (`reattach`) para que UXP recalcule alturas: sin huecos en blanco,
   y los sliders que aparecen (calco, borde) se ven. Errores del panel salen en la línea de estado.
 - assets/bordes y bordes.json fuera del plugin (el .ccx vuelve a ~280 MB).
+
+## 6l. v3.17 — Bordes v3: fotos reales bien integradas (sustituye a la v3.16 procedural)
+El usuario rechazó el quemado procedural («fotomontaje de Paint») y las orejas procedurales. Ahora:
+- Opciones: **Sin borde · Corte limpio · Gastado · Rasgado** + slider **Desgaste**. Quemado eliminado (los estados
+  viejos quemado→gastado, recto→limpio, roto→rasgado).
+- `tools/build_bordes.py` (v3; usa los ayudantes de `bordes_v1.py` y la lista `bordes_sets.json`): por cada tipo
+  (blanco, bisel, periodico, acuarela, washi, artesanal, kraft, gris, vegetal, viejo, viejo_roto, espiral,
+  carton_roto, carton) se calibra cada foto a escala real (franja de fibras, ancho del alma, paso de la espiral
+  6,35 mm, paso de las ondas 7 mm, o anchura de foto), se queda SÓLO la luz (luminancia, sin color salvo un poco del
+  tostado en los viejos) y sólo a D mm del filo, se aplana (se quita la forma grande del desgarro, se conservan dientes
+  y fibras) y todas las fotos del tipo se empalman en una tira larga cíclica a 20 px/mm (`assets/bordes/<tipo>.png`
+  RGB=luz/2, A=alfa; `_k.png` = alma). Esquinas: oreja (limpias, 12), oreja_rota (8), vieja (20), guardadas con la
+  oreja a 20 mm + máscara de solapa `_f.png` (dorso, sin tinta). Descartadas por no ser vista cenital o calidad:
+  las de cartón con ondas en arco (vistas de canto), quemados, esquinas «cuatro» de cartón, etc.
+- Motor (`genBorde` v3, `BORDE_REC` familia→tiras): la forma grande del desgarro es procedural (a escala de hoja);
+  la tira se lee relativa a esa línea, reducida por bloques a la resolución del documento (`boxDown`, sin centelleo).
+  Lo que sobresale del filo no lleva tinta y toma el color del alma; el alma (`_k`) quita la tinta y aclara.
+  Corte limpio: orejas reales con el desgaste (1 o 2, 7-16 mm). Gastado: tiras viejas (y desconchadas con más
+  desgaste), esquinas gastadas reales y una oreja estropeada >60 %. Rasgado: 1-4 lados; libreta: espiral + lados.
+- Se mantienen sombra (`sheetShadow`), aplicar entero sobre blanco y el panel sin huecos de la v3.16.
 
 ## 7. Pendiente / ideas que no se han hecho
 - Probar todo dentro de Photoshop real (las pruebas son en Node + simulación del DOM de UXP; el usuario es quien lo

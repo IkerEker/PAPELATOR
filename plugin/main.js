@@ -495,6 +495,7 @@ function fixForMaterial() {
   if (!state.custom && !famOf(estadoFamilias(), state.estado) && materialOf(state.paper) !== 'screen') { state.estado = 'nuevo'; state.edad = 0; }
   if (state.borde === 'recto' || state.borde === 'gastado') state.borde = 'limpio';
   if (state.borde === 'roto') state.borde = 'rasgado';
+  if (state.borde === 'quemado') state.borde = 'gastado';
   if (state.bordeAmount == null || state.bordeAmount > 1) state.bordeAmount = 0.35;
   if (state.borde && state.borde !== 'ninguno' && !bordeList().some(b => b.id === state.borde)) state.borde = 'ninguno';
   if (materialOf(state.paper) !== 'screen') return;

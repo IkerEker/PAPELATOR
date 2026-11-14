@@ -57,9 +57,10 @@ negro, bloc amarillo, periódico salmón…) y la rueda, que abre el selector de
 **Antigüedad**: no sólo amarillea; cuanto más alta, más marcas (foxing, moho, cercos de agua, polvo, cantos), según
 el estado elegido. Humedad al máximo deja la hoja destrozada.
 
-**Borde** (sólo papel y cartón): Sin borde · Corte limpio · Rasgado · Quemado, con ⟳ y slider **Desgaste**. Todo a
-escala real y según el papel (fibra corta en el folio, algodón en la acuarela, pelo largo en el arroz, fibra marrón en
-el kraft, alma clara en la cartulina gris, ondas en el cartón). La hoja lleva su sombra; al aplicar queda sobre blanco.
+**Borde** (sólo papel y cartón): Sin borde · Corte limpio · Gastado · Rasgado, con ⟳ y slider **Desgaste**. Bordes y
+esquinas de fotos reales, calibrados a escala real y fundidos con el papel elegido: sólo cambia el filo (fibras, dientes,
+alma clara, muescas, orejas). Cada papel tiene su rasgado (folio, papel de color, libreta de espiral, periódico,
+acuarela, arroz, hecho a mano, kraft, cartulina gris, vegetal, cartón). La hoja lleva su sombra; al aplicar queda sobre blanco.
 
 **Intensidad del filtro**: 0 % deja la lámina prácticamente igual; 50 % (por defecto) es sutil; 100 % es muy marcado.
 
@@ -77,7 +78,7 @@ tools/                scripts que procesan las fuentes y generan los assets del 
   build_imperf2.py    imperfecciones sutiles: grapas, agujeros de grapa, clip, pinza, medias lunas, arruguitas
   build_boards.py     maderas (abedul, OSB, aglomerado) y cartones (de caja, kraft) desde NUEVAS_NUEVAS/
   build_surfaces.py   superficies de NUEVAS SUPERFICIES/: aparejo recortado a su periodo, colorable, relieve (dispMm)
-  build_bordes.py     (sin uso desde v3.16: los bordes son procedurales en engine.js)
+  build_bordes.py     bordes de la hoja desde BORDES/: tiras calibradas y aplanadas por tipo de papel + esquinas
   build_overlays.py   Sobreponer: vidrios y plásticos de SOBREPONER/ -> reflejos + mapa de desplazamiento (+ malla)
   build_rotulador.py  calco de rotulador: notas, etiqueta y lista escritas a mano (cursiva) con charcos de tinta
   build_folds.py      pliegues y arrugas: sombreado real de cada foto (fold_sources.json), agrupado por nº de pliegues

@@ -87,6 +87,7 @@ async function catalogs(assets) {
     cache.calco = await assets.json('calco.json');
     try { cache.folds = await assets.json('folds.json'); } catch (e) { cache.folds = {}; }
     try { cache.overlays = await assets.json('overlays.json'); } catch (e) { cache.overlays = {}; }
+    try { cache.bordes = await assets.json('bordes.json'); } catch (e) { cache.bordes = null; }
   }
   return cache;
 }
@@ -630,308 +631,207 @@ async function genFolds(S, st, assets, B) {
 }
 
 // ================================================================ BORDE DE LA HOJA
-// La hoja deja de llenar el documento: queda recortada, con su sombra debajo. Tres maneras (corte limpio, rasgado,
-// quemado) y un solo slider de desgaste que decide todo lo demás. Todo se genera a la escala real del papel:
-//   · corte limpio: canto nítido; con desgaste, pelusa de fibra de 0,2 mm, muescas de 0,3-1,5 mm, esquinas
-//     redondeadas (1-3 mm), suciedad del canto, orejas dobladas (6-25 mm), pequeños desgarros y algún mordisco;
-//   · rasgado: el desgarro se aparta de la recta 1-5 mm en ondas de 4-8 cm, con dientes de 0,1-0,4 mm, fibras que
-//     salen 0,3-3 mm según el papel (folio corto, acuarela algodón, arroz pelo largo, kraft fibra marrón) y, a tramos,
-//     el bisel: la cara interior del papel que asoma, más clara y sin tinta (en un papel de color, blanca; en la
-//     cartulina gris, su alma crema; en el cartón ondulado, las ondas de dentro);
-//   · quemado: frente de quema a lóbulos, filo carbonizado negro con ceniza, chamuscado pardo que se apaga hacia
-//     dentro y, con mucho desgaste, agujeros quemados.
-// Se guarda «plano» (alfa, multiplicador de luz/color, quitar tinta, alma) y se lee desplazado con lo mismo que mueve la
-// tinta: el contorno sigue los pliegues, la forma de la hoja y la cámara.
-const BORDE_PAR = {
-  oficina:     { fib: 0.35, dens: 6, fa: 0.55, bev: 0.75, teeth: 0.14, core: [0.6, 253, 253, 251] },
-  cuaderno:    { fib: 0.35, dens: 6, fa: 0.55, bev: 0.75, teeth: 0.14, core: [0.6, 253, 253, 251] },
-  periodico:   { fib: 0.5, dens: 10, fa: 0.5, bev: 0.45, teeth: 0.22, core: [0.35, 238, 234, 222] },
-  reciclado:   { fib: 0.55, dens: 9, fa: 0.5, bev: 0.6, teeth: 0.22, core: [0.4, 238, 234, 224] },
-  acuarela:    { fib: 0.9, dens: 8, fa: 0.5, bev: 1.0, teeth: 0.3, core: [0.5, 252, 250, 245] },
-  washi:       { fib: 2.4, dens: 5, fa: 0.42, bev: 0.3, teeth: 0.2, curl: 1.6, core: [0.5, 250, 250, 247] },
-  artesanal:   { fib: 1.3, dens: 7, fa: 0.5, bev: 0.9, teeth: 0.35, curl: 1.2, core: [0.4, 246, 240, 228] },
-  kraft:       { fib: 1.0, dens: 7, fa: 0.55, bev: 1.0, teeth: 0.25, core: [0.55, 222, 196, 152] },
-  pergamino:   { fib: 0.18, dens: 1.5, fa: 0.5, bev: 0.35, teeth: 0.45, core: [0.3, 236, 222, 192] },
-  vegetal:     { fib: 0.05, dens: 0.3, fa: 0.4, bev: 0.4, teeth: 0.08, core: [0.85, 250, 250, 250] },
-  gris:        { fib: 0.6, dens: 6, fa: 0.55, bev: 1.5, teeth: 0.25, core: [1, 224, 216, 198] },
-  carton:      { fib: 0.7, dens: 5, fa: 0.55, bev: 3.2, teeth: 0.4, flute: 6.5, core: [0.45, 214, 186, 142] },
-  carton_liso: { fib: 1.1, dens: 6, fa: 0.55, bev: 1.4, teeth: 0.3, core: [0.45, 214, 186, 142] }
+// La hoja deja de llenar el documento: queda recortada, con su sombra. Tres bordes y un slider de desgaste:
+//   · corte limpio: canto nítido; con desgaste, orejas dobladas (fotos reales de orejas) y esquinas algo romas;
+//   · gastado: cantos viejos con muescas y desconchones (fotos reales de bordes viejos), esquinas gastadas y, con mucho
+//     desgaste, una oreja estropeada;
+//   · rasgado: 1 a 4 lados rasgados según el desgaste, con el rasgado REAL de ese papel (fotos: folio, papel de color
+//     con su alma blanca, periódico, acuarela, arroz, hecho a mano, kraft, cartulina gris, vegetal, cartón con sus
+//     ondas, libreta arrancada de la espiral).
+// Las fotos (tools/build_bordes.py) están calibradas a escala real y «aplanadas»: guardan los dientes, las fibras y el
+// bisel; la forma grande del desgarro la pone el motor, a la escala de la hoja. De la foto sólo se usa la luz (no su
+// color ni su textura) y sólo a menos de 1-3 mm del filo: más adentro es el papel elegido.
+// Se guarda «plano» (alfa, luz, quitar tinta, alma) y se lee desplazado con lo mismo que mueve la tinta: el contorno
+// sigue los pliegues, la forma de la hoja y la cámara.
+const BORDE_REC = {
+  oficina: { rasgado: 'blanco', color: 'bisel', gastado: ['viejo', 'viejo_roto'], core: [0.6, 253, 253, 251] },
+  cuaderno: { rasgado: 'blanco', color: 'bisel', lomo: 'espiral', gastado: ['viejo', 'viejo_roto'], core: [0.6, 253, 253, 251] },
+  periodico: { rasgado: 'periodico', gastado: ['viejo', 'viejo_roto'], core: [0.35, 238, 234, 222] },
+  reciclado: { rasgado: 'periodico', gastado: ['viejo', 'viejo_roto'], core: [0.4, 238, 234, 224] },
+  acuarela: { rasgado: 'acuarela', color: 'bisel', gastado: ['viejo', 'viejo_roto'], core: [0.5, 252, 250, 245] },
+  washi: { rasgado: 'washi', gastado: ['viejo'], core: [0.5, 250, 250, 247] },
+  artesanal: { rasgado: 'artesanal', gastado: ['viejo'], core: [0.4, 246, 240, 228] },
+  kraft: { rasgado: 'kraft', gastado: ['viejo', 'carton'], core: [0.5, 222, 198, 156] },
+  pergamino: { rasgado: 'viejo_roto', gastado: ['viejo', 'viejo_roto'], core: [0.3, 236, 222, 192] },
+  vegetal: { rasgado: 'vegetal', gastado: ['viejo'], core: [0.85, 250, 250, 250] },
+  gris: { rasgado: 'gris', gastado: ['viejo'], core: [1, 224, 216, 198] },
+  carton: { rasgado: 'carton_roto', gastado: ['carton'], core: [0.45, 214, 186, 142] },
+  carton_liso: { rasgado: 'kraft', gastado: ['carton'], core: [0.45, 214, 186, 142] }
 };
 function typeIdOf(paperId) { const t = (P.PAPER_TYPES || []).filter(t => t.papers.indexOf(paperId) >= 0)[0]; return t ? t.id : null; }
 function bordeFam(st) { return P.BORDE_FAM[typeIdOf(st.paper)] || null; }
 function bordeTipo(st) {
   const t = st.borde || 'ninguno';
-  return t === 'recto' || t === 'gastado' ? 'limpio' : t === 'roto' ? 'rasgado' : t;
+  return t === 'recto' ? 'limpio' : (t === 'roto' ? 'rasgado' : (t === 'quemado' ? 'gastado' : t));
 }
-function bordeOk(st) { return !!bordeFam(st) && ['limpio', 'rasgado', 'quemado'].indexOf(bordeTipo(st)) >= 0; }
-// margen alrededor de la hoja (lo justo para la sombra y las fibras)
+function bordeOk(st) { return !!bordeFam(st) && ['limpio', 'gastado', 'rasgado'].indexOf(bordeTipo(st)) >= 0; }
 function bordeMargin(ppm) { return 7 * ppm; }
+// reduce una imagen por un factor entero (media por bloques): sin centelleo al leer fibras finas a poca resolución
+function boxDown(img, f, key) {
+  if (f <= 1) return img;
+  const ck = key + '@' + f;
+  if (cache[ck]) return cache[ck];
+  const W = Math.floor(img.width / f), H = Math.floor(img.height / f), ch = img.channels, d = img.data;
+  const out = new Uint8Array(W * H * ch), inv = 1 / (f * f);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) for (let c = 0; c < ch; c++) {
+    let s = 0; for (let yy = 0; yy < f; yy++) for (let xx = 0; xx < f; xx++) s += d[((y * f + yy) * img.width + x * f + xx) * ch + c];
+    out[(y * W + x) * ch + c] = s * inv;
+  }
+  return (cache[ck] = { width: W, height: H, channels: ch, data: out });
+}
 
 async function genBorde(S, st, assets, B) {
-  if (!bordeOk(st)) return null;
-  const tipo = bordeTipo(st), fam = bordeFam(st), PR = BORDE_PAR[fam] || BORDE_PAR.oficina;
+  if (!bordeOk(st) || !cache.bordes) return null;
+  const tipo = bordeTipo(st), fam = bordeFam(st), RC = BORDE_REC[fam] || BORDE_REC.oficina, cat = cache.bordes;
   const { w, h, ppm, N } = S;
-  let amt = clamp(def(st.bordeAmount, 0.35), 0, 1);
-  if (st.borde === 'gastado') amt = Math.max(amt, 0.6); else if (st.borde === 'roto') amt = Math.max(amt, 0.85);
+  const amt = clamp(def(st.bordeAmount, 0.35), 0, 1);
   const r = rng(S.seed * 13 + (def(st.seedBorde, 0) | 0) * 7919 + 5);
-  const mm = ppm;                                   // px por mm
-  // color del papel elegido (para el alma que asoma al rasgar)
+  const mm = ppm, CP = cat.ppm || 20;
+  // color del papel elegido: un papel de color rasgado enseña su alma blanca
   let pr = 0, pg = 0, pb = 0, pn = 0;
   for (let o = 0; o < N; o += 97) { pr += B.alb[o * 4]; pg += B.alb[o * 4 + 1]; pb += B.alb[o * 4 + 2]; pn++; }
   pr /= pn; pg /= pn; pb /= pn;
   const mx = Math.max(pr, pg, pb), mn = Math.min(pr, pg, pb);
-  const colored = (mx - mn) / Math.max(1, mx) > 0.2 && fam !== 'kraft' && fam !== 'carton' && fam !== 'carton_liso';
-  const cr = colored ? [0.8, 250, 250, 248] : PR.core;
+  const colored = (mx - mn) / Math.max(1, mx) > 0.2 && ['kraft', 'carton', 'carton_liso', 'pergamino'].indexOf(fam) < 0;
+  const cr = colored ? [0.85, 250, 250, 248] : RC.core;
   const core = [lerp(pr, cr[1], cr[0]), lerp(pg, cr[2], cr[0]), lerp(pb, cr[3], cr[0])];
 
   const A = new Uint8Array(N).fill(255), SS = new Uint8Array(N * 3).fill(128), K = new Uint8Array(N), C = new Uint8Array(N);
   const gx = (s, t, u) => s === 0 ? t : s === 1 ? w - 1 - u : s === 2 ? w - 1 - t : u;
   const gy = (s, t, u) => s === 0 ? u : s === 1 ? t : s === 2 ? h - 1 - u : h - 1 - t;
-  const mulS = (o, a, b, c) => { const q = o * 3; SS[q] = clamp(SS[q] * a, 0, 255); SS[q + 1] = clamp(SS[q + 1] * b, 0, 255); SS[q + 2] = clamp(SS[q + 2] * c, 0, 255); };
-  const maxK = (o, v) => { const k = v * 255; if (k > K[o]) K[o] = k; };
-  const maxC = (o, v) => { const k = v * 255; if (k > C[o]) C[o] = k; };
-  // ---- qué es cada lado: 0 arriba · 1 derecha · 2 abajo · 3 izquierda
-  const kind = ['limpio', 'limpio', 'limpio', 'limpio'];
+  // ---- qué lleva cada lado (0 arriba · 1 derecha · 2 abajo · 3 izquierda): null = canto limpio
+  const side = [null, null, null, null];
   const order = [0, 1, 2, 3].sort(() => r() - 0.5);
-  if (tipo === 'rasgado') { const nT = amt < 0.25 ? 1 : amt < 0.5 ? 2 : amt < 0.75 ? 3 : 4; for (let i = 0; i < nT; i++) kind[order[i]] = 'rasgado'; }
-  if (tipo === 'quemado') for (let s = 0; s < 4; s++) kind[s] = 'quemado';
-  const wearClean = tipo === 'limpio' ? amt : amt * 0.6;
-  const seeds = [0, 1, 2, 3].map(() => (r() * 1e5) | 0);
-  const margin = bordeMargin(mm);
-  // ---- burn: anchos de carbón y chamuscado
-  const wcB = (0.25 + 0.9 * amt) * mm, wsB = (1.6 + 9 * amt) * mm;
-  const charAt = (o, dm, nz) => {
-    // dm en px desde el filo hacia dentro
-    const wc = wcB * (0.6 + 0.8 * nz), ws = wsB * (0.55 + 0.9 * nz);
-    if (dm < wc) {
-      const ash = smooth(0.55, 0.9, nz) * 0.35;
-      mulS(o, 0.11 + ash, 0.085 + ash, 0.07 + ash * 0.95); maxK(o, 1);
+  if (tipo === 'gastado') {
+    const g = RC.gastado;
+    for (let s = 0; s < 4; s++) side[s] = g[0];
+    const nr = g[1] ? clamp(Math.floor((amt - 0.45) * 8), 0, 4) : 0;
+    for (let i = 0; i < nr; i++) side[order[i]] = g[1];
+  } else if (tipo === 'rasgado') {
+    const torn = colored && RC.color ? RC.color : RC.rasgado;
+    if (RC.lomo) {
+      const s0 = r() < 0.65 ? 3 : 0; side[s0] = RC.lomo;
+      const extra = amt < 0.45 ? 0 : amt < 0.8 ? 1 : 2;
+      const rest = order.filter(s => s !== s0);
+      for (let i = 0; i < extra; i++) side[rest[i]] = torn;
     } else {
-      const f = Math.pow(clamp(1 - (dm - wc) / ws, 0, 1), 1.6);
-      if (f > 0.001) {
-        const deep = smooth(0.7, 1, f);
-        mulS(o, lerp(1, lerp(0.62, 0.3, deep), f), lerp(1, lerp(0.42, 0.18, deep), f), lerp(1, lerp(0.2, 0.08, deep), f));
-        if (deep > 0) maxK(o, deep * 0.6);
-      }
+      const nT = amt < 0.25 ? 1 : amt < 0.5 ? 2 : amt < 0.75 ? 3 : 4;
+      for (let i = 0; i < nT; i++) side[order[i]] = torn;
     }
-  };
-  // ---- cada lado: línea del filo (distancia al borde del documento, px) y lo que pasa cerca de ella
-  const lines = [];
-  const torn = [];
+  }
+  // ---- tiras (reducidas a la resolución del documento)
+  const strips = {};
+  for (const name of side) {
+    if (!name || strips[name] || !cat.strips[name]) continue;
+    const info = cat.strips[name];
+    const f = Math.max(1, Math.floor(CP / (ppm * 1.25)));
+    const img = boxDown(await loadImg(assets, 'bordes/' + name + '.png'), f, 'bordes/' + name);
+    const kimg = info.core ? boxDown(await loadImg(assets, 'bordes/' + name + '_k.png'), f, 'bordes/' + name + '_k') : null;
+    strips[name] = { img, kimg, pxmm: CP / f, edge: info.edge / f };
+  }
+  // ---- la línea de cada lado: margen + la forma grande del desgarro (a escala de hoja)
+  const margin = bordeMargin(mm), lines = [];
   for (let s = 0; s < 4; s++) {
-    const L = (s === 0 || s === 2) ? w : h, sd = seeds[s], kd = kind[s];
-    const line = new Float32Array(L), tm = new Float32Array(L), bev = new Float32Array(L), bnz = new Float32Array(L);
-    const Aw = (0.8 + 4.2 * amt) * mm, slope = (r() - 0.5) * 1.6;
-    // mordiscos en un canto limpio (desgaste alto): tramos rasgados cortos
-    const bites = [];
-    if (kd === 'limpio' && wearClean > 0.82) { const nb = r() < 0.5 ? 1 : 0; for (let i = 0; i < nb; i++) bites.push([r() * L, lerp(6, 16, r()) * mm, lerp(1.5, 4, r()) * mm]); }
-    const nicks = [];
-    if (kd !== 'quemado') { const nn = Math.round(L / mm / 60 * Math.pow(wearClean, 1.4) * 4 * r() + (wearClean > 0.3 ? 1 : 0) * (r() < wearClean ? 1 : 0)); for (let i = 0; i < nn; i++) nicks.push([r() * L, lerp(0.4, 1.8, r()) * mm, lerp(0.15, 0.8, r()) * mm * (0.5 + wearClean)]); }
+    const L = (s === 0 || s === 2) ? w : h, sd = (r() * 1e5) | 0, name = side[s];
+    const line = new Float32Array(L);
+    const torn = name && name !== RC.lomo && tipo === 'rasgado';
+    const Aw = torn ? (0.5 + 2.6 * amt) * mm : name ? 0.12 * mm : 0, slope = (r() - 0.5) * 1.4;
     for (let t = 0; t < L; t++) {
       const tmm = t / mm;
-      let v = margin, tw = 0;
-      if (kd === 'rasgado') {
-        tw = 1;
-        v += Aw * (0.15 + 0.85 * fbm2(tmm / 55, s * 3.7, sd)) + 0.32 * Aw * fbm2(tmm / 9, s * 1.3, sd + 1)
-          + Aw * 0.5 * (0.5 + 0.5 * slope * (t / L - 0.5) * 2);
-        v += PR.teeth * mm * (vnoise(tmm / 0.7, s, sd + 2) + 0.6 * vnoise(tmm / 0.28, s, sd + 3));
-      } else if (kd === 'quemado') {
-        const D = (1.2 + 12 * amt) * mm;
-        const lobe = 1 - Math.abs(2 * vnoise(tmm / 14, s * 2.1, sd) - 1);       // frentes de quema en cúspide
-        v += D * (0.25 + 0.5 * lobe + 0.25 * fbm2(tmm / 40, s, sd + 5)) + 0.35 * mm * vnoise(tmm / 0.5, s, sd + 6);
-      } else {
-        v += 0.03 * mm * (vnoise(tmm / 1.5, s, sd) - 0.5);
-        for (const [t0, bw, bd] of bites) {
-          const q = (t - t0) / bw; if (Math.abs(q) < 1) {
-            const prof = Math.pow(1 - q * q, 0.7);
-            v += bd * prof * (0.6 + 0.8 * fbm2(tmm / 3, s, sd + 7)) + PR.teeth * mm * vnoise(tmm / 0.6, s, sd + 8) * prof;
-            tw = Math.max(tw, smooth(0, 0.35, prof));
-          }
-        }
-        for (const [t0, nw, nd] of nicks) { const q = (t - t0) / nw; if (Math.abs(q) < 1) v += nd * Math.sqrt(1 - q * q) * (0.7 + 0.6 * vnoise(tmm / 0.3, s, sd + 9)); }
-      }
-      line[t] = v; tm[t] = tw;
-      // bisel a tramos: sólo donde el desgarro dejó la cara interior arriba
-      bev[t] = tw * PR.bev * mm * (colored ? 1.5 : 1) * Math.max(0, fbm2(tmm / 7, s * 5.1, sd + 11) * 1.8 - (colored ? 0.3 : 0.5)) * (0.7 + 0.5 * amt);
-      bnz[t] = fbm2(tmm / 6, s * 0.7, sd + 12);
+      let v = margin;
+      if (Aw > 0) v += Aw * (0.2 + 0.8 * fbm2(tmm / 55, s * 3.7, sd)) + 0.3 * Aw * fbm2(tmm / 10, s * 1.3, sd + 1) + (torn ? Aw * 0.4 * (0.5 + slope * (t / L - 0.5)) : 0);
+      line[t] = v;
     }
-    lines.push(line); torn.push(tm);
-    let umax = 0; for (let t = 0; t < L; t++) umax = Math.max(umax, line[t] + bev[t]);
-    const deep = kd === 'quemado' ? wsB * 1.5 + wcB * 1.5 : Math.max(PR.bev * mm * 2, 1.2 * mm) + (PR.flute ? 2 * mm : 0);
-    const D = (s === 0 || s === 2) ? h : w;
-    umax = Math.min(D, Math.ceil(umax + deep + 2));
-    const dirtW = (1 + 2.5 * wearClean) * mm, dirt = 0.09 * Math.pow(wearClean, 1.5);
-    for (let t = 0; t < L; t++) {
-      const ln = line[t], tw = tm[t], bw = bev[t], nz = bnz[t], tmm = t / mm;
-      for (let u = 0; u < umax; u++) {
-        const o = gy(s, t, u) * w + gx(s, t, u);
-        const d = u - ln;
-        if (d < -0.5) {
-          // fuera de la hoja; en el quemado, ceniza suelta pegada al filo
-          if (kd === 'quemado' && d > -0.35 * mm) {
-            const ash = clamp(vnoise(tmm / 0.25, u / mm / 0.25, seeds[s] + 13) * 1.6 - 0.6, 0, 1) * (1 + d / (0.35 * mm));
-            if (ash > 0.02) { A[o] = Math.min(A[o], ash * 200); mulS(o, 0.16, 0.13, 0.11); maxK(o, 1); continue; }
-          }
-          A[o] = 0; continue;
-        }
-        if (d < 0.5) A[o] = A[o] * (d + 0.5);
-        const dd = Math.max(0, d);
-        if (kd === 'quemado') { charAt(o, dd, 0.55 * nz + 0.45 * vnoise(tmm / 2.5, u / mm / 2.5, seeds[s] + 16)); continue; }
-        // canto: el grosor del papel hace una línea finísima algo más oscura
-        if (dd < 0.18 * mm) mulS(o, 0.96, 0.96, 0.96);
-        if (tw > 0) {
-          if (dd < 0.5 * mm) { const f = 1 + 0.035 * tw * (1 - dd / (0.5 * mm)); mulS(o, f, f, f); }
-          if (bw > 0.3 && dd < bw + 0.15 * mm) {
-            if (dd < bw) {
-              // bisel: cara interior, fibrosa, sin tinta
-              const fib = vnoise(tmm / 0.11, dd / mm / 0.6, seeds[s] + 14);
-              maxK(o, tw); maxC(o, tw * (0.75 + 0.25 * fib) * smooth(bw, bw * 0.75, dd));
-              if (PR.flute) {
-                const yy = gy(s, t, u) / mm, ph = Math.cos(yy / PR.flute * 6.283);   // las ondas van en filas, como la textura
-                const f = 0.8 + 0.2 * ph; mulS(o, f, f * 0.98, f * 0.95);
-              }
-            } else { const f = PR.flute ? 0.72 : 0.9; mulS(o, f, f, f); }   // escalón del bisel: sombra fina
-          }
-        }
-        if (dirt > 0 && dd < dirtW) {
-          const f = dirt * Math.pow(1 - dd / dirtW, 2) * (0.5 + vnoise(tmm / 4, s, seeds[s] + 15));
-          mulS(o, 1 - f * 0.9, 1 - f * 1.0, 1 - f * 1.25);
-        }
-      }
-    }
+    lines.push(line);
   }
-  // ---- esquinas: redondeo del desgaste y orejas dobladas (sólo donde los dos cantos son limpios)
-  const cornerSides = [[0, 3], [0, 1], [2, 1], [2, 3]];          // TL, TR, BR, BL
-  const sgxs = [1, -1, -1, 1], sgys = [1, 1, -1, -1];
-  const med = (arr) => { const a = Array.from(arr.subarray(Math.floor(arr.length * 0.1), Math.floor(arr.length * 0.9))).sort((p, q) => p - q); return a[a.length >> 1]; };
-  const Lm = lines.map(med);
-  const cornerXY = (ci) => [sgxs[ci] > 0 ? Lm[3] : w - 1 - Lm[1], sgys[ci] > 0 ? Lm[0] : h - 1 - Lm[2]];
-  const cleanCorner = (ci) => kind[cornerSides[ci][0]] === 'limpio' && kind[cornerSides[ci][1]] === 'limpio';
-  const [Lx0, Ly0] = lightDir(st.luz);
-  for (let ci = 0; ci < 4; ci++) {
-    if (!cleanCorner(ci) && tipo !== 'rasgado') continue;
-    const rad = (0.15 + 3 * Math.pow(wearClean, 1.3) * lerp(0.5, 1.2, r())) * mm;
-    if (rad < 0.4) continue;
-    const [xc, yc] = cornerXY(ci), sx = sgxs[ci], sy = sgys[ci];
-    for (let Y = 0; Y < rad + 2; Y++) for (let X = 0; X < rad + 2; X++) {
-      const x = Math.round(xc + X * sx), y = Math.round(yc + Y * sy); if (x < 0 || y < 0 || x >= w || y >= h) continue;
-      if (X >= rad || Y >= rad) continue;
-      const dist = Math.hypot(rad - X, rad - Y), cov = clamp(rad - dist + 0.5, 0, 1);
-      const o = y * w + x; A[o] = A[o] * cov;
-    }
-  }
-  const nEars = wearClean < 0.35 ? 0 : wearClean < 0.7 ? 1 : 2;
-  const earOrder = [0, 1, 2, 3].sort(() => r() - 0.5).filter(cleanCorner);
-  for (let ei = 0; ei < Math.min(nEars, earOrder.length); ei++) {
-    const ci = earOrder[ei], [xc, yc] = cornerXY(ci), sgx = sgxs[ci], sgy = sgys[ci];
-    const s1 = lerp(6, 22, Math.pow(r(), 1.5)) * (0.7 + 0.5 * wearClean) * mm, s2 = s1 * lerp(0.7, 1.35, r());
-    const f = lerp(0.82, 0.97, r());                       // la solapa no queda plana: se ve algo más corta
-    const nl = Math.hypot(1 / s1, 1 / s2), nx = 1 / s1 / nl, ny = 1 / s2 / nl;
-    const Bx = Math.ceil(Math.max(s1, s2) * 1.15 + 3 * mm);
-    const M = new Float32Array(Bx * Bx), T = new Float32Array(Bx * Bx);
-    const inFlap = (X, Y) => {
-      const dl = X * nx + Y * ny - 1 / nl;                  // >0: lado de la hoja
-      if (dl <= 0) return false;
-      const k = dl * (1 + 1 / f), Xs = X - nx * k, Ys = Y - ny * k;
-      return Xs >= 0 && Ys >= 0;
-    };
-    for (let Y = 0; Y < Bx; Y++) for (let X = 0; X < Bx; X++) {
-      let c = 0; for (const [ox, oy] of [[0.25, 0.25], [0.75, 0.25], [0.25, 0.75], [0.75, 0.75]]) if (inFlap(X + ox, Y + oy)) c++;
-      M[Y * Bx + X] = c / 4;
-    }
-    // sombra de la solapa sobre la hoja: hacia el lado contrario de la luz, más larga lejos del pliegue
-    const sdx = -Lx0 * sgx, sdy = -Ly0 * sgy, off = 0.7 * mm;
-    for (let Y = 0; Y < Bx; Y++) for (let X = 0; X < Bx; X++) {
-      const xs = Math.round(X - sdx * off), ys = Math.round(Y - sdy * off);
-      T[Y * Bx + X] = xs >= 0 && ys >= 0 && xs < Bx && ys < Bx ? M[ys * Bx + xs] : 0;
-    }
-    gaussBlur(T, Bx, Bx, 0.8 * mm, new Float32Array(Bx * Bx));
-    const back = 0.965, lift = (Lx0 * sgx * nx + Ly0 * sgy * ny);   // la solapa mira algo hacia la luz o en contra
-    for (let Y = 0; Y < Bx; Y++) for (let X = 0; X < Bx; X++) {
-      const x = Math.round(xc + X * sgx), y = Math.round(yc + Y * sgy); if (x < 0 || y < 0 || x >= w || y >= h) continue;
-      const o = y * w + x, dl = X * nx + Y * ny - 1 / nl, m = M[Y * Bx + X];
-      if (dl < 0.5) A[o] = A[o] * clamp(dl + 0.5, 0, 1);
-      if (m > 0) {
-        A[o] = Math.max(A[o], m * 255);
-        const g = back * (1 - 0.05 * lift * clamp(dl / (Math.min(s1, s2) * 0.5), 0, 1)) * (dl < 0.35 * mm ? 1.05 : 1);
-        const q = o * 3; SS[q] = clamp(128 * g, 0, 255); SS[q + 1] = SS[q]; SS[q + 2] = clamp(128 * g * 0.99, 0, 255);
-        K[o] = 255; C[o] = 0;
-      } else if (dl > 0) {
-        const sh = T[Y * Bx + X] * 0.33; if (sh > 0.003) mulS(o, 1 - sh, 1 - sh, 1 - sh);
-      }
-    }
-  }
-  // ---- desgarros pequeños que entran en la hoja
-  const nTears = (tipo === 'quemado') ? 0 : wearClean > 0.55 ? 1 + (r() < (wearClean - 0.55) * 2 ? 1 : 0) + (tipo === 'rasgado' && amt > 0.8 ? 1 : 0) : 0;
-  for (let i = 0; i < nTears; i++) {
-    const s = (r() * 4) | 0, L = (s === 0 || s === 2) ? w : h, t0 = lerp(0.12, 0.88, r()) * L;
-    let t = t0, u = lines[s][Math.round(t0)] - 0.5 * mm, ang = (r() - 0.5) * 1.1;
-    const len = lerp(3, 14, r()) * mm, open = lerp(0.05, 0.22, r()) * mm, side = r() < 0.5 ? 1 : -1;
-    const pts = [];
-    for (let l = 0; l < len; l += 0.35 * mm) { pts.push([gx(s, t, u), gy(s, t, u), 1 - l / len]); ang += (r() - 0.5) * 0.6; t += Math.sin(ang) * 0.35 * mm; u += Math.cos(ang) * 0.35 * mm; }
-    const R = 1.2 * mm;
-    let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; for (const p of pts) { x0 = Math.min(x0, p[0]); x1 = Math.max(x1, p[0]); y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]); }
-    for (let y = Math.max(0, Math.floor(y0 - R)); y <= Math.min(h - 1, Math.ceil(y1 + R)); y++) for (let x = Math.max(0, Math.floor(x0 - R)); x <= Math.min(w - 1, Math.ceil(x1 + R)); x++) {
-      let best = 1e9, bs = 0, bw = 0;
-      for (let k = 0; k + 1 < pts.length; k++) {
-        const ax = pts[k][0], ay = pts[k][1], bx = pts[k + 1][0], by = pts[k + 1][1], vx = bx - ax, vy = by - ay, l2 = vx * vx + vy * vy || 1;
-        const q = clamp(((x - ax) * vx + (y - ay) * vy) / l2, 0, 1), px = ax + vx * q - x, py = ay + vy * q - y, dd = px * px + py * py;
-        if (dd < best) { best = dd; bs = (vx * (y - ay) - vy * (x - ax)) > 0 ? 1 : -1; bw = lerp(pts[k][2], pts[k + 1][2], q); }
-      }
-      const dist = Math.sqrt(best), o = y * w + x, half = open * bw * 0.5;
-      if (dist < half + 0.5) A[o] = A[o] * clamp(dist - half + 0.5, 0, 1);
-      if (dist < R) {
-        const e = Math.exp(-dist / (0.35 * mm));
-        if (bs === side) mulS(o, 1 - 0.14 * e, 1 - 0.14 * e, 1 - 0.14 * e); else mulS(o, 1 + 0.05 * e, 1 + 0.05 * e, 1 + 0.05 * e);
-        maxC(o, 0.5 * Math.exp(-dist / (0.12 * mm))); if (dist < 0.25 * mm) maxK(o, 0.6);
-      }
-    }
-  }
-  // ---- agujeros quemados
-  if (tipo === 'quemado' && amt > 0.55) {
-    const nh = 1 + Math.round((amt - 0.55) * 5 * r());
-    for (let i = 0; i < nh; i++) {
-      const s = (r() * 4) | 0, L = (s === 0 || s === 2) ? w : h, t0 = lerp(0.15, 0.85, r()) * L;
-      const Rr = lerp(1.5, 7, r()) * amt * mm, u0 = lines[s][Math.round(t0)] + Rr + lerp(3, 25, r()) * mm;
-      const cx = gx(s, t0, u0), cy = gy(s, t0, u0), hs = (r() * 1e5) | 0, ext = Rr * 1.4 + wsB * 1.6 + wcB * 2;
-      for (let y = Math.max(0, Math.floor(cy - ext)); y <= Math.min(h - 1, Math.ceil(cy + ext)); y++) for (let x = Math.max(0, Math.floor(cx - ext)); x <= Math.min(w - 1, Math.ceil(cx + ext)); x++) {
-        const dx = x - cx, dy = y - cy, rr = Math.hypot(dx, dy), an = Math.atan2(dy, dx);
-        const Rt = Rr * (0.55 + 0.9 * fbm2(Math.cos(an) * 2.2 + 3, Math.sin(an) * 2.2 + 3, hs) + 0.12 * vnoise(an * 9, 2, hs + 3));
-        const d = rr - Rt, o = y * w + x;
-        if (d < 0.5) A[o] = A[o] * clamp(d + 0.5, 0, 1);
-        if (d >= -0.5) charAt(o, Math.max(0, d), fbm2(an * 2, 1, hs + 1));
-      }
-    }
-  }
-  // ---- fibras: salen del filo rasgado (y una pelusa fina en los cantos gastados)
-  const fibW = Math.max(0.55, 0.045 * mm);
   for (let s = 0; s < 4; s++) {
-    if (kind[s] === 'quemado') continue;
-    const L = (s === 0 || s === 2) ? w : h, line = lines[s], tm = torn[s];
-    const Lmm = L / mm;
-    const nF = Math.round(Lmm * PR.dens * (kind[s] === 'rasgado' ? 1 : 0.06 + 0.5 * Math.pow(wearClean, 1.5)));
-    for (let i = 0; i < nF; i++) {
-      const t0 = r() * L, ti = Math.round(t0), tw = Math.max(tm[ti], kind[s] === 'rasgado' ? 1 : 0);
-      const lenK = tw > 0.5 ? 1 : 0.35;
-      const len = PR.fib * lenK * mm * (0.25 + 1.6 * Math.pow(r(), 2.2));
-      if (len < 0.8) continue;
-      let t = t0, u = line[ti] + r() * 0.25 * mm * lenK, ang = gauss(r) * 0.65;
-      { const rx = Math.round(gx(s, t, u + 1)), ry = Math.round(gy(s, t, u + 1)); if (rx < 0 || ry < 0 || rx >= w || ry >= h || A[ry * w + rx] < 160) continue; }
-      const curl = (r() - 0.5) * 0.25 * (PR.curl || 1) / Math.max(1, len / mm);
-      const af = PR.fa * (0.35 + 0.65 * r()) * (tw > 0.5 ? 1 : 0.7);
-      const steps = Math.ceil(len / 0.6);
-      for (let k = 0; k < steps; k++) {
-        const fx = gx(s, t, u), fy = gy(s, t, u);
-        const ix = Math.floor(fx), iy = Math.floor(fy), ffx = fx - ix, ffy = fy - iy;
-        const fade = 1 - 0.6 * (k / steps);
-        for (const [ddx, ddy, ww] of [[0, 0, (1 - ffx) * (1 - ffy)], [1, 0, ffx * (1 - ffy)], [0, 1, (1 - ffx) * ffy], [1, 1, ffx * ffy]]) {
-          const xx = ix + ddx, yy = iy + ddy; if (xx < 0 || yy < 0 || xx >= w || yy >= h) continue;
-          const o = yy * w + xx, a = af * fade * Math.min(1, ww * fibW * 1.6);
-          if (a * 255 > A[o]) A[o] = a * 255;
-          if (a > 0.05) { K[o] = 255; maxC(o, 0.85); }
+    const L = (s === 0 || s === 2) ? w : h, D = (s === 0 || s === 2) ? h : w, line = lines[s], name = side[s];
+    let umax = 0; for (let t = 0; t < L; t++) if (line[t] > umax) umax = line[t];
+    if (!name || !strips[name]) {
+      // canto limpio: nítido; el grosor del papel deja una línea finísima algo más oscura
+      umax = Math.min(D, Math.ceil(umax + 0.3 * mm + 2));
+      for (let t = 0; t < L; t++) for (let u = 0; u < umax; u++) {
+        const d = u - line[t], o = gy(s, t, u) * w + gx(s, t, u);
+        if (d < 0.5) A[o] = A[o] * clamp(d + 0.5, 0, 1);
+        if (d >= -0.5 && d < 0.18 * mm) { const q = o * 3; SS[q] = SS[q] * 0.965; SS[q + 1] = SS[q + 1] * 0.965; SS[q + 2] = SS[q + 2] * 0.965; }
+      }
+      continue;
+    }
+    const sp = strips[name], img = sp.img, iw = img.width, ih = img.height, ic = img.channels, id = img.data;
+    const kd = sp.kimg ? sp.kimg.data : null, kc = sp.kimg ? sp.kimg.channels : 1;
+    const k = sp.pxmm / mm, off = r() * iw, below = (ih - sp.edge) / k;
+    umax = Math.min(D, Math.ceil(umax + below + 2));
+    for (let t = 0; t < L; t++) {
+      const sx = ((t * k + off) % iw + iw) % iw, ix0 = sx | 0, fx = sx - ix0, ix1 = ix0 + 1 < iw ? ix0 + 1 : 0;
+      for (let u = 0; u < umax; u++) {
+        const sy = sp.edge + (u - line[t]) * k;
+        const o = gy(s, t, u) * w + gx(s, t, u);
+        if (sy < 0) { A[o] = 0; continue; }
+        if (sy >= ih - 1) break;
+        const iy0 = sy | 0, fy = sy - iy0, w00 = (1 - fx) * (1 - fy), w10 = fx * (1 - fy), w01 = (1 - fx) * fy, w11 = fx * fy;
+        const p00 = (iy0 * iw + ix0) * ic, p10 = (iy0 * iw + ix1) * ic, p01 = ((iy0 + 1) * iw + ix0) * ic, p11 = ((iy0 + 1) * iw + ix1) * ic;
+        const a = (id[p00 + 3] * w00 + id[p10 + 3] * w10 + id[p01 + 3] * w01 + id[p11 + 3] * w11) / 255;
+        A[o] = A[o] * a;
+        const q = o * 3;
+        for (let c = 0; c < 3; c++) SS[q + c] = clamp(SS[q + c] * (id[p00 + c] * w00 + id[p10 + c] * w10 + id[p01 + c] * w01 + id[p11 + c] * w11) / 127.5, 0, 255);
+        // fibras y lo que sobresale del filo: sin tinta, del color del alma
+        if (sy < sp.edge) { K[o] = 255; const v = 0.55 * 255; if (v > C[o]) C[o] = v; }
+        if (kd) {
+          const kv = kd[(iy0 * iw + ix0) * kc] * w00 + kd[(iy0 * iw + ix1) * kc] * w10 + kd[((iy0 + 1) * iw + ix0) * kc] * w01 + kd[((iy0 + 1) * iw + ix1) * kc] * w11;
+          if (kv > C[o]) C[o] = kv; if (kv > K[o]) K[o] = kv;
         }
-        ang += curl * 0.6 + (r() - 0.5) * 0.18;
-        t += Math.sin(ang) * 0.6; u -= Math.cos(ang) * 0.6;
+      }
+    }
+  }
+  // ---- esquinas reales (orejas y esquinas gastadas): fotos guardadas con la oreja de 20 mm
+  const corners = [];
+  const cleanish = (ci) => { const [a1, b1] = [[0, 3], [0, 1], [2, 1], [2, 3]][ci]; const ok = (n) => !n || (RC.gastado || []).indexOf(n) >= 0; return ok(side[a1]) && ok(side[b1]); };
+  const cOrder = [0, 1, 2, 3].sort(() => r() - 0.5).filter(cleanish);
+  if (tipo === 'limpio' && cat.corners.oreja) {
+    const n = amt < 0.35 ? 0 : amt < 0.75 ? 1 : 2;
+    for (let i = 0; i < Math.min(n, cOrder.length); i++) corners.push([cOrder[i], 'oreja', lerp(7, 16, r()) * (0.8 + 0.4 * amt)]);
+  } else if (tipo === 'gastado') {
+    const nv = clamp(1 + Math.round(amt * 3), 1, 4);
+    let i = 0;
+    if (amt > 0.6 && cat.corners.oreja_rota && cOrder.length) corners.push([cOrder[i++], 'oreja_rota', lerp(9, 16, r())]);
+    for (; i < Math.min(nv, cOrder.length); i++) corners.push([cOrder[i], 'vieja', lerp(3, 7, r()) * (0.7 + 0.6 * amt)]);
+  } else if (tipo === 'rasgado' && amt > 0.75 && cat.corners.oreja && cOrder.length) {
+    corners.push([cOrder[0], 'oreja', lerp(7, 13, r())]);
+  }
+  const sgxs = [1, -1, -1, 1], sgys = [1, 1, -1, -1];
+  const medL = lines.map(l => { const a = Array.from(l.subarray(Math.floor(l.length * 0.1), Math.floor(l.length * 0.9))).sort((p, q) => p - q); return a[a.length >> 1]; });
+  for (const [ci, cset, legMm] of corners) {
+    const list = cat.corners[cset]; if (!list || !list.length) continue;
+    const it = list[(r() * list.length) | 0];
+    const sc = legMm / (it.leg || 20);                       // tamaño real / tamaño guardado
+    const pxmm0 = CP;                                        // px de la foto por mm (a tamaño guardado)
+    const srcPerDst = pxmm0 / (sc * mm);
+    const f = Math.max(1, Math.floor(srcPerDst / 1.25));
+    const img = boxDown(await loadImg(assets, 'bordes/' + it.id + '.png'), f, 'bordes/' + it.id);
+    const fimg = it.flap ? boxDown(await loadImg(assets, 'bordes/' + it.id + '_f.png'), f, 'bordes/' + it.id + '_f') : null;
+    const iw = img.width, ih = img.height, ic = img.channels, id = img.data, inv = srcPerDst / f, org = it.origin / f;
+    const sgx = sgxs[ci], sgy = sgys[ci];
+    const xc = sgx > 0 ? medL[3] : w - 1 - medL[1], yc = sgy > 0 ? medL[0] : h - 1 - medL[2];
+    const ext = Math.ceil((iw - org) / inv), pre = Math.ceil(org / inv) + 1;
+    const flip = r() < 0.5;                                  // la oreja puede ir hacia un lado u otro (espejo en la diagonal)
+    for (let dy = -pre; dy < ext; dy++) {
+      const y = Math.round(yc + dy * sgy); if (y < 0 || y >= h) continue;
+      for (let dx = -pre; dx < ext; dx++) {
+        const x = Math.round(xc + dx * sgx); if (x < 0 || x >= w) continue;
+        let sx = org + dx * inv, sy = org + dy * inv;
+        if (flip) { const tt = sx; sx = sy; sy = tt; }
+        if (sx < 0 || sy < 0 || sx >= iw - 1 || sy >= ih - 1) continue;
+        const ix = sx | 0, iy = sy | 0, fx = sx - ix, fy = sy - iy, w00 = (1 - fx) * (1 - fy), w10 = fx * (1 - fy), w01 = (1 - fx) * fy, w11 = fx * fy;
+        const p00 = (iy * iw + ix) * ic, p10 = p00 + ic, p01 = p00 + iw * ic, p11 = p01 + ic;
+        const o = y * w + x, q = o * 3;
+        const ca = id[p00 + 3] * w00 + id[p10 + 3] * w10 + id[p01 + 3] * w01 + id[p11 + 3] * w11;
+        if (ca < A[o]) A[o] = ca;
+        for (let c = 0; c < 3; c++) SS[q + c] = clamp(SS[q + c] * (id[p00 + c] * w00 + id[p10 + c] * w10 + id[p01 + c] * w01 + id[p11 + c] * w11) / 127.5, 0, 255);
+        if (fimg) {
+          const fd = fimg.data, fc = fimg.channels;
+          const fv = fd[(iy * iw + ix) * fc] * w00 + fd[(iy * iw + ix + 1) * fc] * w10 + fd[((iy + 1) * iw + ix) * fc] * w01 + fd[((iy + 1) * iw + ix + 1) * fc] * w11;
+          if (fv > K[o]) K[o] = fv;                          // la solapa enseña el dorso: sin tinta
+        }
       }
     }
   }
