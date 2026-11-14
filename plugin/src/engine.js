@@ -87,6 +87,7 @@ async function catalogs(assets) {
     cache.calco = await assets.json('calco.json');
     try { cache.folds = await assets.json('folds.json'); } catch (e) { cache.folds = {}; }
     try { cache.overlays = await assets.json('overlays.json'); } catch (e) { cache.overlays = {}; }
+    try { cache.bordes = await assets.json('bordes.json'); } catch (e) { cache.bordes = null; }
   }
   return cache;
 }
@@ -559,6 +560,29 @@ async function genFolds(S, st, assets, B) {
   const JN = new Float32Array(CR); gaussBlur(JN, tw, th, 2.5 * tpm, tmp);            // cruces: mucha arista junta
   let jm = 0; for (let o = 0; o < TN; o += 5) if (JN[o] > jm) jm = JN[o];
   for (let o = 0; o < TN; o++) JN[o] = smooth(0.35, 0.9, JN[o] / (jm || 1));
+  // ---- altura de la hoja: la luz de la foto (sombreado) es la pendiente de la hoja; sumándola a lo largo de filas y
+  // columnas sale su altura (lo que sube y baja en cada pliegue). Visto con la cámara, lo más alto se ve un poco más
+  // hacia fuera: el contorno de la hoja y lo impreso hacen un quiebro en cada pliegue, como en la foto de una hoja
+  // que estuvo doblada.
+  const pd = 2, pw = Math.ceil(tw / pd), ph = Math.ceil(th / pd), PN = pw * ph;
+  const SHd = new Float32Array(PN);
+  for (let y = 0; y < ph; y++) for (let x = 0; x < pw; x++) SHd[y * pw + x] = SH[Math.min(th - 1, y * pd) * tw + Math.min(tw - 1, x * pd)];
+  { let m = 0; for (let o = 0; o < PN; o++) m += SHd[o]; m /= PN; for (let o = 0; o < PN; o++) SHd[o] -= m; }
+  const PZ = new Float32Array(PN), H2 = new Float32Array(PN), tmpP = new Float32Array(PN);
+  for (let y = 0; y < ph; y++) { let s = 0; for (let x = 0; x < pw; x++) { s += SHd[y * pw + x]; PZ[y * pw + x] = s; } }
+  for (let x = 0; x < pw; x++) { let s = 0; for (let y = 0; y < ph; y++) { s += SHd[y * pw + x]; H2[y * pw + x] = s; } }
+  for (let o = 0; o < PN; o++) PZ[o] += H2[o];
+  // sin deriva: se quita lo muy lento (lo que mide más que unos 6 cm)
+  H2.set(PZ); gaussBlur(H2, pw, ph, 60 * tpm / pd, tmpP);
+  let hs = 0; for (let o = 0; o < PN; o++) { PZ[o] -= H2[o]; hs += PZ[o] * PZ[o]; }
+  hs = Math.sqrt(hs / PN) || 1; for (let o = 0; o < PN; o++) PZ[o] = clamp(PZ[o] / hs * 0.25, -0.6, 0.6);
+  // el papel no hace escalones: dobla. Se suaviza unos milímetros para que el contorno haga un codo, no un corte
+  gaussBlur(PZ, pw, ph, 2.5 * tpm / pd, tmpP);
+  const bilP = (u, v) => {
+    u = clamp(u / pd, 0, pw - 1.001); v = clamp(v / pd, 0, ph - 1.001);
+    const iu = u | 0, iv = v | 0, du = u - iu, dv = v - iv, o = iv * pw + iu;
+    return (PZ[o] * (1 - du) + PZ[o + 1] * du) * (1 - dv) + (PZ[o + pw] * (1 - du) + PZ[o + pw + 1] * du) * dv;
+  };
   const bil = (A, u, v) => {
     u = u < 0 ? 0 : u > tw - 1.001 ? tw - 1.001 : u; v = v < 0 ? 0 : v > th - 1.001 ? th - 1.001 : v;
     const iu = u | 0, iv = v | 0, du = u - iu, dv = v - iv, o = iv * tw + iu;
@@ -585,7 +609,10 @@ async function genFolds(S, st, assets, B) {
       const u = a * x + b * y + c, v = d * x + e * y + f;
       out[0] = (bic(u, v) * amt - hiA) / (1 + hiA); out[1] = bil(DS, u, v) * amt; out[2] = bil(CR, u, v); out[3] = bil(JN, u, v);
       return out;
-    }
+    },
+    // altura relativa del panel (-0.5..0.5) en este punto del documento
+    panel(x, y) { return bilP(a * x + b * y + c, d * x + e * y + f); },
+    panelK: 0.01 * Math.min(1.5, amt) * (st.luz === 'ninguna' || st.luz === 'escaner' ? 0.6 : 1)
   };
   // ---- en el papel: color de la arista (fibra rota algo más clara; con los años, suciedad) y, en «Papel de fondo»,
   // el sombreado para ver el pliegue mientras se trabaja
@@ -601,6 +628,186 @@ async function genFolds(S, st, assets, B) {
     if (m !== 1) { alb[j] *= m; alb[j + 1] *= m; alb[j + 2] *= m * (m < 1 ? 0.995 : 1); }
   }
   return F;
+}
+
+// ================================================================ BORDE DE LA HOJA
+// La hoja deja de llenar el documento: queda recortada con alfa. Lo que cuenta cómo es el borde son tiras de borde
+// reales (tools/build_bordes.py): alfa (fibras sueltas semitransparentes incluidas), Sh (luz y color del filo
+// respecto al papel: sombras de solapas, filo tostado o quemado) y K (dónde asoma el alma clara del papel). Se aplican
+// a lo largo de cada lado, siguiendo una línea que se aparta un poco de la recta (rasgado a mano) y, en las esquinas,
+// esquinas reales (orejas dobladas, esquinas gastadas). Todo se guarda «plano»; luego se lee desplazado con lo mismo
+// que mueve la tinta (pliegues, forma de la hoja, cámara), así el contorno se dobla con la hoja.
+const BORDE_REC = {
+  oficina: { rasgado: ['blanco'], color: ['bisel'], roto: ['blanco_roto'], esquinas: ['oreja', 'oreja_rota'] },
+  cuaderno: { rasgado: ['blanco'], color: ['bisel'], lomo: ['espiral', 'espiral', 'wire'], roto: ['blanco_roto'], esquinas: ['oreja', 'oreja_rota'] },
+  periodico: { rasgado: ['periodico'], roto: ['viejo_roto'], viejo: true, core: [0.6, 236, 230, 214] },
+  acuarela: { rasgado: ['acuarela'], color: ['acuarela', 'bisel'], roto: ['blanco_roto', 'acuarela'], esquinas: ['oreja'] },
+  washi: { rasgado: ['washi'], roto: ['washi', 'artesanal'], esquinas: ['oreja'] },
+  artesanal: { rasgado: ['artesanal'], roto: ['artesanal'], esquinas: ['vieja'], core: [0.5, 240, 232, 214] },
+  reciclado: { rasgado: ['reciclado', 'periodico'], roto: ['reciclado'], core: [0.6, 232, 228, 218] },
+  kraft: { rasgado: ['kraft'], roto: ['kraft_grueso', 'kraft'], esquinas: ['oreja_rota'], core: [0.5, 226, 202, 160] },
+  pergamino: { rasgado: ['viejo_roto'], roto: ['viejo_roto'], viejo: true, core: [0.5, 236, 222, 190] },
+  vegetal: { rasgado: ['vegetal'], roto: ['vegetal', 'blanco_roto'], esquinas: ['oreja'], core: [0.5, 246, 246, 244] },
+  gris: { rasgado: ['gris'], roto: ['gris_roto', 'gris'], esquinas: ['oreja_rota'], core: [1, 224, 216, 200] },
+  carton: { rasgado: ['carton_rasgado'], roto: ['carton_roto', 'carton_rasgado'], gastado: ['carton'], esquinas: ['carton'], core: [0.45, 226, 200, 160] },
+  carton_liso: { rasgado: ['kraft_grueso'], roto: ['kraft_grueso'], gastado: ['carton'], esquinas: ['carton'], core: [0.45, 226, 200, 160] }
+};
+function typeIdOf(paperId) { const t = (P.PAPER_TYPES || []).filter(t => t.papers.indexOf(paperId) >= 0)[0]; return t ? t.id : null; }
+function bordeFam(st) { return P.BORDE_FAM[typeIdOf(st.paper)] || null; }
+function bordeOk(st, tipo) {
+  const fam = bordeFam(st); if (!fam) return false;
+  return (P.BORDE_NO[fam] || []).indexOf(tipo || st.borde) < 0;
+}
+async function genBorde(S, st, assets, B) {
+  const tipo = st.borde || 'ninguno';
+  if (tipo === 'ninguno' || !cache.bordes || !bordeOk(st, tipo)) return null;
+  const fam = bordeFam(st), rec = BORDE_REC[fam], cat = cache.bordes;
+  const { w, h, ppm, N } = S;
+  const amt = clamp(def(st.bordeAmount, 1), 0, 2);
+  const r = rng(S.seed * 13 + (def(st.seedBorde, 0) | 0) * 7919 + 5);
+  const pick = (arr) => arr[(r() * arr.length) | 0];
+  const old = !!rec.viejo || def(st.edad, 0) > 0.4;
+  // color del papel elegido: ¿es de color? (un papel de color rasgado enseña su alma blanca)
+  let pr = 0, pg = 0, pb = 0, pn = 0;
+  for (let o = 0; o < N; o += 97) { pr += B.alb[o * 4]; pg += B.alb[o * 4 + 1]; pb += B.alb[o * 4 + 2]; pn++; }
+  pr /= pn; pg /= pn; pb /= pn;
+  const mx = Math.max(pr, pg, pb), mn = Math.min(pr, pg, pb);
+  const colored = (mx - mn) / Math.max(1, mx) > 0.22 || mx < 150;
+  const cr = rec.core || [0.85, 246, 244, 238];
+  const core = [lerp(pr, cr[1], cr[0]), lerp(pg, cr[2], cr[0]), lerp(pb, cr[3], cr[0])];
+  // ---- qué lleva cada lado: [arriba, derecha, abajo, izquierda]; null = canto recto
+  const torn = (colored && rec.color) ? rec.color : rec.rasgado;
+  const sides = [null, null, null, null];
+  let wob = 0, tint = 1;
+  const corners = [];
+  if (tipo === 'gastado') {
+    const set = rec.gastado || ['viejo'];
+    for (let s = 0; s < 4; s++) if (r() < 0.3 + 0.3 * amt) sides[s] = pick(set);
+    tint = old || rec.gastado ? 1 : 0.3;
+    const cset = rec.gastado ? rec.esquinas : old ? ['vieja'] : (rec.esquinas || ['oreja']);
+    const nC = clamp(Math.round(0.6 + amt * 1.4 + r() * 0.8), 1, 4);
+    const order = [0, 1, 2, 3].sort(() => r() - 0.5);
+    for (let i = 0; i < nC; i++) corners.push([order[i], pick(cset)]);
+  } else if (tipo === 'rasgado') {
+    wob = 0.8 + 2.2 * amt;
+    if (rec.lomo) {
+      const s0 = r() < 0.6 ? 3 : 0; sides[s0] = pick(rec.lomo);
+      if (amt > 1.3) sides[(s0 + 2) % 4] = pick(torn);
+      wob = 0.3;
+    } else {
+      const nT = amt < 0.35 ? 1 : amt < 0.7 ? 2 : amt < 0.95 ? 3 : 4;
+      const order = [0, 1, 2, 3].sort(() => r() - 0.5);
+      for (let i = 0; i < nT; i++) sides[order[i]] = pick(torn);
+    }
+  } else if (tipo === 'roto') {
+    wob = 1.5 + 3 * amt;
+    for (let s = 0; s < 4; s++) sides[s] = r() < 0.4 + 0.25 * amt ? pick(rec.roto) : pick(torn);
+  } else if (tipo === 'quemado') {
+    wob = 2 + 4 * amt;
+    for (let s = 0; s < 4; s++) sides[s] = 'quemado';
+  }
+  // ---- tiras: una de cada conjunto
+  const strips = [];
+  for (let s = 0; s < 4; s++) {
+    const list = sides[s] ? (cat.strips[sides[s]] || []) : [];
+    if (!list.length) { strips.push(null); continue; }
+    const it = pick(list);
+    const img = await loadImg(assets, 'bordes/' + it.id + '.png');
+    const kimg = it.core ? await loadImg(assets, 'bordes/' + it.id + '_k.png') : null;
+    const f = ppm / cat.ppm * lerp(0.88, 1.12, r());
+    strips.push({ it, img, kimg, f, off: r() * img.width, reach: it.edge * f, depth: (img.height - it.edge) * f });
+  }
+  // ---- cuánto se mete la hoja: lo justo para que fibras y ondulación quepan en el documento
+  const base = 2.5 * ppm, Wb = wob * ppm;
+  const inset = strips.map(sp => base + (sp ? sp.reach + Wb : 0));
+  const BA = new Uint8Array(N).fill(255), BS = new Uint8Array(N * 3).fill(128), BK = new Uint8Array(N);
+  const gx = (s, t, u) => s === 0 ? t : s === 1 ? w - 1 - u : s === 2 ? w - 1 - t : u;
+  const gy = (s, t, u) => s === 0 ? u : s === 1 ? t : s === 2 ? h - 1 - u : h - 1 - t;
+  const wseed = (r() * 1e5) | 0;
+  for (let s = 0; s < 4; s++) {
+    const L = (s === 0 || s === 2) ? w : h, D = (s === 0 || s === 2) ? h : w, sp = strips[s];
+    const line = new Float32Array(L);
+    const per = 55 * ppm;
+    let umax = 0;
+    for (let t = 0; t < L; t++) {
+      let v = inset[s];
+      if (sp) v += Wb * (fbm2(t / per, s * 7.3, wseed) - 0.5) * 1.6;
+      else v += ppm * 0.05 * (vnoise(t / (2 * ppm), s * 3.1, wseed + 9) - 0.5);   // canto cortado: casi recto
+      line[t] = v; if (v > umax) umax = v;
+    }
+    if (!sp) {
+      umax = Math.min(D, Math.ceil(umax + 2));
+      for (let t = 0; t < L; t++) for (let u = 0; u < umax; u++) {
+        const a = clamp(u - line[t] + 0.5, 0, 1); if (a >= 1) continue;
+        const o = gy(s, t, u) * w + gx(s, t, u); BA[o] = BA[o] * a;
+      }
+      continue;
+    }
+    const img = sp.img, iw = img.width, ih = img.height, ic = img.channels, id = img.data;
+    const kd = sp.kimg ? sp.kimg.data : null, kc = sp.kimg ? sp.kimg.channels : 1;
+    const inv = 1 / sp.f, edge = sp.it.edge;
+    umax = Math.min(D, Math.ceil(umax + sp.depth + 2));
+    for (let t = 0; t < L; t++) {
+      const sx = (t * inv + sp.off) % iw, ix0 = sx | 0, fx = sx - ix0, ix1 = ix0 + 1 < iw ? ix0 + 1 : 0;
+      for (let u = 0; u < umax; u++) {
+        const sy = edge + (u - line[t]) * inv;
+        const o = gy(s, t, u) * w + gx(s, t, u);
+        if (sy < 0) { BA[o] = 0; continue; }
+        if (sy >= ih - 1) break;
+        const iy0 = sy | 0, fy = sy - iy0, w00 = (1 - fx) * (1 - fy), w10 = fx * (1 - fy), w01 = (1 - fx) * fy, w11 = fx * fy;
+        const p00 = (iy0 * iw + ix0) * ic, p10 = (iy0 * iw + ix1) * ic, p01 = ((iy0 + 1) * iw + ix0) * ic, p11 = ((iy0 + 1) * iw + ix1) * ic;
+        BA[o] = BA[o] * (id[p00 + 3] * w00 + id[p10 + 3] * w10 + id[p01 + 3] * w01 + id[p11 + 3] * w11) / 255;
+        let s0 = (id[p00] * w00 + id[p10] * w10 + id[p01] * w01 + id[p11] * w11) / 127.5;
+        let s1 = (id[p00 + 1] * w00 + id[p10 + 1] * w10 + id[p01 + 1] * w01 + id[p11 + 1] * w11) / 127.5;
+        let s2 = (id[p00 + 2] * w00 + id[p10 + 2] * w10 + id[p01 + 2] * w01 + id[p11 + 2] * w11) / 127.5;
+        if (tint < 1) { const l = s0 * 0.2126 + s1 * 0.7152 + s2 * 0.0722; s0 = l + (s0 - l) * tint; s1 = l + (s1 - l) * tint; s2 = l + (s2 - l) * tint; }
+        const q = o * 3;
+        BS[q] = clamp(BS[q] * s0, 0, 255); BS[q + 1] = clamp(BS[q + 1] * s1, 0, 255); BS[q + 2] = clamp(BS[q + 2] * s2, 0, 255);
+        if (kd) {
+          const k = kd[(iy0 * iw + ix0) * kc] * w00 + kd[(iy0 * iw + ix1) * kc] * w10 + kd[((iy0 + 1) * iw + ix0) * kc] * w01 + kd[((iy0 + 1) * iw + ix1) * kc] * w11;
+          if (k > BK[o]) BK[o] = k;
+        }
+      }
+    }
+  }
+  // ---- esquinas (orejas dobladas, esquinas gastadas)
+  for (const [ci, cset] of corners) {
+    const list = (cat.corners[cset] || []); if (!list.length) continue;
+    const it = pick(list);
+    const img = await loadImg(assets, 'bordes/' + it.id + '.png');
+    const scl = cset === 'oreja' ? lerp(0.35, 0.65, r()) : cset === 'carton' ? lerp(0.7, 1, r()) : lerp(0.75, 1.15, r());
+    const f = ppm / cat.ppm * scl * (0.75 + 0.25 * amt), inv = 1 / f;
+    const sgx = (ci === 0 || ci === 3) ? 1 : -1, sgy = ci < 2 ? 1 : -1;      // 0 TL · 1 TR · 2 BR · 3 BL
+    const xc = sgx > 0 ? inset[3] : w - 1 - inset[1], yc = sgy > 0 ? inset[0] : h - 1 - inset[2];
+    const iw = img.width, ih = img.height, ic = img.channels, id = img.data, org = it.origin;
+    const ext = Math.ceil((iw - org) * f), pre = Math.ceil(org * f) + 1;
+    for (let dy = -pre; dy < ext; dy++) {
+      const y = Math.round(yc + dy * sgy); if (y < 0 || y >= h) continue;
+      const sy = org + dy * inv; if (sy < 0 || sy >= ih - 1) continue;
+      for (let dx = -pre; dx < ext; dx++) {
+        const x = Math.round(xc + dx * sgx); if (x < 0 || x >= w) continue;
+        const sx = org + dx * inv; if (sx < 0 || sx >= iw - 1) continue;
+        const ix = sx | 0, iy = sy | 0, fx = sx - ix, fy = sy - iy, w00 = (1 - fx) * (1 - fy), w10 = fx * (1 - fy), w01 = (1 - fx) * fy, w11 = fx * fy;
+        const p00 = (iy * iw + ix) * ic, p10 = p00 + ic, p01 = p00 + iw * ic, p11 = p01 + ic;
+        const o = y * w + x, q = o * 3;
+        BA[o] = id[p00 + 3] * w00 + id[p10 + 3] * w10 + id[p01 + 3] * w01 + id[p11 + 3] * w11;
+        for (let c = 0; c < 3; c++) BS[q + c] = clamp(BS[q + c] * (id[p00 + c] * w00 + id[p10 + c] * w10 + id[p01 + c] * w01 + id[p11 + c] * w11) / 127.5, 0, 255);
+        BK[o] = 0;
+      }
+    }
+  }
+  return { BA, BS, BK, core };
+}
+// lee el borde (bilineal) en una posición del documento: o[0] alfa 0..1, o[1..3] Sh, o[4] K
+function borderAt(BR, w, h, x, y, o) {
+  x = x < 0 ? 0 : x > w - 1.001 ? w - 1.001 : x; y = y < 0 ? 0 : y > h - 1.001 ? h - 1.001 : y;
+  const ix = x | 0, iy = y | 0, fx = x - ix, fy = y - iy, i00 = iy * w + ix, i10 = i00 + 1, i01 = i00 + w, i11 = i01 + 1;
+  const w00 = (1 - fx) * (1 - fy), w10 = fx * (1 - fy), w01 = (1 - fx) * fy, w11 = fx * fy;
+  const A = BR.BA, Sx = BR.BS, K = BR.BK;
+  o[0] = (A[i00] * w00 + A[i10] * w10 + A[i01] * w01 + A[i11] * w11) / 255;
+  for (let c = 0; c < 3; c++) o[1 + c] = (Sx[i00 * 3 + c] * w00 + Sx[i10 * 3 + c] * w10 + Sx[i01 * 3 + c] * w01 + Sx[i11 * 3 + c] * w11) / 128;
+  o[4] = (K[i00] * w00 + K[i10] * w10 + K[i01] * w01 + K[i11] * w11) / 255;
+  return o;
 }
 
 async function genEstado(S, st, assets, B) {
@@ -1157,6 +1364,19 @@ async function renderPaper(opts) {
   genShape(S, st, B, counts);
   await prog(0.68, 'Pliegues…');
   B.fold = await genFolds(S, st, assets, B);
+  B.border = await genBorde(S, st, assets, B);
+  if (B.border && !st._final) {
+    // papel de fondo: la hoja ya recortada (alfa), con el contorno doblado por los pliegues
+    const BR = B.border, FD = B.fold, alb = B.alb, o5 = [0, 0, 0, 0, 0], cx = w / 2, cy = h / 2, pk = FD ? FD.panelK : 0;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      let sx = x, sy = y;
+      if (pk) { const z = FD.panel(x, y) * pk; sx -= (x - cx) * z; sy -= (y - cy) * z; }
+      borderAt(BR, w, h, sx, sy, o5);
+      const j = (y * w + x) * 4, K = o5[4];
+      for (let c = 0; c < 3; c++) alb[j + c] = lerp(alb[j + c], BR.core[c], K) * o5[1 + c];
+      alb[j + 3] = o5[0] * 255;
+    }
+  }
   await prog(0.8, 'Listo el papel');
   return { rgba: new Uint8Array(B.alb.buffer), buffers: B, paper, S, st };
 }
@@ -1288,6 +1508,8 @@ async function renderFinal(opts) {
   const fCell = 2.6 * ppm, fFine = Math.max(1.2, 0.35 * ppm), fSeed = (S.seedF * 7 + 5) | 0;
   const edgeMm = 28 * ppm;
   const mot = 0.8 * ppm, sMot = (S.seed * 3) | 0;
+  const BR = B.border, b5 = [0, 0, 0, 0, 0];
+  if (BR) S.hasAlpha = true;
   await prog(0.55, 'Imprimiendo en el papel…');
   for (let y = 1; y < h - 1; y++) {
     if ((y & 255) === 0) await prog(0.55 + 0.25 * y / h, 'Imprimiendo en el papel…');
@@ -1297,7 +1519,10 @@ async function renderFinal(opts) {
       const gx = (Hs[o + 1] - Hs[o - 1]) * ginv, gy = (Hs[o + w] - Hs[o - w]) * ginv;
       let sx = x - gx * disp, sy = y - gy * disp;
       if (camK) { const f = F[o]; sx -= f * (x - cxp) * camK / ppm; sy -= f * (y - cyp) * camK / ppm; }
-      if (FD) { FD.sample(x, y, fq); sx -= fq[1] * fDisp; sy -= fq[1] * fDisp * 0.65; }
+      if (FD) {
+        FD.sample(x, y, fq); sx -= fq[1] * fDisp; sy -= fq[1] * fDisp * 0.65;
+        if (FD.panelK) { const z = FD.panel(x, y) * FD.panelK; sx -= (x - cxp) * z; sy -= (y - cyp) * z; }
+      }
       let gbx = 0, gby = 0;
       if (Hb) {
         gbx = (Hb[o + 1] - Hb[o - 1]) * gbInv; gby = (Hb[o + w] - Hb[o - w]) * gbInv;
@@ -1393,12 +1618,21 @@ async function renderFinal(opts) {
       if (fk) shade += clamp(-((F[o + 1] - F[o - 1]) * Lx + (F[o + w] - F[o - w]) * Ly) * 0.5 * ppm * fk * 0.06, -0.14, 0.14);
       if (Cb && rk) shade += clamp(((Cb[o + 1] - Cb[o - 1]) * Lx + (Cb[o + w] - Cb[o - w]) * Ly) * 0.06 * kk, -0.05, 0.05);
       if (FD) shade *= clamp(1 + fq[0] * fShK, 0.3, 1.6);
-      out[j] = r * shade; out[j + 1] = g * shade; out[j + 2] = b * shade; out[j + 3] = 255;
+      let alpha = 255;
+      if (BR) {
+        // borde de la hoja leído donde cae la tinta (sigue pliegues, forma de la hoja y cámara): el alma clara que
+        // asoma no lleva tinta, y el filo trae sus sombras y su tostado
+        borderAt(BR, w, h, sx, sy, b5);
+        const K = b5[4];
+        if (K > 0.004) { r = lerp(r, BR.core[0], K); g = lerp(g, BR.core[1], K); b = lerp(b, BR.core[2], K); }
+        r *= b5[1]; g *= b5[2]; b *= b5[3]; alpha = b5[0] * 255;
+      }
+      out[j] = r * shade; out[j + 1] = g * shade; out[j + 2] = b * shade; out[j + 3] = alpha;
     }
   }
   // bordes de 1 px
-  for (let x = 0; x < w; x++) for (const y of [0, h - 1]) { const j = (y * w + x) * 4, jj = ((y === 0 ? 1 : h - 2) * w + clamp(x, 1, w - 2)) * 4; out[j] = out[jj]; out[j + 1] = out[jj + 1]; out[j + 2] = out[jj + 2]; out[j + 3] = 255; }
-  for (let y = 0; y < h; y++) for (const x of [0, w - 1]) { const j = (y * w + x) * 4, jj = (y * w + (x === 0 ? 1 : w - 2)) * 4; out[j] = out[jj]; out[j + 1] = out[jj + 1]; out[j + 2] = out[jj + 2]; out[j + 3] = 255; }
+  for (let x = 0; x < w; x++) for (const y of [0, h - 1]) { const j = (y * w + x) * 4, jj = ((y === 0 ? 1 : h - 2) * w + clamp(x, 1, w - 2)) * 4; out[j] = out[jj]; out[j + 1] = out[jj + 1]; out[j + 2] = out[jj + 2]; out[j + 3] = out[jj + 3]; }
+  for (let y = 0; y < h; y++) for (const x of [0, w - 1]) { const j = (y * w + x) * 4, jj = (y * w + (x === 0 ? 1 : w - 2)) * 4; out[j] = out[jj]; out[j + 1] = out[jj + 1]; out[j + 2] = out[jj + 2]; out[j + 3] = out[jj + 3]; }
   await prog(0.82, 'Fotografiando…');
   await applyOverlay(S, st, out, assets, prog);
   photo(S, st, out, B, paper);
@@ -1718,13 +1952,15 @@ function quality(S, st, px, cal, k) {
   if (Q.gray) for (let o = 0; o < N; o++) { const l = ch[0][o] * 0.3 + ch[1][o] * 0.59 + ch[2][o] * 0.11; ch[0][o] = ch[1][o] = ch[2][o] = l; }
   // 1) resolución efectiva + desenfoque del objetivo
   const sigR = (0.55 * f + (Q.focus || 0) * f * kq) * def(st._soft, 1);
-  if (sigR > 0.45) for (let c = 0; c < 3; c++) gaussBlur(ch[c], w, h, sigR, tmp);
+  if (S.hasAlpha) { const A = new Float32Array(N); for (let o = 0; o < N; o++) A[o] = px[o * 4 + 3]; ch.push(A); }
+  const nch = ch.length;
+  if (sigR > 0.45) for (let c = 0; c < nch; c++) gaussBlur(ch[c], w, h, sigR, tmp);
   // 2) trepidación: barrido en una dirección
   if (Q.motion) {
     const len = Q.motion * longS * kq * def(st._soft, 1) * lerp(0.6, 1.2, r()), ang = (r() - 0.5) * 1.2 + (r() < 0.5 ? 0 : Math.PI / 2);
     if (len > 1) {
       const taps = Math.min(9, Math.max(3, Math.round(len))), dx = Math.cos(ang) * len / (taps - 1), dy = Math.sin(ang) * len / (taps - 1);
-      for (let c = 0; c < 3; c++) {
+      for (let c = 0; c < nch; c++) {
         const a = ch[c]; tmp.set(a);
         for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
           let s = 0;
@@ -1837,6 +2073,7 @@ function quality(S, st, px, cal, k) {
       R += s; G += s; Bb += s;
     }
     px[j] = R; px[j + 1] = G; px[j + 2] = Bb;
+    if (nch > 3) px[j + 3] = ch[3][o];
   }
   // 9) polvo del cristal / de la película y pelos
   const area = (w * h) / (2480 * 3508), scaleK = Math.max(1, longS / 3000);
@@ -1910,20 +2147,25 @@ function captureGeometry(S, st, px, Q, k) {
     if (Math.abs(t[1]) > 1e-6) z = Math.min(z, (1 - Math.abs(offY)) / Math.abs(t[1]));
   }
   z *= 0.998 * (1 - 0.2 * e2);
+  // con borde la hoja está recortada sobre transparente: no hace falta recortar para tapar esquinas vacías, se ve la
+  // hoja entera girada (y lo que queda fuera es transparente)
+  const NQ = S.hasAlpha ? 4 : 3;
+  if (S.hasAlpha) z = 1 - 0.04 * Math.min(1, rot / 4) - 0.1 * e2;
   if (rot > 0 || persp > 0 || barrel > 0) {
     const src = new Uint8ClampedArray(px);
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
       map((2 * x + 1) / w - 1, (2 * y + 1) / h - 1, z, t);
       let sx = (t[0] + offX + 1) * w / 2 - 0.5, sy = (t[1] + offY + 1) * h / 2 - 0.5;
+      const j = (y * w + x) * 4;
+      if (S.hasAlpha && (sx < -1 || sy < -1 || sx > w || sy > h)) { px[j + 3] = 0; continue; }
       sx = sx < 0 ? 0 : sx > w - 1.001 ? w - 1.001 : sx; sy = sy < 0 ? 0 : sy > h - 1.001 ? h - 1.001 : sy;
       const ix = sx | 0, iy = sy | 0, fx = sx - ix, fy = sy - iy, a = (iy * w + ix) * 4, b = a + 4, c = a + w * 4, d = c + 4;
-      const j = (y * w + x) * 4;
-      for (let q = 0; q < 3; q++) px[j + q] = (src[a + q] * (1 - fx) + src[b + q] * fx) * (1 - fy) + (src[c + q] * (1 - fx) + src[d + q] * fx) * fy;
+      for (let q = 0; q < NQ; q++) px[j + q] = (src[a + q] * (1 - fx) + src[b + q] * fx) * (1 - fy) + (src[c + q] * (1 - fx) + src[d + q] * fx) * fy;
     }
   }
   if (edge > 0.3) {
     const tmp = new Float32Array(N), b1 = [], b2 = [];
-    for (let q = 0; q < 3; q++) {
+    for (let q = 0; q < NQ; q++) {
       const a = new Float32Array(N); for (let o = 0; o < N; o++) a[o] = px[o * 4 + q];
       const c = new Float32Array(a); gaussBlur(a, w, h, edge * 0.5, tmp); gaussBlur(c, w, h, edge, tmp); b1.push(a); b2.push(c);
     }
@@ -1935,7 +2177,7 @@ function captureGeometry(S, st, px, Q, k) {
       const m2 = smooth(0.4 - 0.32 * ef, 1.15 - 0.45 * ef, Math.sqrt(u * u * 0.8 + v * v * 0.8) + far * (1 + 1.5 * ef));
       if (m2 <= 0) continue;
       const o = y * w + x, j = o * 4;
-      for (let q = 0; q < 3; q++) {
+      for (let q = 0; q < NQ; q++) {
         const lo = lerp(px[j + q], b1[q][o], Math.min(1, m2 * 2)), hi = b2[q][o];
         px[j + q] = m2 > 0.5 ? lerp(lo, hi, (m2 - 0.5) * 2) : lo;
       }

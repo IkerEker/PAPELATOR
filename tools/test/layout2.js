@@ -29,6 +29,7 @@ const boot = `
   const out = [];
   for (const [W, H, theme, setup, tag] of [
     [330, 900, 'dark', s => s, 'papel'],
+    [330, 1500, 'dark', s => Object.assign(s, { paper: 'caja', borde: 'rasgado' }), 'caja_borde'],
     [330, 900, 'dark', s => Object.assign(s, { paper: 'kraft', color: '#3a6ea5' }), 'kraft'],
     [330, 900, 'dark', s => Object.assign(s, { paper: 'pantalla_lcd', sobre: 'acanalado' }), 'pantalla'],
     [330, 900, 'dark', s => Object.assign(s, { paper: 'osb' }), 'madera'],

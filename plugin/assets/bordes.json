@@ -1,0 +1,1357 @@
+{
+ "ppm": 10.0,
+ "strips": {
+  "blanco": [
+   {
+    "id": "blanco_1",
+    "w": 1118,
+    "h": 105,
+    "edge": 34.4,
+    "core": false,
+    "src": "Papel blanco rasgado sobre fondo verde (1).png"
+   },
+   {
+    "id": "blanco_2",
+    "w": 973,
+    "h": 98,
+    "edge": 28.1,
+    "core": false,
+    "src": "Papel blanco rasgado sobre fondo verde.png"
+   },
+   {
+    "id": "blanco_3",
+    "w": 968,
+    "h": 82,
+    "edge": 17.2,
+    "core": false,
+    "src": "Papel blanco rasgado sobre verde croma.png"
+   },
+   {
+    "id": "blanco_4",
+    "w": 963,
+    "h": 95,
+    "edge": 28.1,
+    "core": false,
+    "src": "Papel rasgado sobre fondo verde croma.png"
+   },
+   {
+    "id": "blanco_5",
+    "w": 891,
+    "h": 120,
+    "edge": 42.2,
+    "core": false,
+    "src": "Gemini_Generated_Image_hfopqshfopqshfop.jpg"
+   },
+   {
+    "id": "blanco_6",
+    "w": 939,
+    "h": 137,
+    "edge": 66.0,
+    "core": false,
+    "src": "Gemini_Generated_Image_lpj7mflpj7mflpj7.jpg"
+   }
+  ],
+  "bisel": [
+   {
+    "id": "bisel_1",
+    "w": 971,
+    "h": 104,
+    "edge": 28.9,
+    "core": true,
+    "src": "Borde de papel azul rasgado sobre verde (1).png"
+   },
+   {
+    "id": "bisel_2",
+    "w": 1037,
+    "h": 98,
+    "edge": 27.3,
+    "core": true,
+    "src": "Borde de papel azul rasgado sobre verde.png"
+   },
+   {
+    "id": "bisel_3",
+    "w": 1110,
+    "h": 106,
+    "edge": 33.6,
+    "core": true,
+    "src": "Borde de papel rasgado verde y azul.png"
+   },
+   {
+    "id": "bisel_4",
+    "w": 913,
+    "h": 102,
+    "edge": 32.8,
+    "core": true,
+    "src": "Textura de papel rasgado verde y azul.png"
+   },
+   {
+    "id": "bisel_5",
+    "w": 952,
+    "h": 207,
+    "edge": 78.8,
+    "core": true,
+    "src": "Gemini_Generated_Image_jhrzrqjhrzrqjhrz.jpg"
+   },
+   {
+    "id": "bisel_6",
+    "w": 1011,
+    "h": 167,
+    "edge": 53.6,
+    "core": true,
+    "src": "Gemini_Generated_Image_tcek3wtcek3wtcek.jpg"
+   },
+   {
+    "id": "bisel_7",
+    "w": 904,
+    "h": 184,
+    "edge": 50.8,
+    "core": true,
+    "src": "Gemini_Generated_Image_vfntrhvfntrhvfnt.jpg"
+   }
+  ],
+  "blanco_roto": [
+   {
+    "id": "blanco_roto_1",
+    "w": 1005,
+    "h": 144,
+    "edge": 73.6,
+    "core": false,
+    "src": "Borde de papel rasgado sobre verde croma.png"
+   },
+   {
+    "id": "blanco_roto_2",
+    "w": 1118,
+    "h": 237,
+    "edge": 77.1,
+    "core": false,
+    "src": "Gemini_Generated_Image_9gqm6j9gqm6j9gqm.jpg"
+   },
+   {
+    "id": "blanco_roto_3",
+    "w": 635,
+    "h": 355,
+    "edge": 137.8,
+    "core": false,
+    "src": "Gemini_Generated_Image_p0rslp0rslp0rslp.jpg"
+   },
+   {
+    "id": "blanco_roto_4",
+    "w": 1057,
+    "h": 240,
+    "edge": 66.3,
+    "core": false,
+    "src": "Gemini_Generated_Image_rjsv6srjsv6srjsv.jpg"
+   },
+   {
+    "id": "blanco_roto_5",
+    "w": 1120,
+    "h": 254,
+    "edge": 155.3,
+    "core": false,
+    "src": "Gemini_Generated_Image_xh0lmdxh0lmdxh0l.jpg"
+   },
+   {
+    "id": "blanco_roto_6",
+    "w": 1104,
+    "h": 123,
+    "edge": 27.9,
+    "core": false,
+    "src": "Papel rasgado sobre fondo verde croma (1).png"
+   }
+  ],
+  "espiral": [
+   {
+    "id": "espiral_1",
+    "w": 1008,
+    "h": 125,
+    "edge": 28.5,
+    "core": false,
+    "src": "Borde de cuaderno espiral rasgado.png"
+   },
+   {
+    "id": "espiral_2",
+    "w": 913,
+    "h": 142,
+    "edge": 37.4,
+    "core": false,
+    "src": "Borde de cuaderno rasgado sobre verde croma.png"
+   },
+   {
+    "id": "espiral_3",
+    "w": 901,
+    "h": 130,
+    "edge": 27.0,
+    "core": false,
+    "src": "Borde perforado rasgado sobre fondo verde.png"
+   },
+   {
+    "id": "espiral_4",
+    "w": 763,
+    "h": 158,
+    "edge": 44.6,
+    "core": false,
+    "src": "Gemini_Generated_Image_osszabosszabossz.jpg"
+   },
+   {
+    "id": "espiral_5",
+    "w": 1004,
+    "h": 132,
+    "edge": 32.9,
+    "core": false,
+    "src": "Papel de cuaderno rasgado sobre verde croma.png"
+   }
+  ],
+  "wire": [
+   {
+    "id": "wire_1",
+    "w": 378,
+    "h": 143,
+    "edge": 26.4,
+    "core": false,
+    "src": "Gemini_Generated_Image_946sq8946sq8946s.jpg"
+   },
+   {
+    "id": "wire_2",
+    "w": 365,
+    "h": 186,
+    "edge": 53.7,
+    "core": false,
+    "src": "Gemini_Generated_Image_gmnp57gmnp57gmnp (1).jpg"
+   }
+  ],
+  "periodico": [
+   {
+    "id": "periodico_1",
+    "w": 921,
+    "h": 108,
+    "edge": 43.0,
+    "core": true,
+    "src": "Borde de papel rasgado sobre fondo verde (1).png"
+   },
+   {
+    "id": "periodico_2",
+    "w": 882,
+    "h": 112,
+    "edge": 42.2,
+    "core": false,
+    "src": "Borde de papel rasgado sobre fondo verde (2).png"
+   },
+   {
+    "id": "periodico_3",
+    "w": 996,
+    "h": 102,
+    "edge": 33.6,
+    "core": false,
+    "src": "Borde de papel rasgado sobre verde cromático.png"
+   },
+   {
+    "id": "periodico_4",
+    "w": 1002,
+    "h": 120,
+    "edge": 46.1,
+    "core": false,
+    "src": "Textura macro de papel rasgado sobre fondo verde.png"
+   }
+  ],
+  "reciclado": [
+   {
+    "id": "reciclado_1",
+    "w": 1048,
+    "h": 197,
+    "edge": 65.5,
+    "core": false,
+    "src": "Gemini_Generated_Image_1luw5j1luw5j1luw.jpg"
+   },
+   {
+    "id": "reciclado_2",
+    "w": 663,
+    "h": 201,
+    "edge": 80.2,
+    "core": true,
+    "src": "Gemini_Generated_Image_lon8udlon8udlon8.jpg"
+   }
+  ],
+  "acuarela": [
+   {
+    "id": "acuarela_1",
+    "w": 910,
+    "h": 76,
+    "edge": 18.0,
+    "core": false,
+    "src": "Borde Rasgado sobre Fondo Verde Croma.png"
+   },
+   {
+    "id": "acuarela_2",
+    "w": 990,
+    "h": 113,
+    "edge": 32.0,
+    "core": false,
+    "src": "Borde de papel rasgado sobre fondo verde (4).png"
+   },
+   {
+    "id": "acuarela_3",
+    "w": 898,
+    "h": 74,
+    "edge": 14.1,
+    "core": false,
+    "src": "Borde de papel rasgado sobre fondo verde (5).png"
+   },
+   {
+    "id": "acuarela_4",
+    "w": 1024,
+    "h": 123,
+    "edge": 43.0,
+    "core": false,
+    "src": "Borde de papel rasgado sobre verde croma (1).png"
+   },
+   {
+    "id": "acuarela_5",
+    "w": 1087,
+    "h": 122,
+    "edge": 39.8,
+    "core": false,
+    "src": "Borde de papel rasgado sobre verde croma (2).png"
+   },
+   {
+    "id": "acuarela_6",
+    "w": 963,
+    "h": 115,
+    "edge": 36.7,
+    "core": false,
+    "src": "Borde de papel rasgado sobre verde croma (4).png"
+   },
+   {
+    "id": "acuarela_7",
+    "w": 904,
+    "h": 92,
+    "edge": 23.7,
+    "core": false,
+    "src": "Gemini_Generated_Image_5h8do5h8do5h8do5.jpg"
+   },
+   {
+    "id": "acuarela_8",
+    "w": 1021,
+    "h": 115,
+    "edge": 30.4,
+    "core": false,
+    "src": "Gemini_Generated_Image_5txiv75txiv75txi.jpg"
+   },
+   {
+    "id": "acuarela_9",
+    "w": 1046,
+    "h": 159,
+    "edge": 64.1,
+    "core": false,
+    "src": "Gemini_Generated_Image_niw66yniw66yniw6.jpg"
+   },
+   {
+    "id": "acuarela_10",
+    "w": 959,
+    "h": 83,
+    "edge": 21.9,
+    "core": false,
+    "src": "Papel rasgado sobre fondo verde intenso.png"
+   },
+   {
+    "id": "acuarela_11",
+    "w": 974,
+    "h": 86,
+    "edge": 18.0,
+    "core": false,
+    "src": "Textura de papel rasgado sobre fondo verde chroma.png"
+   }
+  ],
+  "washi": [
+   {
+    "id": "washi_1",
+    "w": 932,
+    "h": 212,
+    "edge": 137.5,
+    "core": false,
+    "src": "Borde de papel fibroso sobre verde croma (1).png"
+   },
+   {
+    "id": "washi_2",
+    "w": 970,
+    "h": 186,
+    "edge": 111.7,
+    "core": false,
+    "src": "Borde de papel fibroso sobre verde croma.png"
+   },
+   {
+    "id": "washi_3",
+    "w": 1104,
+    "h": 195,
+    "edge": 121.1,
+    "core": false,
+    "src": "Franja de fibras sobre fondo verde croma.png"
+   },
+   {
+    "id": "washi_4",
+    "w": 518,
+    "h": 253,
+    "edge": 118.2,
+    "core": false,
+    "src": "Gemini_Generated_Image_c6xal8c6xal8c6xa.jpg"
+   },
+   {
+    "id": "washi_5",
+    "w": 470,
+    "h": 244,
+    "edge": 119.6,
+    "core": false,
+    "src": "Gemini_Generated_Image_c77cwhc77cwhc77c.jpg"
+   },
+   {
+    "id": "washi_6",
+    "w": 637,
+    "h": 221,
+    "edge": 135.8,
+    "core": false,
+    "src": "Gemini_Generated_Image_rerukarerukareru.jpg"
+   },
+   {
+    "id": "washi_7",
+    "w": 888,
+    "h": 280,
+    "edge": 135.8,
+    "core": false,
+    "src": "Gemini_Generated_Image_zhlrc6zhlrc6zhlr.jpg"
+   },
+   {
+    "id": "washi_8",
+    "w": 1045,
+    "h": 178,
+    "edge": 81.6,
+    "core": false,
+    "src": "Gemini_Generated_Image_fpch7ffpch7ffpch.jpg"
+   }
+  ],
+  "artesanal": [
+   {
+    "id": "artesanal_1",
+    "w": 1030,
+    "h": 127,
+    "edge": 56.2,
+    "core": false,
+    "src": "Borde de papel artesanal sobre fondo verde-1.png"
+   },
+   {
+    "id": "artesanal_2",
+    "w": 1001,
+    "h": 200,
+    "edge": 85.2,
+    "core": false,
+    "src": "Borde de papel artesanal sobre fondo verde.png"
+   },
+   {
+    "id": "artesanal_3",
+    "w": 1120,
+    "h": 181,
+    "edge": 82.6,
+    "core": false,
+    "src": "Gemini_Generated_Image_41mxx041mxx041mx.jpg"
+   },
+   {
+    "id": "artesanal_4",
+    "w": 906,
+    "h": 257,
+    "edge": 61.7,
+    "core": false,
+    "src": "Gemini_Generated_Image_eb8ybgeb8ybgeb8y.jpg"
+   },
+   {
+    "id": "artesanal_5",
+    "w": 1013,
+    "h": 175,
+    "edge": 74.2,
+    "core": false,
+    "src": "Papel artesanal rasgado sobre verde croma-2.png"
+   },
+   {
+    "id": "artesanal_6",
+    "w": 1080,
+    "h": 203,
+    "edge": 86.7,
+    "core": false,
+    "src": "Papel artesanal sobre fondo verde intenso.png"
+   }
+  ],
+  "viejo": [
+   {
+    "id": "viejo_1",
+    "w": 1099,
+    "h": 105,
+    "edge": 14.4,
+    "core": false,
+    "src": "Borde de Papel Rasgado sobre Fondo Verde.png"
+   },
+   {
+    "id": "viejo_2",
+    "w": 1194,
+    "h": 149,
+    "edge": 21.1,
+    "core": false,
+    "src": "Gemini_Generated_Image_5nie615nie615nie.jpg"
+   },
+   {
+    "id": "viejo_3",
+    "w": 1011,
+    "h": 111,
+    "edge": 19.5,
+    "core": false,
+    "src": "Papel envejecido con borde rasgado sobre verde croma.png"
+   },
+   {
+    "id": "viejo_4",
+    "w": 1149,
+    "h": 109,
+    "edge": 12.7,
+    "core": false,
+    "src": "Papel rasgado sobre fondo verde croma (2).png"
+   },
+   {
+    "id": "viejo_5",
+    "w": 1062,
+    "h": 112,
+    "edge": 16.1,
+    "core": false,
+    "src": "Textura de papel blanco rasgado sobre verde croma.png"
+   },
+   {
+    "id": "viejo_6",
+    "w": 1108,
+    "h": 163,
+    "edge": 27.8,
+    "core": false,
+    "src": "Gemini_Generated_Image_6tno7u6tno7u6tno.jpg"
+   },
+   {
+    "id": "viejo_7",
+    "w": 979,
+    "h": 116,
+    "edge": 23.1,
+    "core": false,
+    "src": "Gemini_Generated_Image_9fkdgg9fkdgg9fkd.jpg"
+   },
+   {
+    "id": "viejo_8",
+    "w": 991,
+    "h": 183,
+    "edge": 19.0,
+    "core": false,
+    "src": "Gemini_Generated_Image_wd1h3jwd1h3jwd1h.jpg"
+   }
+  ],
+  "viejo_roto": [
+   {
+    "id": "viejo_roto_1",
+    "w": 1047,
+    "h": 170,
+    "edge": 27.1,
+    "core": false,
+    "src": "Borde de papel envejecido sobre verde croma.png"
+   },
+   {
+    "id": "viejo_roto_2",
+    "w": 1174,
+    "h": 192,
+    "edge": 30.5,
+    "core": false,
+    "src": "Papel Rasgado sobre Fondo Verde Croma (3).png"
+   },
+   {
+    "id": "viejo_roto_3",
+    "w": 972,
+    "h": 146,
+    "edge": 19.5,
+    "core": false,
+    "src": "Papel antiguo rasgado sobre fondo verde (1).png"
+   },
+   {
+    "id": "viejo_roto_4",
+    "w": 1159,
+    "h": 146,
+    "edge": 22.9,
+    "core": false,
+    "src": "Papel antiguo rasgado sobre fondo verde croma.png"
+   },
+   {
+    "id": "viejo_roto_5",
+    "w": 1184,
+    "h": 190,
+    "edge": 21.2,
+    "core": false,
+    "src": "Papel envejecido rasgado sobre fondo verde croma.png"
+   },
+   {
+    "id": "viejo_roto_6",
+    "w": 1189,
+    "h": 153,
+    "edge": 17.8,
+    "core": false,
+    "src": "Textura de Papel Antiguo Rasgado sobre Verde Croma.png"
+   },
+   {
+    "id": "viejo_roto_7",
+    "w": 981,
+    "h": 195,
+    "edge": 27.1,
+    "core": false,
+    "src": "Pergamino antiguo sobre fondo verde intenso.png"
+   }
+  ],
+  "quemado": [
+   {
+    "id": "quemado_1",
+    "w": 1152,
+    "h": 206,
+    "edge": 16.6,
+    "core": true,
+    "src": "Gemini_Generated_Image_d1gb52d1gb52d1gb.jpg"
+   },
+   {
+    "id": "quemado_2",
+    "w": 1223,
+    "h": 254,
+    "edge": 10.5,
+    "core": false,
+    "src": "Gemini_Generated_Image_f0lxcnf0lxcnf0lx.jpg"
+   },
+   {
+    "id": "quemado_3",
+    "w": 1032,
+    "h": 344,
+    "edge": 40.4,
+    "core": true,
+    "src": "Gemini_Generated_Image_mn5wvumn5wvumn5w.jpg"
+   },
+   {
+    "id": "quemado_4",
+    "w": 1006,
+    "h": 157,
+    "edge": 15.0,
+    "core": true,
+    "src": "Gemini_Generated_Image_owkdrxowkdrxowkd.jpg"
+   },
+   {
+    "id": "quemado_5",
+    "w": 590,
+    "h": 286,
+    "edge": 54.8,
+    "core": false,
+    "src": "Gemini_Generated_Image_q58nq58nq58nq58n.jpg"
+   },
+   {
+    "id": "quemado_6",
+    "w": 1026,
+    "h": 173,
+    "edge": 13.3,
+    "core": false,
+    "src": "Gemini_Generated_Image_uu6xw7uu6xw7uu6x.jpg"
+   }
+  ],
+  "kraft": [
+   {
+    "id": "kraft_1",
+    "w": 893,
+    "h": 136,
+    "edge": 57.8,
+    "core": true,
+    "src": "Papel kraft rasgado sobre fondo verde (1).png"
+   },
+   {
+    "id": "kraft_2",
+    "w": 968,
+    "h": 145,
+    "edge": 61.7,
+    "core": true,
+    "src": "Papel kraft rasgado sobre fondo verde croma.png"
+   },
+   {
+    "id": "kraft_3",
+    "w": 926,
+    "h": 132,
+    "edge": 52.3,
+    "core": true,
+    "src": "Papel kraft rasgado sobre fondo verde.png"
+   },
+   {
+    "id": "kraft_4",
+    "w": 1009,
+    "h": 116,
+    "edge": 43.0,
+    "core": true,
+    "src": "Textura de papel kraft rasgado sobre fondo verde.png"
+   }
+  ],
+  "kraft_grueso": [
+   {
+    "id": "kraft_grueso_1",
+    "w": 1039,
+    "h": 249,
+    "edge": 82.8,
+    "core": true,
+    "src": "Gemini_Generated_Image_28rnrw28rnrw28rn.jpg"
+   },
+   {
+    "id": "kraft_grueso_2",
+    "w": 602,
+    "h": 296,
+    "edge": 117.2,
+    "core": true,
+    "src": "Gemini_Generated_Image_9hr7un9hr7un9hr7.jpg"
+   },
+   {
+    "id": "kraft_grueso_3",
+    "w": 762,
+    "h": 285,
+    "edge": 112.1,
+    "core": true,
+    "src": "Gemini_Generated_Image_ykkdfpykkdfpykkd.jpg"
+   }
+  ],
+  "gris": [
+   {
+    "id": "gris_1",
+    "w": 1089,
+    "h": 161,
+    "edge": 33.0,
+    "core": true,
+    "src": "Borde de Papel Rasgado sobre Verde Vivo.png"
+   },
+   {
+    "id": "gris_2",
+    "w": 1171,
+    "h": 162,
+    "edge": 24.5,
+    "core": true,
+    "src": "Cartulina gris rasgada sobre fondo verde.png"
+   },
+   {
+    "id": "gris_3",
+    "w": 1030,
+    "h": 180,
+    "edge": 38.1,
+    "core": true,
+    "src": "Cartón gris rasgado sobre fondo verde.png"
+   },
+   {
+    "id": "gris_4",
+    "w": 1042,
+    "h": 133,
+    "edge": 29.6,
+    "core": true,
+    "src": "Papel gris rasgado sobre fondo verde.png"
+   },
+   {
+    "id": "gris_5",
+    "w": 1062,
+    "h": 190,
+    "edge": 35.5,
+    "core": true,
+    "src": "Textura de papel gris rasgado sobre verde intenso.png"
+   }
+  ],
+  "gris_roto": [
+   {
+    "id": "gris_roto_1",
+    "w": 1165,
+    "h": 328,
+    "edge": 46.0,
+    "core": true,
+    "src": "Gemini_Generated_Image_2ctmqd2ctmqd2ctm.jpg"
+   },
+   {
+    "id": "gris_roto_2",
+    "w": 1043,
+    "h": 269,
+    "edge": 76.4,
+    "core": true,
+    "src": "Gemini_Generated_Image_5ovzra5ovzra5ovz.jpg"
+   },
+   {
+    "id": "gris_roto_3",
+    "w": 1102,
+    "h": 244,
+    "edge": 53.2,
+    "core": true,
+    "src": "Gemini_Generated_Image_btyvfjbtyvfjbtyv.jpg"
+   },
+   {
+    "id": "gris_roto_4",
+    "w": 1161,
+    "h": 231,
+    "edge": 48.2,
+    "core": true,
+    "src": "Gemini_Generated_Image_j1j6gfj1j6gfj1j6.jpg"
+   },
+   {
+    "id": "gris_roto_5",
+    "w": 1030,
+    "h": 219,
+    "edge": 46.0,
+    "core": true,
+    "src": "Gemini_Generated_Image_ysju5ysju5ysju5y.jpg"
+   }
+  ],
+  "vegetal": [
+   {
+    "id": "vegetal_1",
+    "w": 1013,
+    "h": 68,
+    "edge": 10.9,
+    "core": true,
+    "src": "Borde de papel translúcido rasgado.png"
+   },
+   {
+    "id": "vegetal_2",
+    "w": 1029,
+    "h": 78,
+    "edge": 15.6,
+    "core": true,
+    "src": "Borde rasgado sobre fondo negro (1).png"
+   },
+   {
+    "id": "vegetal_3",
+    "w": 1066,
+    "h": 103,
+    "edge": 25.2,
+    "core": true,
+    "src": "Gemini_Generated_Image_77d5hw77d5hw77d5.jpg"
+   },
+   {
+    "id": "vegetal_4",
+    "w": 1056,
+    "h": 92,
+    "edge": 18.5,
+    "core": true,
+    "src": "Gemini_Generated_Image_8omdq08omdq08omd.jpg"
+   },
+   {
+    "id": "vegetal_5",
+    "w": 966,
+    "h": 114,
+    "edge": 24.2,
+    "core": true,
+    "src": "Gemini_Generated_Image_axsst0axsst0axss.jpg"
+   },
+   {
+    "id": "vegetal_6",
+    "w": 915,
+    "h": 133,
+    "edge": 43.2,
+    "core": true,
+    "src": "Gemini_Generated_Image_rx96qkrx96qkrx96.jpg"
+   }
+  ],
+  "carton": [
+   {
+    "id": "carton_1",
+    "w": 1364,
+    "h": 146,
+    "edge": 8.3,
+    "core": true,
+    "src": "Borde de cartón corrugado sobre fondo verde.png"
+   },
+   {
+    "id": "carton_2",
+    "w": 1384,
+    "h": 141,
+    "edge": 12.5,
+    "core": true,
+    "src": "Borde de cartón desgastado sobre fondo verde.png"
+   },
+   {
+    "id": "carton_3",
+    "w": 1266,
+    "h": 127,
+    "edge": 9.4,
+    "core": true,
+    "src": "Cartón kraft desgastado sobre fondo verde (1).png"
+   },
+   {
+    "id": "carton_4",
+    "w": 1455,
+    "h": 144,
+    "edge": 9.4,
+    "core": true,
+    "src": "Primer plano de cartón desgastado sobre verde croma.png"
+   },
+   {
+    "id": "carton_5",
+    "w": 1397,
+    "h": 120,
+    "edge": 10.4,
+    "core": true,
+    "src": "Textura de cartón corrugado sobre fondo verde chroma (1).png"
+   },
+   {
+    "id": "carton_6",
+    "w": 1405,
+    "h": 121,
+    "edge": 10.4,
+    "core": true,
+    "src": "Textura de cartón corrugado sobre fondo verde.png"
+   },
+   {
+    "id": "carton_7",
+    "w": 1074,
+    "h": 290,
+    "edge": 19.0,
+    "core": true,
+    "src": "Gemini_Generated_Image_i1b606i1b606i1b6.jpg"
+   },
+   {
+    "id": "carton_8",
+    "w": 1104,
+    "h": 112,
+    "edge": 17.1,
+    "core": true,
+    "src": "Gemini_Generated_Image_k8uuprk8uuprk8uu.jpg"
+   },
+   {
+    "id": "carton_9",
+    "w": 1100,
+    "h": 161,
+    "edge": 19.0,
+    "core": true,
+    "src": "Gemini_Generated_Image_n2513an2513an251.jpg"
+   }
+  ],
+  "carton_rasgado": [
+   {
+    "id": "carton_rasgado_1",
+    "w": 877,
+    "h": 163,
+    "edge": 56.7,
+    "core": true,
+    "src": "Cartón corrugado desgarrado sobre verde croma.png"
+   },
+   {
+    "id": "carton_rasgado_2",
+    "w": 865,
+    "h": 143,
+    "edge": 28.0,
+    "core": true,
+    "src": "Cartón corrugado rasgado sobre fondo verde (2).png"
+   },
+   {
+    "id": "carton_rasgado_3",
+    "w": 891,
+    "h": 164,
+    "edge": 21.9,
+    "core": true,
+    "src": "Cartón corrugado rasgado sobre fondo verde (3).png"
+   },
+   {
+    "id": "carton_rasgado_4",
+    "w": 843,
+    "h": 152,
+    "edge": 21.9,
+    "core": true,
+    "src": "Cartón corrugado rasgado sobre verde】【。.png"
+   },
+   {
+    "id": "carton_rasgado_5",
+    "w": 930,
+    "h": 237,
+    "edge": 53.6,
+    "core": true,
+    "src": "Gemini_Generated_Image_sdiif5sdiif5sdii.jpg"
+   },
+   {
+    "id": "carton_rasgado_6",
+    "w": 826,
+    "h": 271,
+    "edge": 29.5,
+    "core": true,
+    "src": "Gemini_Generated_Image_sjmjb2sjmjb2sjmj.jpg"
+   },
+   {
+    "id": "carton_rasgado_7",
+    "w": 915,
+    "h": 245,
+    "edge": 52.7,
+    "core": true,
+    "src": "Gemini_Generated_Image_xjtwvaxjtwvaxjtw.jpg"
+   },
+   {
+    "id": "carton_rasgado_8",
+    "w": 969,
+    "h": 299,
+    "edge": 86.4,
+    "core": true,
+    "src": "Gemini_Generated_Image_31s2w331s2w331s2.jpg"
+   }
+  ],
+  "carton_roto": [
+   {
+    "id": "carton_roto_1",
+    "w": 1334,
+    "h": 181,
+    "edge": 19.8,
+    "core": true,
+    "src": "Cartón corrugado rasgado sobre fondo verde (1).png"
+   },
+   {
+    "id": "carton_roto_2",
+    "w": 1261,
+    "h": 126,
+    "edge": 16.7,
+    "core": true,
+    "src": "Cartón corrugado rasgado sobre fondo verde.png"
+   },
+   {
+    "id": "carton_roto_3",
+    "w": 1174,
+    "h": 130,
+    "edge": 21.9,
+    "core": true,
+    "src": "Cartón corrugado rasgado sobre verde croma (1).png"
+   },
+   {
+    "id": "carton_roto_4",
+    "w": 1349,
+    "h": 164,
+    "edge": 21.9,
+    "core": true,
+    "src": "Cartón kraft con borde rasgado.png"
+   },
+   {
+    "id": "carton_roto_5",
+    "w": 1224,
+    "h": 105,
+    "edge": 16.7,
+    "core": true,
+    "src": "Cartón kraft rasgado sobre fondo verde (1).png"
+   },
+   {
+    "id": "carton_roto_6",
+    "w": 1326,
+    "h": 183,
+    "edge": 25.0,
+    "core": true,
+    "src": "Cartón kraft rasgado sobre fondo verde.png"
+   }
+  ]
+ },
+ "corners": {
+  "oreja_rota": [
+   {
+    "id": "esq_oreja_rota_1",
+    "size": 288,
+    "origin": 6.4,
+    "damage": 21.7,
+    "src": "Esquinas de Papel Rasgado sobre Verde (1).png"
+   },
+   {
+    "id": "esq_oreja_rota_2",
+    "size": 297,
+    "origin": 6.4,
+    "damage": 22.4,
+    "src": "Esquinas de papel rasgado sobre verde auxiliar.png"
+   },
+   {
+    "id": "esq_oreja_rota_3",
+    "size": 300,
+    "origin": 6.4,
+    "damage": 22.6,
+    "src": "Esquinas de papel rasgado sobre verde croma.png"
+   },
+   {
+    "id": "esq_oreja_rota_4",
+    "size": 334,
+    "origin": 7.9,
+    "damage": 25.1,
+    "src": "Esquinas de papel rasgado sobre verde.png"
+   },
+   {
+    "id": "esq_oreja_rota_5",
+    "size": 274,
+    "origin": 6.4,
+    "damage": 20.6,
+    "src": "Esquinas de papel rasgado sobre verde.png"
+   },
+   {
+    "id": "esq_oreja_rota_6",
+    "size": 282,
+    "origin": 7.8,
+    "damage": 21.1,
+    "src": "Gemini_Generated_Image_efun1zefun1zefun.jpg"
+   },
+   {
+    "id": "esq_oreja_rota_7",
+    "size": 318,
+    "origin": 8.3,
+    "damage": 23.8,
+    "src": "Gemini_Generated_Image_efun1zefun1zefun.jpg"
+   },
+   {
+    "id": "esq_oreja_rota_8",
+    "size": 352,
+    "origin": 9.6,
+    "damage": 26.4,
+    "src": "Gemini_Generated_Image_o174zgo174zgo174.jpg"
+   },
+   {
+    "id": "esq_oreja_rota_9",
+    "size": 330,
+    "origin": 8.7,
+    "damage": 24.7,
+    "src": "Gemini_Generated_Image_o174zgo174zgo174.jpg"
+   },
+   {
+    "id": "esq_oreja_rota_10",
+    "size": 292,
+    "origin": 8.7,
+    "damage": 21.8,
+    "src": "Gemini_Generated_Image_ts6d2wts6d2wts6d.jpg"
+   },
+   {
+    "id": "esq_oreja_rota_11",
+    "size": 309,
+    "origin": 8.3,
+    "damage": 23.1,
+    "src": "Gemini_Generated_Image_ts6d2wts6d2wts6d.jpg"
+   },
+   {
+    "id": "esq_oreja_rota_12",
+    "size": 345,
+    "origin": 9.1,
+    "damage": 25.9,
+    "src": "Gemini_Generated_Image_zfku2mzfku2mzfku.jpg"
+   },
+   {
+    "id": "esq_oreja_rota_13",
+    "size": 250,
+    "origin": 8.7,
+    "damage": 18.6,
+    "src": "Gemini_Generated_Image_zfku2mzfku2mzfku.jpg"
+   }
+  ],
+  "oreja": [
+   {
+    "id": "esq_oreja_1",
+    "size": 363,
+    "origin": 15.6,
+    "damage": 26.8,
+    "src": "Collage de esquinas de papel plegadas.png"
+   },
+   {
+    "id": "esq_oreja_2",
+    "size": 201,
+    "origin": 15.6,
+    "damage": 13.5,
+    "src": "Collage de esquinas de papel plegadas.png"
+   },
+   {
+    "id": "esq_oreja_3",
+    "size": 658,
+    "origin": 17.6,
+    "damage": 49.4,
+    "src": "Collage de esquinas de papel plegadas.png"
+   },
+   {
+    "id": "esq_oreja_4",
+    "size": 193,
+    "origin": 15.6,
+    "damage": 13.1,
+    "src": "Esquinas de papel plegadas sobre verde.png"
+   },
+   {
+    "id": "esq_oreja_5",
+    "size": 375,
+    "origin": 15.6,
+    "damage": 27.7,
+    "src": "Esquinas de papel plegadas sobre verde.png"
+   },
+   {
+    "id": "esq_oreja_6",
+    "size": 617,
+    "origin": 19.5,
+    "damage": 46.1,
+    "src": "Esquinas de papel plegadas sobre verde.png"
+   },
+   {
+    "id": "esq_oreja_7",
+    "size": 203,
+    "origin": 15.6,
+    "damage": 13.8,
+    "src": "Tres esquinas de papel dobladas (1).png"
+   },
+   {
+    "id": "esq_oreja_8",
+    "size": 330,
+    "origin": 15.6,
+    "damage": 24.3,
+    "src": "Tres esquinas de papel dobladas (1).png"
+   },
+   {
+    "id": "esq_oreja_9",
+    "size": 596,
+    "origin": 17.6,
+    "damage": 44.5,
+    "src": "Tres esquinas de papel dobladas (1).png"
+   },
+   {
+    "id": "esq_oreja_10",
+    "size": 688,
+    "origin": 17.6,
+    "damage": 51.6,
+    "src": "Tres esquinas de papel dobladas.png"
+   },
+   {
+    "id": "esq_oreja_11",
+    "size": 402,
+    "origin": 17.6,
+    "damage": 29.7,
+    "src": "Tres esquinas de papel dobladas.png"
+   },
+   {
+    "id": "esq_oreja_12",
+    "size": 213,
+    "origin": 15.6,
+    "damage": 14.6,
+    "src": "Tres esquinas de papel dobladas.png"
+   }
+  ],
+  "vieja": [
+   {
+    "id": "esq_vieja_1",
+    "size": 292,
+    "origin": 7.3,
+    "damage": 21.9,
+    "src": "Cuatro esquinas de papel envejecido (1).png"
+   },
+   {
+    "id": "esq_vieja_2",
+    "size": 294,
+    "origin": 7.3,
+    "damage": 22.1,
+    "src": "Cuatro esquinas de papel envejecido (1).png"
+   },
+   {
+    "id": "esq_vieja_3",
+    "size": 237,
+    "origin": 7.3,
+    "damage": 17.7,
+    "src": "Cuatro esquinas de papel envejecido (1).png"
+   },
+   {
+    "id": "esq_vieja_4",
+    "size": 312,
+    "origin": 7.3,
+    "damage": 23.4,
+    "src": "Cuatro esquinas de papel envejecido (1).png"
+   },
+   {
+    "id": "esq_vieja_6",
+    "size": 232,
+    "origin": 7.3,
+    "damage": 17.3,
+    "src": "Cuatro esquinas de papel envejecido.png"
+   },
+   {
+    "id": "esq_vieja_7",
+    "size": 265,
+    "origin": 7.3,
+    "damage": 19.9,
+    "src": "Cuatro esquinas de papel envejecido.png"
+   },
+   {
+    "id": "esq_vieja_8",
+    "size": 324,
+    "origin": 7.3,
+    "damage": 24.3,
+    "src": "Cuatro esquinas de papel envejecido.png"
+   },
+   {
+    "id": "esq_vieja_9",
+    "size": 238,
+    "origin": 7.3,
+    "damage": 17.7,
+    "src": "Cuatro esquinas de papel envejecido.png"
+   },
+   {
+    "id": "esq_vieja_11",
+    "size": 150,
+    "origin": 7.3,
+    "damage": 11.0,
+    "src": "Esquinas de papel vintage sobre verde.png"
+   },
+   {
+    "id": "esq_vieja_13",
+    "size": 173,
+    "origin": 7.3,
+    "damage": 12.8,
+    "src": "Esquinas de papel vintage sobre verde.png"
+   },
+   {
+    "id": "esq_vieja_14",
+    "size": 206,
+    "origin": 8.2,
+    "damage": 15.2,
+    "src": "Fragmentos de papel envejecido en cuadrícula.png"
+   },
+   {
+    "id": "esq_vieja_15",
+    "size": 168,
+    "origin": 7.8,
+    "damage": 12.4,
+    "src": "Gemini_Generated_Image_9hbxex9hbxex9hbx.jpg"
+   },
+   {
+    "id": "esq_vieja_16",
+    "size": 192,
+    "origin": 8.3,
+    "damage": 14.1,
+    "src": "Gemini_Generated_Image_9hbxex9hbxex9hbx.jpg"
+   },
+   {
+    "id": "esq_vieja_17",
+    "size": 306,
+    "origin": 7.8,
+    "damage": 23.0,
+    "src": "Gemini_Generated_Image_9hbxex9hbxex9hbx.jpg"
+   },
+   {
+    "id": "esq_vieja_18",
+    "size": 188,
+    "origin": 7.2,
+    "damage": 13.9,
+    "src": "Gemini_Generated_Image_fcpm14fcpm14fcpm.jpg"
+   },
+   {
+    "id": "esq_vieja_19",
+    "size": 130,
+    "origin": 7.2,
+    "damage": 9.5,
+    "src": "Gemini_Generated_Image_fcpm14fcpm14fcpm.jpg"
+   },
+   {
+    "id": "esq_vieja_20",
+    "size": 195,
+    "origin": 7.2,
+    "damage": 14.5,
+    "src": "Gemini_Generated_Image_jivhbpjivhbpjivh.jpg"
+   },
+   {
+    "id": "esq_vieja_21",
+    "size": 162,
+    "origin": 7.8,
+    "damage": 11.9,
+    "src": "Gemini_Generated_Image_jivhbpjivhbpjivh.jpg"
+   }
+  ],
+  "carton": [
+   {
+    "id": "esq_carton_1",
+    "size": 700,
+    "origin": 18.8,
+    "damage": 52.5,
+    "src": "Gemini_Generated_Image_t4qy3tt4qy3tt4qy.jpg"
+   }
+  ]
+ }
+}

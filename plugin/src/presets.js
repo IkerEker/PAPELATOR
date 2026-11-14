@@ -132,6 +132,42 @@ const ESTADOS = [
   { id: 'abandonado', name: 'Sótano abandonado', desc: 'Inundado y olvidado', edad: 0.9, v: { agua: 3, humedad: 2, foxing: 220, barro: 1, polvo: 320, sangrado: 1, manchado: 1, manoseo: 0.2, cockle: 1, grapa_agujero: 1, clip_huella: 1, arruguita: 2, media_luna: 2 } }
 ];
 
+
+// Bordes de la hoja: la hoja deja de llenar el documento y queda recortada con alfa. Cinco maneras, pero cada papel
+// tiene SU borde: un folio rasgado deja fibra blanca fina, una libreta se arranca de la espiral, la acuarela tiene
+// barbas, el kraft fibra larga, la cartulina gris enseña su alma clara, el cartón ondulado sus ondas…
+const BORDES = [
+  { id: 'ninguno', name: 'Sin borde' },
+  { id: 'recto', name: 'Recto' },
+  { id: 'gastado', name: 'Gastado' },
+  { id: 'rasgado', name: 'Rasgado' },
+  { id: 'roto', name: 'Roto' },
+  { id: 'quemado', name: 'Quemado' }
+];
+// tipo de papel (PAPER_TYPES) -> familia de borde
+const BORDE_FAM = {
+  folio: 'oficina', milimetrado: 'oficina', isometrico: 'oficina', pentagrama: 'oficina',
+  rayado: 'cuaderno', cuadriculado: 'cuaderno', punteado: 'cuaderno',
+  periodico: 'periodico',
+  acuarela_fina: 'acuarela', acuarela_gruesa: 'acuarela', algodon: 'acuarela', verjurado: 'acuarela',
+  arroz: 'washi', hecho_mano: 'artesanal', reciclado: 'reciclado', kraft: 'kraft', pergamino: 'pergamino',
+  vegetal: 'vegetal', horno: 'vegetal', cartulina: 'gris',
+  caja: 'carton', carton: 'carton', carton_kraft: 'carton_liso'
+};
+// qué es cada borde en cada familia (lo que se cuenta en el panel) y lo que no existe
+const BORDE_NO = { vegetal: ['quemado'], carton: ['quemado'], carton_liso: ['quemado'] };
+const BORDE_DESC = {
+  recto: 'cortado limpio',
+  gastado: { _: 'cantos con muescas y alguna esquina doblada', carton: 'cantos aplastados y raspados', carton_liso: 'cantos aplastados y raspados',
+    periodico: 'cantos viejos con muescas y esquinas redondeadas', pergamino: 'cantos viejos con muescas y esquinas redondeadas' },
+  rasgado: { _: 'rasgado a mano', cuaderno: 'arrancada de la espiral', acuarela: 'barbas de papel de algodón', washi: 'fibras largas sueltas',
+    artesanal: 'barbas gruesas de papel hecho a mano', periodico: 'fibra corta y gris', kraft: 'fibra larga marrón', gris: 'se separa en capas y enseña el alma clara',
+    pergamino: 'quebradizo, a escamas', vegetal: 'nítido, con el filo blanquecino', carton: 'se ven las ondas de dentro', carton_liso: 'fibra gruesa deshilachada', reciclado: 'fibra corta, mullida' },
+  roto: { _: 'desgarros que entran en la hoja y solapas levantadas', periodico: 'quebradizo, le faltan trozos', pergamino: 'quebradizo, le faltan trozos',
+    gris: 'arrancado a capas', carton: 'cara arrancada: se ven las ondas', carton_liso: 'fibra arrancada', kraft: 'fibra arrancada a mechones' },
+  quemado: 'cantos quemados y tostados'
+};
+
 // Pliegues: número de veces que se dobló (líneas de pliegue que se ven) o arrugado. ⟳ recorre las hojas reales
 // de ese grupo; el relieve y el desgaste de las aristas son sliders.
 const PLIEGUES = [
@@ -264,6 +300,9 @@ const DEFAULT_STATE = {
   sobreRefl: 1,                       // cuánta luz devuelve
   sobreDirt: 0.25,                    // huellas, grasa y polvo sobre el vidrio
   sobreScale: 1,
+  borde: 'ninguno',                   // borde de la hoja (alfa alrededor)
+  bordeAmount: 1,                     // cuánto: más lados rasgados, más irregular, más esquinas dobladas
+  seedBorde: 0,                       // ⟳
   calco: 'ninguno',
   calcoAmount: 1,
   calcoBleed: 1,
@@ -281,4 +320,4 @@ const DEFAULT_STATE = {
   hideOriginals: false
 };
 
-module.exports = { COLOR_SUGERIDOS, FAMILIAS_PAPEL, ESTADOS_POR_MATERIAL, COLORS, SOBRES, PAPER_TYPES, ESTADO_FAMILIAS, CALCO_FAMILIAS, LUZ_FAMILIAS, CALIDAD_FAMILIAS, PLIEGUE_ALIAS, ESTADOS, PLIEGUES, CALCOS, IMPRESIONES, LUCES, CALIDADES, DEFAULT_STATE };
+module.exports = { BORDES, BORDE_FAM, BORDE_NO, BORDE_DESC, COLOR_SUGERIDOS, FAMILIAS_PAPEL, ESTADOS_POR_MATERIAL, COLORS, SOBRES, PAPER_TYPES, ESTADO_FAMILIAS, CALCO_FAMILIAS, LUZ_FAMILIAS, CALIDAD_FAMILIAS, PLIEGUE_ALIAS, ESTADOS, PLIEGUES, CALCOS, IMPRESIONES, LUCES, CALIDADES, DEFAULT_STATE };

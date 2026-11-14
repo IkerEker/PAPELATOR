@@ -42,7 +42,7 @@ function saveJSON(key, v) { try { localStorage.setItem(key, JSON.stringify(v)); 
 let state = merge(clone(P.DEFAULT_STATE), loadJSON('papelator3.state'));
 // v4: la intensidad global ya no está en el panel principal; vuelve a la de referencia
 if ((state.version | 0) < 4) { state.intensity = 50; state.version = 4; }
-const CLEAN = { estado: 'nuevo', edad: 0, custom: null, pliegue: 'ninguno', pliegueVar: 0, calco: 'ninguno', sobre: 'ninguno', sobreVar: 0,
+const CLEAN = { estado: 'nuevo', edad: 0, custom: null, pliegue: 'ninguno', pliegueVar: 0, borde: 'ninguno', seedBorde: 0, calco: 'ninguno', sobre: 'ninguno', sobreVar: 0,
   luz: 'ninguna', calidad: 'perfecta', exposure: 0, encuadre: 0 };
 Object.assign(state, CLEAN);
 if (P.PLIEGUE_ALIAS[state.pliegue]) { state.pliegue = P.PLIEGUE_ALIAS[state.pliegue]; state.pliegueVar = 0; }
@@ -261,20 +261,30 @@ function artHash(data, w, h) {
 const lastApply = {};   // doc.id -> { hash, layerId, sample }
 const SAMPLE_STEP = 97;
 function sampleOf(data, comps) {
-  const n = Math.floor(data.length / comps / SAMPLE_STEP), out = new Uint8Array(n * 3);
-  for (let i = 0; i < n; i++) { const o = i * SAMPLE_STEP * comps; out[i * 3] = data[o]; out[i * 3 + 1] = data[o + 1]; out[i * 3 + 2] = data[o + 2]; }
+  // muestras repartidas por el documento (RGB + alfa); con borde, lo transparente no cuenta
+  const n = Math.floor(data.length / comps / SAMPLE_STEP), out = new Uint8Array(n * 4);
+  for (let i = 0; i < n; i++) { const o = i * SAMPLE_STEP * comps; out[i * 4] = data[o]; out[i * 4 + 1] = data[o + 1]; out[i * 4 + 2] = data[o + 2]; out[i * 4 + 3] = comps === 4 ? data[o + 3] : 255; }
   return out;
 }
 async function layerIntact(doc, layer, prev, w, h) {
   try {
     const r = await imaging.getPixels({ documentID: doc.id, layerID: layer.id, componentSize: 8, colorSpace: 'RGB' });
     const idt = r.imageData, sb = r.sourceBounds || { left: 0, top: 0, right: idt.width, bottom: idt.height };
-    if (idt.width !== w || idt.height !== h || sb.left !== 0 || sb.top !== 0) { idt.dispose(); return false; }
+    const iw = idt.width, ih = idt.height;
     const data = await idt.getData({ chunky: true }), comps = idt.components; idt.dispose();
-    const smp = sampleOf(data, comps), ref = prev.sample;
-    if (!ref || smp.length !== ref.length) return false;
-    let bad = 0; for (let i = 0; i < smp.length; i++) if (Math.abs(smp[i] - ref[i]) > 3) bad++;
-    return bad < smp.length * 0.002;
+    const ref = prev.sample; if (!ref) return false;
+    // se compara en coordenadas del documento (una hoja con borde no ocupa todo: sus límites son más pequeños)
+    let bad = 0, n = 0;
+    for (let i = 0; i < ref.length / 4; i++) {
+      if (ref[i * 4 + 3] < 250) continue;
+      const pIdx = i * SAMPLE_STEP, x = pIdx % w, y = (pIdx / w) | 0;
+      n++;
+      const lx = x - sb.left, ly = y - sb.top;
+      if (lx < 0 || ly < 0 || lx >= iw || ly >= ih) { bad++; continue; }
+      const o = (ly * iw + lx) * comps;
+      if (Math.abs(data[o] - ref[i * 4]) > 3 || Math.abs(data[o + 1] - ref[i * 4 + 1]) > 3 || Math.abs(data[o + 2] - ref[i * 4 + 2]) > 3) bad++;
+    }
+    return n > 0 && bad < n * 0.002;
   } catch (e) { return false; }
 }
 async function doApply() {
@@ -315,7 +325,8 @@ async function doApply() {
     lastApply[doc.id] = { hash, layerId: layer.id, sample: sampleOf(res.rgba, 4) };
     // queda seleccionado el resultado: así Ctrl/Cmd+E lo fusiona directamente con la capa de debajo
     restoreSelection(doc, [layer.id]);
-    setStatus((reuse ? 'Actualizado' : 'Aplicado en') + ' «' + RESULT_NAME + '» (' + ((Date.now() - t0) / 1000).toFixed(1) + ' s). Ctrl/Cmd+Z lo deshace de una vez.');
+    setStatus((reuse ? 'Actualizado' : 'Aplicado en') + ' «' + RESULT_NAME + '» (' + ((Date.now() - t0) / 1000).toFixed(1) + ' s). Ctrl/Cmd+Z lo deshace de una vez.'
+      + (state.borde && state.borde !== 'ninguno' && usable('borde') ? ' Alrededor de la hoja es transparente: oculta las capas de debajo para verla sola.' : ''));
   });
 }
 async function doRemove() {
@@ -413,6 +424,7 @@ function materialOf(id) { const p = papers.filter(x => x.id === id)[0]; return (
 function paperOf(id) { return papers.filter(x => x.id === id)[0] || null; }
 function usable(what) {
   const m = materialOf(state.paper), p = paperOf(state.paper);
+  if (what === 'borde') return !!bordeFamOf(state.paper);
   if (m === 'screen') return ['papel', 'sobre', 'foto', 'general', 'aplicar'].indexOf(what) >= 0;
   if (m === 'surface') {
     if (what === 'color') return !!(p && p.colorable);         // gotelé, estuco, azulejo… sí; ladrillo, piedra, metal no
@@ -420,6 +432,18 @@ function usable(what) {
   }
   if (m === 'wood' || m === 'carton') return ['pliegues', 'calco', 'color'].indexOf(what) < 0;
   return true;
+}
+// bordes de la hoja: cada papel tiene los suyos (madera, superficies y pantallas, ninguno)
+function bordeFamOf(id) { return P.BORDE_FAM[typeOf(id).id] || null; }
+function bordeList() {
+  const fam = bordeFamOf(state.paper); if (!fam) return [];
+  const no = P.BORDE_NO[fam] || [];
+  return P.BORDES.filter(b => no.indexOf(b.id) < 0);
+}
+function bordeDesc() {
+  const fam = bordeFamOf(state.paper), d = P.BORDE_DESC[state.borde];
+  if (!d) return '';
+  return typeof d === 'string' ? d : (d[fam] || d._);
 }
 // estados que tienen sentido en este material
 // imperfecciones sueltas que no existen en este material (madera sin foxing, pared sin grapas…)
@@ -435,6 +459,7 @@ function famUsable(f) { return materialOf(state.paper) !== 'screen' || !SCREEN_N
 function fixForMaterial() {
   // si el estado elegido no existe para este material, vuelve a «Nuevo»
   if (!state.custom && !famOf(estadoFamilias(), state.estado) && materialOf(state.paper) !== 'screen') { state.estado = 'nuevo'; state.edad = 0; }
+  if (state.borde && state.borde !== 'ninguno' && !bordeList().some(b => b.id === state.borde)) state.borde = 'ninguno';
   if (materialOf(state.paper) !== 'screen') return;
   const lf = P.LUZ_FAMILIAS.filter(f => f.items.indexOf(state.luz) >= 0)[0];
   if (lf && !famUsable(lf)) state.luz = 'ninguna';
@@ -522,6 +547,7 @@ function buildSimple() {
       state.custom = null; pickFam('estado', it);
       const e = P.ESTADOS.filter(x => x.id === state.estado)[0]; if (e) state.edad = e.edad;
     });
+    chipRow(byId('s-borde'), bordeList(), it => (state.borde || 'ninguno') === it.id, it => { state.borde = it.id; });
     chipRow(byId('s-pliegue'), P.PLIEGUES, it => state.pliegue === it.id, it => { if (state.pliegue !== it.id) { state.pliegue = it.id; state.pliegueVar = 0; } });
     chipRow(byId('s-calco'), P.CALCO_FAMILIAS, it => it.items.indexOf(state.calco) >= 0, it => pickFam('calco', it));
     chipRow(byId('s-sobre'), P.SOBRES, it => state.sobre === it.id, it => { if (state.sobre !== it.id) { state.sobre = it.id; state.sobreVar = 0; } });
@@ -531,7 +557,7 @@ function buildSimple() {
     if (byId('s-impresion')) chipRow(byId('s-impresion'), P.IMPRESIONES, it => state.impresion === it.id, it => { state.impresion = it.id; });
   }
   // cada tarjeta: cabecera (número, título, resumen de lo elegido, ⟳) + cuerpo plegable
-  const SEC_IDS = ['s-sec-papel', 's-sec-color', 's-sec-estado', 's-sec-pliegue', 's-sec-calco', 's-sec-sobre', 's-sec-foto'];
+  const SEC_IDS = ['s-sec-papel', 's-sec-color', 's-sec-estado', 's-sec-pliegue', 's-sec-borde', 's-sec-calco', 's-sec-sobre', 's-sec-foto'];
   if (!ui.closed) ui.closed = {};
   SEC_IDS.forEach(id => {
     const sec = byId(id); if (!sec || sec._built) return; sec._built = true;
@@ -560,6 +586,7 @@ function buildSimple() {
       case 's-sec-color': { if (isOrigColor()) return 'Original'; const s = colorSug().filter(x => x[0] === colorHex(state.color))[0]; return s ? s[1] : 'Personalizado'; }
       case 's-sec-estado': return (state.custom ? 'Personalizado' : fam(P.ESTADO_FAMILIAS, state.estado)) + (state.edad > 0.005 ? ' · ' + pct0(state.edad) : '');
       case 's-sec-pliegue': return nm(P.PLIEGUES, state.pliegue);
+      case 's-sec-borde': return nm(P.BORDES, state.borde || 'ninguno');
       case 's-sec-calco': return fam(P.CALCO_FAMILIAS, state.calco);
       case 's-sec-sobre': return nm(P.SOBRES, state.sobre);
       case 's-sec-foto': return fam(P.LUZ_FAMILIAS, state.luz) + ' · ' + fam(P.CALIDAD_FAMILIAS, state.calidad);
@@ -568,6 +595,7 @@ function buildSimple() {
   }
   function describe(id) {
     if (id === 's-sec-estado' && !state.custom) { const e = P.ESTADOS.filter(x => x.id === state.estado)[0]; return e ? e.name + ': ' + (e.desc || '').toLowerCase() : ''; }
+    if (id === 's-sec-borde' && state.borde && state.borde !== 'ninguno') return nm(P.BORDES, state.borde) + ': ' + bordeDesc() + '. Fuera de la hoja queda transparente.';
     if (id === 's-sec-calco' && state.calco !== 'ninguno') { const c = P.CALCOS.filter(x => x.id === state.calco)[0]; return c && c.desc ? c.name + ': ' + c.desc.toLowerCase() : ''; }
     if (id === 's-sec-papel' && materialOf(state.paper) === 'screen') return 'Pantalla: sin pliegues, calco ni estado del papel.';
     if (id === 's-sec-papel' && (materialOf(state.paper) === 'wood' || materialOf(state.paper) === 'carton')) return 'Madera y cartón no se doblan ni transparentan.';
@@ -578,7 +606,7 @@ function buildSimple() {
     return '';
   }
   function sections() {
-    const show = { 's-sec-color': usable('color'), 's-sec-estado': usable('estado'), 's-sec-pliegue': usable('pliegues'), 's-sec-calco': usable('calco') };
+    const show = { 's-sec-borde': usable('borde'), 's-sec-color': usable('color'), 's-sec-estado': usable('estado'), 's-sec-pliegue': usable('pliegues'), 's-sec-calco': usable('calco') };
     Object.keys(show).forEach(id => { const el = byId(id); if (el) el.style.display = show[id] ? 'block' : 'none'; });
     const mat = materialOf(state.paper), scr = mat === 'screen';
     byId('s-scalewrap').style.display = scr ? 'none' : 'block';
@@ -611,6 +639,9 @@ function buildSimple() {
     pa.value = Math.round(state.pliegueAmount * 100); byId('s-plamtval').textContent = Math.round(state.pliegueAmount * 100) + '%';
     pw.value = Math.round(state.pliegueWear * 100); byId('s-plwearval').textContent = Math.round(state.pliegueWear * 100) + '%';
     byId('s-plopts').style.display = state.pliegue && state.pliegue !== 'ninguno' ? 'block' : 'none';
+    byId('s-bordeopts').style.display = state.borde && state.borde !== 'ninguno' && state.borde !== 'recto' ? 'block' : 'none';
+    const ba = state.bordeAmount == null ? 1 : state.bordeAmount;
+    byId('s-bordeamt').value = Math.round(ba * 100); byId('s-bordeamtval').textContent = Math.round(ba * 100) + '%';
     byId('s-enc').value = Math.round(state.encuadre * 100); byId('s-encval').textContent = Math.round(state.encuadre * 100) + '%';
     byId('s-sobreopts').style.display = state.sobre && state.sobre !== 'ninguno' ? 'block' : 'none';
     byId('s-sobretrans').value = Math.round(state.sobreTrans * 100); byId('s-sobretransval').textContent = Math.round(state.sobreTrans * 100) + '%';
@@ -638,6 +669,7 @@ function buildSimple() {
   bindSlider('s-exposure', 's-expval', v => { state.exposure = v / 100; }, v => (v > 0 ? '+' : '') + v);
   bindSlider('s-edad', 's-edadval', v => { state.edad = v / 100; }, v => v + '%');
   bindSlider('s-plamt', 's-plamtval', v => { state.pliegueAmount = v / 100; }, v => v + '%');
+  bindSlider('s-bordeamt', 's-bordeamtval', v => { state.bordeAmount = v / 100; }, v => v + '%');
   bindSlider('s-plwear', 's-plwearval', v => { state.pliegueWear = v / 100; }, v => v + '%');
   bindSlider('s-zoom', 's-zoomval', v => { state.screenZoom = v / 100; }, v => v + '%');
   bindSlider('s-bright', 's-brightval', v => { state.screenBright = v / 100; }, v => v + '%');
@@ -650,6 +682,7 @@ function buildSimple() {
   dice('s-r-sobre', () => { const c = overlayCats[state.sobre]; const n = c && c.items ? c.items.length : 1; state.sobreVar = ((state.sobreVar | 0) + 1) % n; });
   dice('s-r-papel', () => { state.paper = nextIn(typeOf(state.paper).papers, state.paper); state.seedPaper = (state.seedPaper | 0) + 1; });
   dice('s-r-estado', () => { const f = famOf(P.ESTADO_FAMILIAS, state.estado); if (f && !state.custom) state.estado = nextIn(f.items, state.estado); state.seedEstado = (state.seedEstado | 0) + 1; });
+  dice('s-r-borde', () => { state.seedBorde = (state.seedBorde | 0) + 1; });
   dice('s-r-pliegue', () => {
     const pre = P.PLIEGUES.filter(p => p.id === state.pliegue)[0];
     const cat = pre && foldCats[pre.group];
@@ -709,6 +742,11 @@ function buildSections() {
       { t: 'slider', path: 'patternOpacity', label: 'Intensidad de las líneas', min: 0, max: 1.5, step: 0.05, fmt: pct, when: isPattern }
     ] },
     { id: 'estado', title: 'Estado e imperfecciones', when: () => usable('estado'), items: estadoItems },
+    { id: 'borde', title: 'Borde de la hoja', when: () => usable('borde'), items: [
+      { t: 'picker', path: 'borde', label: 'Borde', options: () => bordeList().map(b => [b.id, b.name]) },
+      { t: 'slider', path: 'bordeAmount', label: 'Cuánto (lados rasgados, irregularidad, esquinas)', min: 0, max: 2, step: 0.05, fmt: pct, when: () => state.borde && state.borde !== 'ninguno' && state.borde !== 'recto' },
+      { t: 'slider', path: 'seedBorde', label: 'Variación del borde', min: 0, max: 99, step: 1, fmt: v => '#' + (v + 1), when: () => state.borde && state.borde !== 'ninguno' }
+    ] },
     { id: 'pliegues', title: 'Pliegues y arrugas', when: () => usable('pliegues'), items: [
       { t: 'picker', path: 'pliegue', label: 'Cómo se dobló', options: () => P.PLIEGUES.map(c => [c.id, c.name]) },
       { t: 'slider', path: 'pliegueAmount', label: 'Relieve de los pliegues', min: 0, max: 2.5, step: 0.05, fmt: pct , when: () => state.pliegue !== 'ninguno' },

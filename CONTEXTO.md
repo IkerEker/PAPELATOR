@@ -2,7 +2,7 @@
 
 > Pega o adjunta este archivo al empezar el chat nuevo. Todo el proyecto está en GitHub:
 > **https://github.com/IkerEker/PAPELATOR** (rama `main`, último commit «Una sola ventana con dos pestañas: Presets y Avanzado»).
-> Versión actual del plugin: **3.14.2** (`plugin/manifest.json`). Instalable: `dist/PAPELATOR.ccx`.
+> Versión actual del plugin: **3.15.0** (`plugin/manifest.json`). Instalable: `dist/PAPELATOR.ccx`.
 
 ---
 
@@ -256,6 +256,32 @@ que las opciones que no tienen sentido en cada material desaparezcan (gotelé se
 - **v3.14.2 — pantallas legibles**: tamaño del píxel con curva `zoom^0.6` (400 % ≈ ×2,3), tele de tubo con 380
   líneas (antes 260), bandas ×0.6, desenfoque óptico menor, y la calidad de foto sobre una pantalla desenfoca la
   mitad (`st._soft = 0.5`: resolución, foco, trepidación y bordes).
+
+## 6k. v3.15 — Bordes de la hoja (alfa alrededor)
+Pedido: sólo en papel (y cartón), la hoja recortada sobre transparente; bordes distintos (recto, gastado, rasgado,
+roto…) que dependan del papel (no hay borde de cartón en un periódico); con pliegues, el canto se dobla con la hoja;
+interfaz sencilla.
+- Fuentes: `BORDES/` (163 fotos, 156 distintas; ChatGPT/Gemini sobre croma verde, el vegetal sobre negro).
+- `tools/bordes_matte.py`: recorte con alfa fino (fondo local por bloques, color del papel cercano, alfa en la señal
+  G-max(R,B) o luminancia, des-mezclado del verde, limpieza de motas).
+- `tools/build_bordes.py` (`PAPELATOR_TMP` = caché de recortes): STRIPS (21 conjuntos de tiras: blanco, bisel, blanco_roto,
+  espiral, wire, periodico, reciclado, acuarela, washi, artesanal, viejo, viejo_roto, quemado, kraft, kraft_grueso, gris,
+  gris_roto, vegetal, carton, carton_rasgado, carton_roto) y CORNERS (oreja, oreja_rota, vieja, carton). Cada tira:
+  enderezada, recortada a la banda del borde, cíclica en horizontal; PNG RGBA = (Sh/2, alfa) + `_k.png` (alma clara que
+  asoma). Sh = luminancia relativa + tinte sólo si el papel de la foto no es saturado (así sirve para cualquier color).
+  Esquinas: cantos por moda de filas/columnas, daño = lo que falta unido al exterior; giradas a esquina sup. izq. con
+  `origin`. Todo a 10 px/mm. Catálogo `plugin/assets/bordes.json`. Descartadas a mano: 3 esquinas viejas, varias washi
+  sin papel debajo, 1 kraft_grueso, 1 gris_roto.
+- presets.js: `BORDES` (Sin borde, Recto, Gastado, Rasgado, Roto, Quemado), `BORDE_FAM` (tipo de papel → familia),
+  `BORDE_NO`, `BORDE_DESC`; estado `borde`, `bordeAmount`, `seedBorde`.
+- engine.js: `BORDE_REC` (familia → qué conjuntos usa en cada borde; papel de color → bisel blanco; cuaderno → espiral);
+  `genBorde` construye BA/BS/BK en plano (tiras a lo largo de cada lado sobre una línea ondulada, cantos rectos, esquinas)
+  y `borderAt` lo lee. En «Papel de fondo» se aplica deformado por la altura de la hoja; en «Aplicar» se lee en (sx,sy),
+  el mismo punto donde cae la tinta, así el borde sigue pliegues/forma/cámara. Altura de la hoja (`FD.panel`): integral
+  del sombreado del pliegue por filas y columnas, sin deriva y suavizada → cada pliegue hace un pequeño codo en el
+  contorno (`panelK` 0.01). La calidad y el encuadre arrastran el alfa (con borde no se recorta para tapar esquinas).
+- main.js: sección «Borde» (chips por papel, ⟳, slider «Cuánto»), desaparece en madera, superficies y pantallas;
+  `fixForMaterial` la resetea; `layerIntact` compara en coordenadas del documento (la capa con alfa tiene límites menores).
 
 ## 7. Pendiente / ideas que no se han hecho
 - Probar todo dentro de Photoshop real (las pruebas son en Node + simulación del DOM de UXP; el usuario es quien lo

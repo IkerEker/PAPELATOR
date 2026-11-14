@@ -57,6 +57,11 @@ negro, bloc amarillo, periódico salmón…) y la rueda, que abre el selector de
 **Antigüedad**: no sólo amarillea; cuanto más alta, más marcas (foxing, moho, cercos de agua, polvo, cantos), según
 el estado elegido. Humedad al máximo deja la hoja destrozada.
 
+**Borde** (sólo papel y cartón): Sin borde · Recto · Gastado · Rasgado · Roto · Quemado, con ⟳ y slider «Cuánto».
+La hoja queda recortada y alrededor es transparente. Cada papel tiene su borde: folio con fibra blanca, papel de color con
+el alma blanca a la vista, libreta arrancada de la espiral, acuarela con barbas, washi con fibras largas, kraft con fibra
+marrón, cartulina gris en capas, cartón con sus ondas, pergamino quebradizo. Con pliegues, el canto se dobla con la hoja.
+
 **Intensidad del filtro**: 0 % deja la lámina prácticamente igual; 50 % (por defecto) es sutil; 100 % es muy marcado.
 
 ## Estructura
@@ -73,6 +78,7 @@ tools/                scripts que procesan las fuentes y generan los assets del 
   build_imperf2.py    imperfecciones sutiles: grapas, agujeros de grapa, clip, pinza, medias lunas, arruguitas
   build_boards.py     maderas (abedul, OSB, aglomerado) y cartones (de caja, kraft) desde NUEVAS_NUEVAS/
   build_surfaces.py   superficies de NUEVAS SUPERFICIES/: aparejo recortado a su periodo, colorable, relieve (dispMm)
+  build_bordes.py     bordes de la hoja (BORDES/): tiras tileables con alfa + esquinas (usa bordes_matte.py)
   build_overlays.py   Sobreponer: vidrios y plásticos de SOBREPONER/ -> reflejos + mapa de desplazamiento (+ malla)
   build_rotulador.py  calco de rotulador: notas, etiqueta y lista escritas a mano (cursiva) con charcos de tinta
   build_folds.py      pliegues y arrugas: sombreado real de cada foto (fold_sources.json), agrupado por nº de pliegues
