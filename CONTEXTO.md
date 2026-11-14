@@ -2,7 +2,7 @@
 
 > Pega o adjunta este archivo al empezar el chat nuevo. Todo el proyecto está en GitHub:
 > **https://github.com/IkerEker/PAPELATOR** (rama `main`, último commit «Una sola ventana con dos pestañas: Presets y Avanzado»).
-> Versión actual del plugin: **3.13.0** (`plugin/manifest.json`). Instalable: `dist/PAPELATOR.ccx`.
+> Versión actual del plugin: **3.14.0** (`plugin/manifest.json`). Instalable: `dist/PAPELATOR.ccx`.
 
 ---
 
@@ -232,6 +232,22 @@ que las opciones que no tienen sentido en cada material desaparezcan (gotelé se
   Con manchas/Humedad; slider **Relieve** (= `state.grain`) en Presets; en Avanzado el preset de estado se filtra,
   las imperfecciones imposibles se ocultan y «Deformación por el grano» pasa a «Relieve de la superficie».
   El título de la sección 1 dice Papel / Fondo / Superficie / Pantalla.
+
+## 6j. v3.14 — color en 4 muestras, antigüedad que destroza, calco descarado, encuadre comedido, huecos en blanco
+- **Color**: sólo 4 muestras redondas sin texto: el color propio del papel · dos colores que existen de verdad en
+  ESE tipo (`COLOR_SUGERIDOS` en presets.js, por id de tipo; '_' por defecto) · rueda = selector de color de
+  Photoshop (`batchPlay showColorPicker` dentro de `executeAsModal`, sin paso de historial). Se guarda como hex en
+  `state.color`; los ids antiguos ('marfil'…) siguen valiendo. Resumen: nombre de la sugerencia o «Personalizado».
+- **Antigüedad** (todas las familias): `estadoCounts()` suma marcas según la edad (`AGE_ADD` + `AGE_FLAVOR` del
+  estado, curva `(edad-0.05)^1.6`) y multiplica las del preset si pasas de su edad propia. `genEstado`: manchas más
+  oscuras (`AGE_DARK`), cercos más grandes (`AGE_BIG`), foxing en colonias mayores y **moho** (colonias densas de
+  1-4 cm, `counts.moho`). Humedad al 110 % = hoja destrozada. A 0-30 % casi no cambia.
+- **Calco**: curva `gA` (0 = invisible, 100 % = sutil como antes, 250 % ≈ ×7 y más oscuro y nítido: se lee).
+- **Encuadre**: curva más lenta (`enc^2.2` para giro/perspectiva/descentrado, `enc^1.8` desenfoque, `enc^1.6` zona
+  enfocada). 16 % casi imperceptible; 100 % igual que antes.
+- **Huecos en blanco** (UXP, p. ej. encima de los chips de Sobreponer): las filas con flex-wrap no recalculaban su
+  altura. `chipRow`/`renderColors` sustituyen el contenedor por uno nuevo (`fresh()`), `.chips` lleva
+  `align-content: flex-start` y al cambiar el ancho del panel se repintan (`fitHeights`).
 
 ## 7. Pendiente / ideas que no se han hecho
 - Probar todo dentro de Photoshop real (las pruebas son en Node + simulación del DOM de UXP; el usuario es quien lo

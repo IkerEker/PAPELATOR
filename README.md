@@ -51,6 +51,12 @@ foto lo sombrea. Slider **Relieve** para más o menos. Sólo se pueden **pintar*
 guardan su color y la sección de color desaparece. En ninguna hay pliegues ni calco, y de estado sólo Nuevo, Usado,
 Con manchas y Humedad (sin foxing, grapas, escritura ni nada propio del papel).
 
+**Color**: cuatro muestras: el color propio del papel, dos que existen de verdad en ese papel (kraft blanco y
+negro, bloc amarillo, periódico salmón…) y la rueda, que abre el selector de color de Photoshop.
+
+**Antigüedad**: no sólo amarillea; cuanto más alta, más marcas (foxing, moho, cercos de agua, polvo, cantos), según
+el estado elegido. Humedad al máximo deja la hoja destrozada.
+
 **Intensidad del filtro**: 0 % deja la lámina prácticamente igual; 50 % (por defecto) es sutil; 100 % es muy marcado.
 
 ## Estructura

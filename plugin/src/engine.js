@@ -240,10 +240,34 @@ const MATERIAL_NO = {
 };
 function materialOf(st) { const p = paperById(st.paper); return (p && p.material) || 'paper'; }
 function allowed(st, cid) { const no = MATERIAL_NO[materialOf(st)]; return !no || !no[cid]; }
+// La antigüedad no sólo tuesta el papel: cuanto más vieja la hoja, más marcas. Al subir el slider se suman a las del
+// estado elegido (que además se multiplican si pasas de su antigüedad propia). Curva lenta al principio: a 20-40 %
+// apenas añade; a 100-120 % la hoja está destrozada (hongos por todas partes, cercos de agua, polvo, cantos rotos).
+const AGE_ADD = { moho: 2, polvo: 420, foxing: 300, manchado: 1.1, descamacion: 110, fibras: 4, humedad: 2, agua: 2, uv: 1,
+  media_luna: 3, arruguita: 3, cockle: 0.7, manoseo: 0.45, grapa_agujero: 1, huella_grasa: 1.5, adhesivo: 0.6 };
+// cada estado envejece a su manera (sumas extra por unidad de la curva)
+const AGE_FLAVOR = {
+  humedad: { moho: 12, foxing: 650, humedad: 4, agua: 4, barro: 1.5, cockle: 0.6, manchado: 0.5, descamacion: 80, sangrado: 1 },
+  abandonado: { moho: 20, foxing: 800, humedad: 5, agua: 5, barro: 2.5, cockle: 0.6, manchado: 0.7, descamacion: 140, polvo: 300, sangrado: 1.5 },
+  libro: { moho: 2, foxing: 350, manchado: 0.5, uv: 1, descamacion: 40 }, correo: { foxing: 250, matasellos: 1, huella_tinta: 1, agua: 1 },
+  archivo: { moho: 4, foxing: 250, polvo: 300, adhesivo: 1.5, grapa_agujero: 2, clip_huella: 1, humedad: 1 },
+  sol: { uv: 2, calor: 1, foxing: -150 }, oficial: { foxing: 150, huella_tinta: 1, grapa_agujero: 1 },
+  bar: { cafe: 2, salp_cafe: 1.5, grasa: 2, quemadura: 2, huella_grasa: 2 }, taller: { grasa: 3, barro: 2, huella_tinta: 2, huella_grasa: 3 },
+  velas: { cera: 3, quemadura: 3, calor: 2 }, escuela: { grafito: 2, goma: 2, huella_grasa: 2, arruguita: 2 },
+  usado: { huella_grasa: 2, manoseo: 0.3 }, nuevo: {}
+};
+function ageCurve(st) { return Math.pow(Math.max(0, clamp(def(st.edad, 0), 0, 1.5) - 0.05), 1.6); }
 function estadoCounts(st) {
   if (st.custom && typeof st.custom === 'object') return st.custom;
   const e = P.ESTADOS.filter(x => x.id === st.estado)[0] || P.ESTADOS[0];
-  return e.v;
+  const a = clamp(def(st.edad, e.edad), 0, 1.5), g = ageCurve(st);
+  if (g <= 0) return e.v;
+  const v = {}, mul = 1 + 1.2 * Math.max(0, a - e.edad);
+  Object.keys(e.v).forEach(c => { v[c] = e.v[c] * (c === 'sol' ? 1 : mul); });
+  const add = (tbl) => Object.keys(tbl).forEach(c => { v[c] = Math.max(0, (v[c] || 0) + tbl[c] * g); });
+  add(AGE_ADD); add(AGE_FLAVOR[e.id] || {});
+  ['cockle', 'manchado', 'manoseo'].forEach(c => { if (v[c] != null) v[c] = Math.min(1.5, v[c]); });
+  return v;
 }
 
 // Dibuja una mancha (o una pieza de atlas) escalada, girada y fundida según su naturaleza.
@@ -589,13 +613,17 @@ async function genEstado(S, st, assets, B) {
   const cats = cache.imperf;
   const r = rng(S.seedE * 31 + 7);
   const opK = clamp(k, 0, 2) * Math.min(1.5, amt);
+  // con los años las manchas se oscurecen y los hongos crecen en colonias más grandes
+  const ag = st.custom ? 0 : Math.min(1.4, ageCurve(st));
+  const AGE_DARK = { foxing: 1.3, humedad: 2.0, agua: 1.4, polvo: 0.5, descamacion: 0.5, barro: 0.4, uv: 0.6, manchado: 0.5 };
+  const AGE_BIG = { humedad: 0.5, agua: 0.45, uv: 0.3 };   // los cercos viejos son más grandes
   const order = ['nodulos', 'fibras', 'descamacion', 'polvo', 'uv', 'calor', 'humedad', 'agua', 'foxing', 'cafe', 'salp_cafe',
     'barro', 'grasa', 'cera', 'adhesivo', 'matasellos', 'quemadura', 'sangrado', 'salp_tinta', 'grafito', 'huella_tinta',
     'huella_grasa', 'goma', 'escritura', 'mecano', 'sello_seco', 'arruguita', 'media_luna', 'pinza', 'clip_huella', 'grapa_marca', 'grapa_agujero'];
   for (const cid of order) {
     let n = counts[cid]; const C = cats[cid];
     if (!n || !C || !allowed(st, cid)) continue;
-    const op0 = C.opacity * opK;
+    const op0 = Math.min(1, C.opacity * opK * (1 + def(AGE_DARK[cid], 0) * ag));
     const base = { absorb: def(C.absorb, 0), erode: def(C.erode, 0), cellPx: def(C.cellMm, 5) * ppm, cockle: def(C.cockle, 0) };
     if (C.kind === 'stamp') {
       n = Math.round(n * Math.min(1.5, amt));
@@ -603,7 +631,7 @@ async function genEstado(S, st, assets, B) {
         const it = C.items[(r() * C.items.length) | 0];
         const img = await loadImg(assets, 'imperf/' + it.file);
         const mask = it.mask ? await loadImg(assets, 'imperf/' + it.file.replace('.png', '_m.png')) : null;
-        const sizeMm = lerp(C.size[0], C.size[1], r());
+        const sizeMm = lerp(C.size[0], C.size[1], r()) * (1 + def(AGE_BIG[cid], 0) * ag);
         const sc = sizeMm * ppm / Math.max(it.w, it.h);
         const an = 1 + (r() - 0.5) * 2 * def(C.aniso, 0.12);    // ninguna mancha tiene las mismas proporciones (las de taza siguen siendo redondas)
         const pl = place(C.place, r, Wm, Hm, sizeMm, it);
@@ -642,10 +670,10 @@ async function genEstado(S, st, assets, B) {
         // por pieza: cantidad por A4; el tamaño sigue una ley de potencia (muchas pequeñas, pocas grandes)
         const total = Math.round(n * areaK * Math.min(2, amt));
         const clusters = [];
-        if (C.place === 'foxing') for (let c = 0; c < 3 + Math.round(n / 50); c++) {
+        if (C.place === 'foxing') for (let c = 0; c < 3 + Math.round(n / (50 + 60 * ag)); c++) {
           const edgeBias = r() < 0.65;
           clusters.push([edgeBias ? (r() < 0.5 ? lerp(0.02, 0.18, r()) : lerp(0.82, 0.98, r())) * Wm : r() * Wm,
-            edgeBias && r() < 0.4 ? (r() < 0.5 ? lerp(0.02, 0.15, r()) : lerp(0.85, 0.98, r())) * Hm : r() * Hm, lerp(8, 35, r())]);
+            edgeBias && r() < 0.4 ? (r() < 0.5 ? lerp(0.02, 0.15, r()) : lerp(0.85, 0.98, r())) * Hm : r() * Hm, lerp(8, 35 + 25 * ag, r())]);
         }
         for (let i = 0; i < total; i++) {
           const s = sp[(r() * sp.length) | 0];
@@ -655,7 +683,7 @@ async function genEstado(S, st, assets, B) {
             const e = Math.pow(r(), 2) * 30, sd = (r() * 4) | 0;
             x = sd === 0 ? e : sd === 1 ? Wm - e : r() * Wm; y = sd === 2 ? e : sd === 3 ? Hm - e : r() * Hm;
           } else { x = r() * Wm; y = r() * Hm; }
-          const size = cid === 'foxing' ? lerp(0.35, 1.15, Math.pow(r(), 2.2)) : lerp(0.55, 1.15, r());
+          const size = cid === 'foxing' ? lerp(0.35, 1.15 + 1.4 * ag, Math.pow(r(), 2.2)) : lerp(0.55, 1.15, r());
           const sc = s.mm * ppm * size;
           const opp = cid === 'foxing' ? op0 * lerp(0.35, 1, Math.pow(r(), 0.7)) : op0 * lerp(0.45, 1, r());
           drawSprite(S, B, atlas, s.r, x * ppm, y * ppm, sc, sc, r() * Math.PI * 2, C.mode, opp, null, r() < 0.5, opt);
@@ -683,6 +711,27 @@ async function genEstado(S, st, assets, B) {
       }
     }
   }
+  // colonias de moho: muchas motas de foxing apretadas en manchas de 1-4 cm, más densas en el centro
+  const nMoho = Math.round(def(counts.moho, 0) * areaK * Math.min(2, amt));
+  if (nMoho > 0 && allowed(st, 'foxing') && cats.foxing) {
+    const C = cats.foxing, atlas = await loadImg(assets, 'imperf/' + C.atlas), sp = C.sprites;
+    const opt = { absorb: def(C.absorb, 0) };
+    for (let m = 0; m < nMoho; m++) {
+      const edge = r() < 0.6;
+      const cx = (edge && r() < 0.5 ? (r() < 0.5 ? lerp(0.0, 0.2, r()) : lerp(0.8, 1, r())) : r()) * Wm;
+      const cy = (edge && r() < 0.5 ? (r() < 0.5 ? lerp(0.0, 0.2, r()) : lerp(0.8, 1, r())) : r()) * Hm;
+      const R = lerp(5, 20, Math.pow(r(), 1.4)) * (0.7 + 0.6 * ag), dots = Math.round(lerp(60, 160, r()) * R / 10);
+      const sq = lerp(0.6, 1.4, r());
+      for (let d = 0; d < dots; d++) {
+        const s = sp[(r() * sp.length) | 0];
+        const rr = Math.abs(gauss(r)) * R * 0.5, a = r() * Math.PI * 2;
+        const x = cx + Math.cos(a) * rr * sq, y = cy + Math.sin(a) * rr / sq;
+        const sc = s.mm * ppm * lerp(0.5, 1.7, Math.pow(r(), 1.5));
+        const op = Math.min(1, C.opacity * opK * (1.2 + ag) * lerp(0.4, 1, r()) * Math.max(0.25, 1 - rr / (R * 1.3)));
+        drawSprite(S, B, atlas, s.r, x * ppm, y * ppm, sc, sc, r() * Math.PI * 2, C.mode, op, null, r() < 0.5, opt);
+      }
+    }
+  }
 }
 
 // ================================================================ CALCO
@@ -697,10 +746,14 @@ async function genCalco(S, st, assets, B, paper, backArt) {
   if (!id || id === 'ninguno' || materialOf(st) !== 'paper') return;   // madera y cartón no transparentan
   const { w, h, ppm, N } = S;
   const k = S.k;
-  const amount = clamp(def(st.calcoAmount, 1), 0, 3) * clamp(k, 0, 2) * def(st._calcoBoost, 1);
+  // slider: 0 = invisible · 100 % = sutil (como siempre) · 250 % = descarado, se lee lo de detrás
+  const A = clamp(def(st.calcoAmount, 1), 0, 3);
+  const gA = A <= 1 ? A : 1 + Math.pow(A - 1, 1.5) * 3.2;
+  const amount = gA * clamp(k, 0, 2) * def(st._calcoBoost, 1);
   if (amount <= 0) return;
+  const loud = clamp((gA - 1) / 6, 0, 1);   // 0 hasta 100 %, 1 al máximo
   const tr = clamp(def(paper.translucency, 0.25), 0, 1);
-  const blur = ppm * (0.18 + 0.5 * (1 - tr)) * clamp(def(st.calcoBlur, 1), 0.2, 4);
+  const blur = ppm * (0.18 + 0.5 * (1 - tr)) * clamp(def(st.calcoBlur, 1), 0.2, 4) / (1 + 0.8 * loud);
   const f = clamp(Math.floor(blur / 1.5), 1, 6);
   const lw = Math.ceil(w / f), lh = Math.ceil(h / f), LN = lw * lh;
   const cov = new Float32Array(LN), tmpL = new Float32Array(LN);
@@ -739,12 +792,12 @@ async function genCalco(S, st, assets, B, paper, backArt) {
     // más trasluz donde el papel es más fino (formación) o está engrasado
     const boost = (trans ? 1 + 2.4 * trans[o] / 255 : 1) * clamp(1 + 0.25 * D[o] * dinv, 0.6, 1.5);
     const s = clamp(s0 * boost, 0, 0.9) * v;
-    const j = o * 4;
-    if (colB) { for (let c = 0; c < 3; c++) { const cv = bil(colB[c], x, y) / Math.max(v, 1e-3); alb[j + c] *= 1 - s * (0.55 * cv + 0.45 * (1 - tint[c] + 0.12)); } }
-    else { alb[j] *= 1 - s * (1 - tint[0] + 0.14); alb[j + 1] *= 1 - s * (1 - tint[1] + 0.14); alb[j + 2] *= 1 - s * (1 - tint[2] + 0.14); }
+    const j = o * 4, dk = 0.35 * loud;   // al máximo la tinta de detrás se ve casi gris oscuro
+    if (colB) { for (let c = 0; c < 3; c++) { const cv = bil(colB[c], x, y) / Math.max(v, 1e-3); alb[j + c] *= 1 - s * (0.55 * cv + 0.45 * (1 - tint[c] + 0.12) + dk); } }
+    else { alb[j] *= 1 - s * (1 - tint[0] + 0.14 + dk); alb[j + 1] *= 1 - s * (1 - tint[1] + 0.14 + dk); alb[j + 2] *= 1 - s * (1 - tint[2] + 0.14 + dk); }
   }
   const tmp = (id === 'apuntes' || id === 'rotulador') ? new Float32Array(N) : null;
-  const bleedK = clamp(def(st.calcoBleed, 1), 0, 3) * amount;
+  const bleedK = clamp(def(st.calcoBleed, 1), 0, 3) * A * clamp(k, 0, 2) * (1 + 1.5 * loud);
   const info = cache.calco[id] || {};
   const thin = 0.15 + 0.85 * tr;
   const bleedLayers = [];
@@ -1813,9 +1866,10 @@ function captureGeometry(S, st, px, Q, k) {
   // Encuadre (0 = de frente): cuanto más alto, la cámara está más girada e inclinada, descentrada y más cerca;
   // sólo se recorta (nunca se inventa lo que queda fuera), así que al máximo lo del centro casi se sale del plano.
   // curva suave: los primeros tramos tuercen poco, el final ya es una foto muy mala
-  const enc = clamp(def(st.encuadre, 0), 0, 1), ep = Math.pow(enc, 1.7), e2 = ep * ep;
+  // reparto: 0-25 % casi imperceptible (un pelo girada), 50 % foto normal de móvil, 100 % muy torcida y desenfocada
+  const enc = clamp(def(st.encuadre, 0), 0, 1), ep = Math.pow(enc, 2.2), e2 = ep * ep, ef = Math.pow(enc, 1.6);
   const rot = (Q.rot || 0) * kk + 11 * ep, persp = (Q.persp || 0) * kk + 0.3 * ep,
-    barrel = (Q.barrel || 0) * kk + 0.04 * ep, edge = ((Q.edge || 0) * kk + 8 * Math.pow(enc, 1.2)) * Math.max(w, h) / 2000;
+    barrel = (Q.barrel || 0) * kk + 0.04 * ep, edge = ((Q.edge || 0) * kk + 8 * Math.pow(enc, 1.8)) * Math.max(w, h) / 2000;
   if (rot <= 0 && persp <= 0 && edge <= 0 && barrel <= 0) return;
   const r = rng((S.seed + (def(st.seedFoto, 0) | 0) * 7717) * 3 + 41);
   const th = (r() < 0.5 ? -1 : 1) * rot * (0.6 + 0.4 * r()) * Math.PI / 180;
@@ -1861,7 +1915,7 @@ function captureGeometry(S, st, px, Q, k) {
       const u = (2 * x + 1) / w - 1, v = (2 * y + 1) / h - 1;
       const far = persp > 0 ? (pxk * u + pyk * v) / pn * 0.45 : 0;
       // zona enfocada: más pequeña cuanto peor el encuadre, y desplazada hacia donde está más cerca
-      const m2 = smooth(0.4 - 0.32 * enc, 1.15 - 0.45 * enc, Math.sqrt(u * u * 0.8 + v * v * 0.8) + far * (1 + 1.5 * enc));
+      const m2 = smooth(0.4 - 0.32 * ef, 1.15 - 0.45 * ef, Math.sqrt(u * u * 0.8 + v * v * 0.8) + far * (1 + 1.5 * ef));
       if (m2 <= 0) continue;
       const o = y * w + x, j = o * 4;
       for (let q = 0; q < 3; q++) {

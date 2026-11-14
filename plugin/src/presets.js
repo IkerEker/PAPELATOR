@@ -13,6 +13,38 @@ const COLORS = [
   { id: 'negro', name: 'Negro', hex: '#2c2b2a' }
 ];
 
+// Color: el panel enseña sólo 4 muestras: el color propio del papel, dos que existen de verdad en ESE papel y
+// «elegir» (selector de color de Photoshop). Clave = id del tipo (PAPER_TYPES); '_' = cualquier otro.
+const COLOR_SUGERIDOS = {
+  folio: [['#f1e9d6', 'Ahuesado'], ['#f5ecb4', 'Amarillo pastel']],
+  periodico: [['#f0d2bf', 'Salmón (prensa económica)'], ['#e4d3a3', 'Amarillento']],
+  rayado: [['#f6eb9e', 'Amarillo de bloc'], ['#f1e9d6', 'Ahuesado']],
+  cuadriculado: [['#f1e9d6', 'Ahuesado'], ['#dcebd4', 'Verde pastel']],
+  milimetrado: [['#f1e9d6', 'Ahuesado'], ['#e9ddb6', 'Amarillento']],
+  punteado: [['#f1e9d6', 'Ahuesado'], ['#2c2b2a', 'Negro']],
+  isometrico: [['#f1e9d6', 'Ahuesado'], ['#dbe6f0', 'Azul pálido']],
+  pentagrama: [['#eee1c3', 'Crema'], ['#e3d2a8', 'Envejecido']],
+  acuarela_fina: [['#efe6d0', 'Natural'], ['#dcdad4', 'Gris claro']],
+  acuarela_gruesa: [['#efe5cc', 'Natural'], ['#d8dfe2', 'Gris azulado']],
+  algodon: [['#f7f6f2', 'Blanco'], ['#eee1c3', 'Crema']],
+  verjurado: [['#c9d3db', 'Azul Ingres'], ['#e3cfa0', 'Ocre']],
+  arroz: [['#f5f3ee', 'Blanco'], ['#efd8d3', 'Rosa washi']],
+  cartulina: [['#2b2a29', 'Negra'], ['#d8c8a6', 'Arena']],
+  kraft: [['#ebe6dc', 'Kraft blanco'], ['#33302c', 'Kraft negro']],
+  reciclado: [['#cfccc5', 'Gris'], ['#e9dfc8', 'Crema']],
+  hecho_mano: [['#ece2cc', 'Natural'], ['#ebd4cd', 'Rosa pétalo']],
+  pergamino: [['#efe2c0', 'Claro'], ['#d6bc84', 'Antiguo']],
+  vegetal: [['#d9e5ee', 'Azul'], ['#f1e9b8', 'Amarillo']],
+  horno: [['#d8b78a', 'Sin blanquear'], ['#f5f3ee', 'Blanco']],
+  sup_bloques: [['#ecebe6', 'Pintado de blanco'], ['#b9c6cf', 'Azul grisáceo']],
+  sup_azulejo: [['#b8d3c3', 'Verde agua'], ['#a8c3d8', 'Azul']],
+  sup_gotele: [['#ecc9b2', 'Salmón'], ['#d6d5d0', 'Gris perla']],
+  sup_pared_lisa: [['#d6d5d0', 'Gris perla'], ['#c8d3bf', 'Verde salvia']],
+  sup_pintura: [['#eceae4', 'Blanco'], ['#c98a6a', 'Terracota']],
+  sup_yeso: [['#c9c6bf', 'Gris piedra'], ['#d9b8ad', 'Rosa empolvado']],
+  _: [['#f2ead8', 'Marfil'], ['#dce6ee', 'Azul']]
+};
+
 // Tipos de papel (lo que se elige). Cada tipo agrupa sus variantes reales; ⟳ pasa a la siguiente.
 // Organización: tres familias (Papel · Superficies · Pantallas) y dentro, grupos; cada tipo agrupa variantes (⟳).
 const FAMILIAS_PAPEL = [
@@ -249,4 +281,4 @@ const DEFAULT_STATE = {
   hideOriginals: false
 };
 
-module.exports = { FAMILIAS_PAPEL, ESTADOS_POR_MATERIAL, COLORS, SOBRES, PAPER_TYPES, ESTADO_FAMILIAS, CALCO_FAMILIAS, LUZ_FAMILIAS, CALIDAD_FAMILIAS, PLIEGUE_ALIAS, ESTADOS, PLIEGUES, CALCOS, IMPRESIONES, LUCES, CALIDADES, DEFAULT_STATE };
+module.exports = { COLOR_SUGERIDOS, FAMILIAS_PAPEL, ESTADOS_POR_MATERIAL, COLORS, SOBRES, PAPER_TYPES, ESTADO_FAMILIAS, CALCO_FAMILIAS, LUZ_FAMILIAS, CALIDAD_FAMILIAS, PLIEGUE_ALIAS, ESTADOS, PLIEGUES, CALCOS, IMPRESIONES, LUCES, CALIDADES, DEFAULT_STATE };

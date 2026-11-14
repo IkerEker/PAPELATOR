@@ -384,6 +384,27 @@ function chip(label, on, onClick, dot) {
   c.addEventListener('click', onClick);
   return c;
 }
+// ---------- color del papel
+function rgbHex(c) { return '#' + c.map(v => ('0' + Math.max(0, Math.min(255, Math.round(v))).toString(16)).slice(-2)).join(''); }
+function hexRgb(s) { const m = /^#?([0-9a-f]{6})$/i.exec(String(s || '').trim()); if (!m) return null; const n = parseInt(m[1], 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+function isOrigColor() { return !state.color || state.color === 'original'; }
+// ids antiguos ('marfil'…) -> hex
+function colorHex(c) { const k = P.COLORS.filter(x => x.id === c)[0]; if (k) return k.hex; const r = hexRgb(c); return r ? rgbHex(r) : null; }
+function colorSug() { return P.COLOR_SUGERIDOS[typeOf(state.paper).id] || P.COLOR_SUGERIDOS._; }
+// selector de color de Photoshop (no deja paso en el historial)
+async function pickColor(startHex) {
+  const c = hexRgb(startHex) || [242, 234, 216];
+  let out = null;
+  try {
+    await core.executeAsModal(async () => {
+      const r = await ps.action.batchPlay([{ _obj: 'showColorPicker', context: 'PAPELATOR · color del papel',
+        color: { _obj: 'RGBColor', red: c[0], grain: c[1], blue: c[2] } }], {});
+      const v = r && r[0] && (r[0].RGBFloatColor || r[0].color);
+      if (v && v.red != null) out = [v.red, v.grain != null ? v.grain : v.green, v.blue];
+    }, { commandName: 'Elegir color' });
+  } catch (e) { setStatus('No se pudo abrir el selector de color: ' + (e.message || e), 'warn'); }
+  return out ? rgbHex(out) : null;
+}
 // familias: el panel muestra pocas opciones; cada una agrupa variantes reales y ⟳ pasa a la siguiente
 const GROUPS = P.FAMILIAS_PAPEL.reduce((a, f) => a.concat(f.groups), []);
 function familyOfGroup(g) { return P.FAMILIAS_PAPEL.filter(f => f.groups.indexOf(g) >= 0)[0] || P.FAMILIAS_PAPEL[0]; }
@@ -461,14 +482,42 @@ function buildSimple() {
       swEl.appendChild(d);
     });
   }
+  // UXP no recalcula bien la altura de una fila con flex-wrap cuando cambia el ancho del panel o su contenido
+  // (dejaba huecos en blanco encima de los chips): se sustituye el contenedor por uno nuevo en cada pintada.
+  function fresh(el) {
+    if (!el || !el.cloneNode || !el.parentNode || !el.parentNode.replaceChild) { if (el) el.innerHTML = ''; return el; }
+    const n = el.cloneNode(false); el.parentNode.replaceChild(n, el); return n;
+  }
   function chipRow(el, list, isOn, set, dotFn) {
-    el.innerHTML = '';
+    el = fresh(el);
     list.forEach(it => el.appendChild(chip(it.name, isOn(it), () => { set(it); changed({ source: 'simple' }); }, dotFn ? dotFn(it) : null)));
   }
   // familia elegida: si ya estás en ella se conserva la variante; si no, la primera
   const pickFam = (key, it) => { if (it.items.indexOf(state[key]) < 0) state[key] = it.items[0]; };
+  // Color: el suyo · dos que existen en este papel · elegir (selector de Photoshop). Sin texto: sólo muestras.
+  function renderColors() {
+    const el = fresh(byId('s-colors'));
+    const p = paperOf(state.paper); if (!p) return;
+    const sug = colorSug(), cur = colorHex(state.color), orig = isOrigColor();
+    const known = orig || sug.some(s => s[0] === cur);
+    const sw = (fill, on, title, onClick, pick) => {
+      const d = h('div', 'csw' + (on ? ' on' : '') + (pick ? ' pick' : ''));
+      const f = h('div', 'cfill'); if (fill) f.style.backgroundColor = fill; d.appendChild(f);
+      if (pick) { const im = h('img', fill ? 'cbadge' : 'cwheel'); im.src = 'assets/ui/rueda.png'; d.appendChild(im); }
+      try { d.title = title; } catch (e) { /* sin tooltip */ }
+      d.addEventListener('click', onClick);
+      el.appendChild(d);
+    };
+    const pc = p.color || [240, 236, 226];
+    sw('rgb(' + pc.map(v => Math.round(v)).join(',') + ')', orig, 'Original', () => { state.color = 'original'; changed({ source: 'simple' }); });
+    sug.forEach(s => sw(s[0], cur === s[0], s[1], () => { state.color = s[0]; changed({ source: 'simple' }); }));
+    sw(known ? null : cur, !known, 'Elegir color…', async () => {
+      const hx = await pickColor(known ? (orig ? rgbHex(pc) : cur) : cur);
+      if (hx) { state.color = hx; changed({ source: 'simple' }); }
+    }, true);
+  }
   function renderChips() {
-    chipRow(byId('s-colors'), P.COLORS, it => state.color === it.id, it => { state.color = it.id; }, it => it.hex || 'transparent');
+    renderColors();
     chipRow(byId('s-estado'), estadoFamilias(), it => !state.custom && it.items.indexOf(state.estado) >= 0, it => {
       state.custom = null; pickFam('estado', it);
       const e = P.ESTADOS.filter(x => x.id === state.estado)[0]; if (e) state.edad = e.edad;
@@ -508,7 +557,7 @@ function buildSimple() {
     const nm = (list, v) => { const f = list.filter(x => x.id === v)[0]; return f ? f.name : ''; };
     switch (id) {
       case 's-sec-papel': return (t ? t.name : '') + (t && t.papers.length > 1 ? ' ' + (t.papers.indexOf(state.paper) + 1) + '/' + t.papers.length : '');
-      case 's-sec-color': return nm(P.COLORS, state.color) || state.color;
+      case 's-sec-color': { if (isOrigColor()) return 'Original'; const s = colorSug().filter(x => x[0] === colorHex(state.color))[0]; return s ? s[1] : 'Personalizado'; }
       case 's-sec-estado': return (state.custom ? 'Personalizado' : fam(P.ESTADO_FAMILIAS, state.estado)) + (state.edad > 0.005 ? ' · ' + pct0(state.edad) : '');
       case 's-sec-pliegue': return nm(P.PLIEGUES, state.pliegue);
       case 's-sec-calco': return fam(P.CALCO_FAMILIAS, state.calco);
@@ -824,6 +873,10 @@ function fitHeights() {
   for (const root of shown) {
     const hgt = panelHeight(root);
     if (hgt && root._h !== hgt) { root._h = hgt; root.style.height = hgt + 'px'; }
+    // al cambiar el ancho del panel se vuelven a pintar las filas de chips (UXP no reajusta su altura)
+    let wd = 0; try { wd = root.clientWidth || root.offsetWidth || 0; } catch (e) { wd = 0; }
+    if (wd && root._w && Math.abs(root._w - wd) > 4) { root._w = wd; refreshers.forEach(fn => { try { fn('resize'); } catch (e) { /* nada */ } }); }
+    else if (wd && !root._w) root._w = wd;
   }
 }
 function attach(root, arg) {
