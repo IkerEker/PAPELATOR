@@ -1246,7 +1246,7 @@
  {
   "id": "corrugado",
   "name": "Cartón corrugado",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "Textura de cartón corrugado kraft-2.png",
   "tileMm": [
@@ -1281,7 +1281,7 @@
  {
   "id": "corrugado_fino",
   "name": "Cartón corrugado fino",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "Textura de cartón corrugado kraft unerquicklich.png",
   "tileMm": [
@@ -1540,7 +1540,7 @@
  {
   "id": "madera",
   "name": "Madera de abedul",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Textura de madera de abedul claro.png",
   "tileMm": [
@@ -1574,7 +1574,7 @@
  {
   "id": "madera_vetas",
   "name": "Madera de vetas onduladas",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Textura de madera clara con vetas onduladas.png",
   "tileMm": [
@@ -1608,7 +1608,7 @@
  {
   "id": "madera_clara",
   "name": "Madera clara",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Textura de madera clara y natural-1.png",
   "tileMm": [
@@ -1642,7 +1642,7 @@
  {
   "id": "madera_nudos",
   "name": "Madera de abedul con nudos",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Textura natural de madera de abedul-2.png",
   "tileMm": [
@@ -1676,7 +1676,7 @@
  {
   "id": "osb",
   "name": "OSB",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Textura de tablero OSB de madera natural.png",
   "tileMm": [
@@ -1710,7 +1710,7 @@
  {
   "id": "osb_prensado",
   "name": "OSB prensado",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Textura de tablero OSB de madera prensada.png",
   "tileMm": [
@@ -1744,7 +1744,7 @@
  {
   "id": "osb_detalle",
   "name": "OSB de virutas grandes",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Textura detallada de tablero OSB de madera.png",
   "tileMm": [
@@ -1778,7 +1778,7 @@
  {
   "id": "osb_detalle2",
   "name": "OSB de virutas grandes II",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Textura detallada de tablero OSB de madera (1).png",
   "tileMm": [
@@ -1812,7 +1812,7 @@
  {
   "id": "osb_fino",
   "name": "OSB de virutas finas",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Textura detallada de tablero OSB.png",
   "tileMm": [
@@ -1846,7 +1846,7 @@
  {
   "id": "osb_realista",
   "name": "OSB natural",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Textura realista de tablero OSB de madera.png",
   "tileMm": [
@@ -1880,7 +1880,7 @@
  {
   "id": "osb_viejo",
   "name": "OSB a la intemperie",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Gemini_Generated_Image_bpp2f4bpp2f4bpp2.jpg",
   "tileMm": [
@@ -1914,7 +1914,7 @@
  {
   "id": "aglomerado",
   "name": "Aglomerado",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Textura realista de aglomerado de madera.png",
   "tileMm": [
@@ -1948,7 +1948,7 @@
  {
   "id": "aglomerado_marron",
   "name": "Aglomerado marrón",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Textura de aglomerado de madera marrón.png",
   "tileMm": [
@@ -1982,7 +1982,7 @@
  {
   "id": "aglomerado_granular",
   "name": "Aglomerado granular",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Textura granular de aglomerado de madera.png",
   "tileMm": [
@@ -2016,7 +2016,7 @@
  {
   "id": "aglomerado_uniforme",
   "name": "Aglomerado uniforme",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Textura uniforme de aglomerado de madera.png",
   "tileMm": [
@@ -2050,7 +2050,7 @@
  {
   "id": "particulas",
   "name": "Tablero de partículas",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Textura uniforme de tablero de partículas de madera.png",
   "tileMm": [
@@ -2084,7 +2084,7 @@
  {
   "id": "virutas",
   "name": "Virutas prensadas",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Textura uniforme de virutas de madera.png",
   "tileMm": [
@@ -2118,7 +2118,7 @@
  {
   "id": "caja",
   "name": "Cartón de caja",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Textura de cartón corrugado marrón.png",
   "tileMm": [
@@ -2152,7 +2152,7 @@
  {
   "id": "caja_3",
   "name": "Cartón de caja III",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Textura de cartón corrugado marrón (2).png",
   "tileMm": [
@@ -2186,7 +2186,7 @@
  {
   "id": "caja_4",
   "name": "Cartón de caja IV",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Textura de cartón corrugado marrón (3).png",
   "tileMm": [
@@ -2220,7 +2220,7 @@
  {
   "id": "caja_kraft",
   "name": "Cartón de caja kraft",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Textura de cartón corrugado kraft.png",
   "tileMm": [
@@ -2254,7 +2254,7 @@
  {
   "id": "caja_kraft_2",
   "name": "Cartón de caja kraft II",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Textura de cartón kraft corrugado.png",
   "tileMm": [
@@ -2288,7 +2288,7 @@
  {
   "id": "caja_kraft_3",
   "name": "Cartón de caja kraft III",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Textura de cartón kraft corrugado (1).png",
   "tileMm": [
@@ -2322,7 +2322,7 @@
  {
   "id": "caja_kraft_4",
   "name": "Cartón de caja kraft IV",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Textura de cartón kraft corrugado (2).png",
   "tileMm": [
@@ -2356,7 +2356,7 @@
  {
   "id": "caja_kraft_5",
   "name": "Cartón de caja kraft V",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Textura de cartón kraft corrugado (3).png",
   "tileMm": [
@@ -2390,7 +2390,7 @@
  {
   "id": "caja_reciclado",
   "name": "Cartón de caja reciclado",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "ROT:NUEVAS_NUEVAS/Textura de cartón corrugado reciclado.png",
   "tileMm": [
@@ -2424,7 +2424,7 @@
  {
   "id": "carton_kraft",
   "name": "Cartón kraft liso",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Textura uniforme de cartón kraft marrón.png",
   "tileMm": [
@@ -2457,7 +2457,7 @@
  {
   "id": "carton_kraft_2",
   "name": "Cartón kraft liso II",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Textura uniforme de cartón kraft marrón (1).png",
   "tileMm": [
@@ -2490,7 +2490,7 @@
  {
   "id": "carton_kraft_3",
   "name": "Cartón kraft liso III",
-  "group": "Maderas y cartones",
+  "group": "Madera y cartón",
   "kind": "color",
   "source": "NUEVAS_NUEVAS/Textura uniforme de cartón kraft marrón (2).png",
   "tileMm": [
@@ -2675,5 +2675,2631 @@
   "rough": 0.0,
   "grainMm": 0.1,
   "ageK": 0
+ },
+ {
+  "id": "ladrillo_1",
+  "name": "Ladrillo 1",
+  "group": "Paredes",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Muro de ladrillo rojo envejecido.png",
+  "tileMm": [
+   238.6,
+   209.98
+  ],
+  "size": [
+   1142,
+   1005
+  ],
+  "gain": 108.132,
+  "detailStd": 0.2543,
+  "color": [
+   163,
+   107,
+   85
+  ],
+  "translucency": 0.0,
+  "bytes": 917331,
+  "chroma": 4,
+  "seam": [
+   0.98,
+   0.95
+  ],
+  "material": "surface",
+  "surface": "ladrillo",
+  "colorable": false,
+  "dispMm": 1.7,
+  "heightMm": 0.8,
+  "ageK": 0.2,
+  "mix": "none",
+  "rough": 0.20122,
+  "grainMm": 0.4179
+ },
+ {
+  "id": "ladrillo_2",
+  "name": "Ladrillo 2",
+  "group": "Paredes",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Pared de ladrillo rojo desgastado.png",
+  "tileMm": [
+   227.53,
+   170.91
+  ],
+  "size": [
+   1089,
+   818
+  ],
+  "gain": 105.197,
+  "detailStd": 0.2614,
+  "color": [
+   159,
+   102,
+   78
+  ],
+  "translucency": 0.0,
+  "bytes": 704136,
+  "chroma": 4,
+  "seam": [
+   0.84,
+   1.06
+  ],
+  "material": "surface",
+  "surface": "ladrillo",
+  "colorable": false,
+  "dispMm": 1.7,
+  "heightMm": 0.8,
+  "ageK": 0.2,
+  "mix": "none",
+  "rough": 0.20903,
+  "grainMm": 0.4179
+ },
+ {
+  "id": "ladrillo_3",
+  "name": "Ladrillo 3",
+  "group": "Paredes",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de pared de ladrillo envejecido.png",
+  "tileMm": [
+   226.69,
+   238.6
+  ],
+  "size": [
+   1085,
+   1142
+  ],
+  "gain": 92.082,
+  "detailStd": 0.2986,
+  "color": [
+   165,
+   102,
+   79
+  ],
+  "translucency": 0.0,
+  "bytes": 994352,
+  "chroma": 4,
+  "seam": [
+   0.9,
+   0.88
+  ],
+  "material": "surface",
+  "surface": "ladrillo",
+  "colorable": false,
+  "dispMm": 1.7,
+  "heightMm": 0.8,
+  "ageK": 0.2,
+  "mix": "none",
+  "rough": 0.22599,
+  "grainMm": 0.4179
+ },
+ {
+  "id": "ladrillo_4",
+  "name": "Ladrillo 4",
+  "group": "Paredes",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de pared de ladrillo rojo envejecido.png",
+  "tileMm": [
+   204.96,
+   147.09
+  ],
+  "size": [
+   981,
+   704
+  ],
+  "gain": 94.59,
+  "detailStd": 0.2907,
+  "color": [
+   154,
+   100,
+   76
+  ],
+  "translucency": 0.0,
+  "bytes": 542480,
+  "chroma": 4,
+  "seam": [
+   0.9,
+   0.95
+  ],
+  "material": "surface",
+  "surface": "ladrillo",
+  "colorable": false,
+  "dispMm": 1.7,
+  "heightMm": 0.8,
+  "ageK": 0.2,
+  "mix": "none",
+  "rough": 0.20969,
+  "grainMm": 0.4179
+ },
+ {
+  "id": "ladrillo_5",
+  "name": "Ladrillo 5",
+  "group": "Paredes",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de pared de ladrillo rojo envejecido (1).png",
+  "tileMm": [
+   164.64,
+   153.15
+  ],
+  "size": [
+   788,
+   733
+  ],
+  "gain": 115.001,
+  "detailStd": 0.2391,
+  "color": [
+   168,
+   106,
+   74
+  ],
+  "translucency": 0.0,
+  "bytes": 454966,
+  "chroma": 4,
+  "seam": [
+   1.0,
+   0.94
+  ],
+  "material": "surface",
+  "surface": "ladrillo",
+  "colorable": false,
+  "dispMm": 1.7,
+  "heightMm": 0.8,
+  "ageK": 0.2,
+  "mix": "none",
+  "rough": 0.18581,
+  "grainMm": 0.4179
+ },
+ {
+  "id": "bloques_1",
+  "name": "Bloque de hormigón 1",
+  "group": "Paredes",
+  "kind": "neutral",
+  "source": "NUEVAS SUPERFICIES/Textura de muro de bloques de hormigón.png",
+  "tileMm": [
+   212.01,
+   211.51
+  ],
+  "size": [
+   844,
+   842
+  ],
+  "gain": 139.63,
+  "detailStd": 0.1969,
+  "color": [
+   141,
+   140,
+   138
+  ],
+  "translucency": 0.0,
+  "bytes": 567735,
+  "seam": [
+   0.84,
+   0.87
+  ],
+  "material": "surface",
+  "surface": "bloques",
+  "colorable": true,
+  "dispMm": 1.5,
+  "heightMm": 0.8,
+  "ageK": 0.2,
+  "mix": "none",
+  "rough": 0.18618,
+  "grainMm": 0.5024
+ },
+ {
+  "id": "bloques_2",
+  "name": "Bloque de hormigón 2",
+  "group": "Paredes",
+  "kind": "neutral",
+  "source": "NUEVAS SUPERFICIES/Textura de muro de bloques de hormigón (1).png",
+  "tileMm": [
+   211.51,
+   164.03
+  ],
+  "size": [
+   842,
+   653
+  ],
+  "gain": 112.578,
+  "detailStd": 0.2443,
+  "color": [
+   142,
+   141,
+   138
+  ],
+  "translucency": 0.0,
+  "bytes": 436677,
+  "seam": [
+   0.85,
+   0.89
+  ],
+  "material": "surface",
+  "surface": "bloques",
+  "colorable": true,
+  "dispMm": 1.5,
+  "heightMm": 0.8,
+  "ageK": 0.2,
+  "mix": "none",
+  "rough": 0.23357,
+  "grainMm": 0.5024
+ },
+ {
+  "id": "bloques_3",
+  "name": "Bloque de hormigón 3",
+  "group": "Paredes",
+  "kind": "neutral",
+  "source": "NUEVAS SUPERFICIES/Textura de pared de bloques de hormigón.png",
+  "tileMm": [
+   250.44,
+   191.41
+  ],
+  "size": [
+   997,
+   762
+  ],
+  "gain": 132.699,
+  "detailStd": 0.2072,
+  "color": [
+   135,
+   132,
+   129
+  ],
+  "translucency": 0.0,
+  "bytes": 604195,
+  "seam": [
+   0.85,
+   0.81
+  ],
+  "material": "surface",
+  "surface": "bloques",
+  "colorable": true,
+  "dispMm": 1.5,
+  "heightMm": 0.8,
+  "ageK": 0.2,
+  "mix": "none",
+  "rough": 0.19922,
+  "grainMm": 0.5024
+ },
+ {
+  "id": "bloques_4",
+  "name": "Bloque de hormigón 4",
+  "group": "Paredes",
+  "kind": "neutral",
+  "source": "NUEVAS SUPERFICIES/Textura de pared de bloques de hormigón encadenados.png",
+  "tileMm": [
+   226.08,
+   213.01
+  ],
+  "size": [
+   900,
+   848
+  ],
+  "gain": 134.909,
+  "detailStd": 0.2038,
+  "color": [
+   141,
+   139,
+   136
+  ],
+  "translucency": 0.0,
+  "bytes": 606876,
+  "seam": [
+   0.99,
+   1.16
+  ],
+  "material": "surface",
+  "surface": "bloques",
+  "colorable": true,
+  "dispMm": 1.5,
+  "heightMm": 0.8,
+  "ageK": 0.2,
+  "mix": "none",
+  "rough": 0.19585,
+  "grainMm": 0.5024
+ },
+ {
+  "id": "sillar_1",
+  "name": "Piedra de sillería 1",
+  "group": "Paredes",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de muro de piedra caliza.png",
+  "tileMm": [
+   173.42,
+   165.0
+  ],
+  "size": [
+   659,
+   627
+  ],
+  "gain": 167.111,
+  "detailStd": 0.1646,
+  "color": [
+   194,
+   171,
+   141
+  ],
+  "translucency": 0.0,
+  "bytes": 344830,
+  "chroma": 4,
+  "seam": [
+   1.11,
+   1.21
+  ],
+  "material": "surface",
+  "surface": "sillar",
+  "colorable": false,
+  "dispMm": 1.9,
+  "heightMm": 1.0,
+  "ageK": 0.2,
+  "mix": "none",
+  "rough": 0.14626,
+  "grainMm": 0.5263
+ },
+ {
+  "id": "sillar_2",
+  "name": "Piedra de sillería 2",
+  "group": "Paredes",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de muro de piedra caliza (1).png",
+  "tileMm": [
+   282.37,
+   212.63
+  ],
+  "size": [
+   1073,
+   808
+  ],
+  "gain": 178.605,
+  "detailStd": 0.154,
+  "color": [
+   185,
+   163,
+   132
+  ],
+  "translucency": 0.0,
+  "bytes": 720233,
+  "chroma": 4,
+  "seam": [
+   0.94,
+   0.91
+  ],
+  "material": "surface",
+  "surface": "sillar",
+  "colorable": false,
+  "dispMm": 1.9,
+  "heightMm": 1.0,
+  "ageK": 0.2,
+  "mix": "none",
+  "rough": 0.14227,
+  "grainMm": 0.5263
+ },
+ {
+  "id": "sillar_3",
+  "name": "Piedra de sillería 3",
+  "group": "Paredes",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de muro de piedra caliza envejecida.png",
+  "tileMm": [
+   274.47,
+   258.68
+  ],
+  "size": [
+   1043,
+   983
+  ],
+  "gain": 186.672,
+  "detailStd": 0.1473,
+  "color": [
+   190,
+   170,
+   145
+  ],
+  "translucency": 0.0,
+  "bytes": 846309,
+  "chroma": 4,
+  "seam": [
+   0.9,
+   1.03
+  ],
+  "material": "surface",
+  "surface": "sillar",
+  "colorable": false,
+  "dispMm": 1.9,
+  "heightMm": 1.0,
+  "ageK": 0.2,
+  "mix": "none",
+  "rough": 0.13189,
+  "grainMm": 0.5263
+ },
+ {
+  "id": "sillar_4",
+  "name": "Piedra de sillería 4",
+  "group": "Paredes",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Muro de piedra caliza porosa.png",
+  "tileMm": [
+   262.37,
+   178.16
+  ],
+  "size": [
+   997,
+   677
+  ],
+  "gain": 171.973,
+  "detailStd": 0.1599,
+  "color": [
+   196,
+   173,
+   148
+  ],
+  "translucency": 0.0,
+  "bytes": 544133,
+  "chroma": 4,
+  "seam": [
+   0.88,
+   1.02
+  ],
+  "material": "surface",
+  "surface": "sillar",
+  "colorable": false,
+  "dispMm": 1.9,
+  "heightMm": 1.0,
+  "ageK": 0.2,
+  "mix": "none",
+  "rough": 0.14268,
+  "grainMm": 0.5263
+ },
+ {
+  "id": "azulejo_1",
+  "name": "Azulejo 1",
+  "group": "Paredes",
+  "kind": "neutral",
+  "source": "NUEVAS SUPERFICIES/Superficie de azulejos blancos.png",
+  "tileMm": [
+   125.0,
+   166.47
+  ],
+  "size": [
+   627,
+   835
+  ],
+  "gain": 528.801,
+  "detailStd": 0.052,
+  "color": [
+   221,
+   220,
+   222
+  ],
+  "translucency": 0.0,
+  "bytes": 254749,
+  "seam": [
+   3.25,
+   8.38
+  ],
+  "material": "surface",
+  "surface": "azulejo",
+  "colorable": true,
+  "dispMm": 0.9,
+  "heightMm": 0.35,
+  "ageK": 0.2,
+  "mix": "none",
+  "rough": 0.03812,
+  "grainMm": 0.7974
+ },
+ {
+  "id": "azulejo_2",
+  "name": "Azulejo 2",
+  "group": "Paredes",
+  "kind": "neutral",
+  "source": "NUEVAS SUPERFICIES/Superficie de azulejos blancos glossy.png",
+  "tileMm": [
+   207.93,
+   166.47
+  ],
+  "size": [
+   1043,
+   835
+  ],
+  "gain": 495.323,
+  "detailStd": 0.0555,
+  "color": [
+   221,
+   221,
+   221
+  ],
+  "translucency": 0.0,
+  "bytes": 402305,
+  "seam": [
+   5.03,
+   11.2
+  ],
+  "material": "surface",
+  "surface": "azulejo",
+  "colorable": true,
+  "dispMm": 0.9,
+  "heightMm": 0.35,
+  "ageK": 0.2,
+  "mix": "none",
+  "rough": 0.04152,
+  "grainMm": 0.7974
+ },
+ {
+  "id": "azulejo_3",
+  "name": "Azulejo 3",
+  "group": "Paredes",
+  "kind": "neutral",
+  "source": "NUEVAS SUPERFICIES/Superficie de azulejos blancos envejecidos.png",
+  "tileMm": [
+   125.2,
+   125.0
+  ],
+  "size": [
+   628,
+   627
+  ],
+  "gain": 428.112,
+  "detailStd": 0.0642,
+  "color": [
+   212,
+   212,
+   213
+  ],
+  "translucency": 0.0,
+  "bytes": 174278,
+  "seam": [
+   4.54,
+   8.24
+  ],
+  "material": "surface",
+  "surface": "azulejo",
+  "colorable": true,
+  "dispMm": 0.9,
+  "heightMm": 0.35,
+  "ageK": 0.2,
+  "mix": "none",
+  "rough": 0.04929,
+  "grainMm": 0.9968
+ },
+ {
+  "id": "azulejo_4",
+  "name": "Azulejo 4",
+  "group": "Paredes",
+  "kind": "neutral",
+  "source": "NUEVAS SUPERFICIES/Pared de azulejos blancos en cuadrícula.png",
+  "tileMm": [
+   166.47,
+   125.0
+  ],
+  "size": [
+   835,
+   627
+  ],
+  "gain": 485.133,
+  "detailStd": 0.0567,
+  "color": [
+   219,
+   219,
+   219
+  ],
+  "translucency": 0.0,
+  "bytes": 253041,
+  "seam": [
+   7.62,
+   10.94
+  ],
+  "material": "surface",
+  "surface": "azulejo",
+  "colorable": true,
+  "dispMm": 0.9,
+  "heightMm": 0.35,
+  "ageK": 0.2,
+  "mix": "none",
+  "rough": 0.04151,
+  "grainMm": 0.9968
+ },
+ {
+  "id": "gotele_1",
+  "name": "Gotelé 1",
+  "group": "Paredes",
+  "kind": "neutral",
+  "source": "NUEVAS SUPERFICIES/Textura de estuco blanco rugoso.png",
+  "tileMm": [
+   194.26,
+   194.26
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 356.098,
+  "detailStd": 0.0772,
+  "color": [
+   221,
+   221,
+   224
+  ],
+  "translucency": 0.0,
+  "bytes": 928794,
+  "seam": [
+   0.9,
+   1.01
+  ],
+  "material": "surface",
+  "surface": "gotele",
+  "colorable": true,
+  "dispMm": 0.75,
+  "heightMm": 0.6,
+  "ageK": 0.2,
+  "rough": 0.07279,
+  "grainMm": 0.5024
+ },
+ {
+  "id": "gotele_2",
+  "name": "Gotelé 2",
+  "group": "Paredes",
+  "kind": "neutral",
+  "source": "NUEVAS SUPERFICIES/Textura de estuco blanco rugoso (1).png",
+  "tileMm": [
+   194.26,
+   194.26
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 439.206,
+  "detailStd": 0.0626,
+  "color": [
+   219,
+   218,
+   218
+  ],
+  "translucency": 0.0,
+  "bytes": 928322,
+  "seam": [
+   0.97,
+   0.93
+  ],
+  "material": "surface",
+  "surface": "gotele",
+  "colorable": true,
+  "dispMm": 0.75,
+  "heightMm": 0.6,
+  "ageK": 0.2,
+  "rough": 0.06088,
+  "grainMm": 0.5024
+ },
+ {
+  "id": "gotele_3",
+  "name": "Gotelé 3",
+  "group": "Paredes",
+  "kind": "neutral",
+  "source": "NUEVAS SUPERFICIES/Textura de estuco blanco rugoso (2).png",
+  "tileMm": [
+   194.26,
+   194.26
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 377.049,
+  "detailStd": 0.0729,
+  "color": [
+   217,
+   218,
+   219
+  ],
+  "translucency": 0.0,
+  "bytes": 911451,
+  "seam": [
+   0.98,
+   0.98
+  ],
+  "material": "surface",
+  "surface": "gotele",
+  "colorable": true,
+  "dispMm": 0.75,
+  "heightMm": 0.6,
+  "ageK": 0.2,
+  "rough": 0.06884,
+  "grainMm": 0.5024
+ },
+ {
+  "id": "gotele_4",
+  "name": "Gotelé 4",
+  "group": "Paredes",
+  "kind": "neutral",
+  "source": "NUEVAS SUPERFICIES/Textura rugosa de estuco blanco.png",
+  "tileMm": [
+   194.26,
+   194.26
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 374.104,
+  "detailStd": 0.0735,
+  "color": [
+   219,
+   220,
+   222
+  ],
+  "translucency": 0.0,
+  "bytes": 900456,
+  "seam": [
+   0.99,
+   0.89
+  ],
+  "material": "surface",
+  "surface": "gotele",
+  "colorable": true,
+  "dispMm": 0.75,
+  "heightMm": 0.6,
+  "ageK": 0.2,
+  "rough": 0.07129,
+  "grainMm": 0.5024
+ },
+ {
+  "id": "pared_lisa_1",
+  "name": "Pared lisa 1",
+  "group": "Paredes",
+  "kind": "neutral",
+  "source": "NUEVAS SUPERFICIES/Textura sutil de pared blanca-1.png",
+  "tileMm": [
+   259.01,
+   259.01
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 457.433,
+  "detailStd": 0.0601,
+  "color": [
+   216,
+   215,
+   213
+  ],
+  "translucency": 0.0,
+  "bytes": 1004137,
+  "seam": [
+   0.97,
+   1.01
+  ],
+  "material": "surface",
+  "surface": "pared_lisa",
+  "colorable": true,
+  "dispMm": 0.45,
+  "heightMm": 0.5,
+  "ageK": 0.2,
+  "rough": 0.05944,
+  "grainMm": 0.4466
+ },
+ {
+  "id": "pared_lisa_2",
+  "name": "Pared lisa 2",
+  "group": "Paredes",
+  "kind": "neutral",
+  "source": "NUEVAS SUPERFICIES/Textura sutil de pared blanca-2.png",
+  "tileMm": [
+   259.01,
+   259.01
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 417.313,
+  "detailStd": 0.0659,
+  "color": [
+   221,
+   219,
+   217
+  ],
+  "translucency": 0.0,
+  "bytes": 1000329,
+  "seam": [
+   0.95,
+   0.92
+  ],
+  "material": "surface",
+  "surface": "pared_lisa",
+  "colorable": true,
+  "dispMm": 0.45,
+  "heightMm": 0.5,
+  "ageK": 0.2,
+  "rough": 0.065,
+  "grainMm": 0.4466
+ },
+ {
+  "id": "pared_lisa_3",
+  "name": "Pared lisa 3",
+  "group": "Paredes",
+  "kind": "neutral",
+  "source": "NUEVAS SUPERFICIES/Textura sutil de pared de estuco.png",
+  "tileMm": [
+   259.01,
+   259.01
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 755.052,
+  "detailStd": 0.0364,
+  "color": [
+   231,
+   230,
+   228
+  ],
+  "translucency": 0.0,
+  "bytes": 940369,
+  "seam": [
+   1.1,
+   1.0
+  ],
+  "material": "surface",
+  "surface": "pared_lisa",
+  "colorable": true,
+  "dispMm": 0.45,
+  "heightMm": 0.5,
+  "ageK": 0.2,
+  "rough": 0.03588,
+  "grainMm": 0.4466
+ },
+ {
+  "id": "pared_lisa_4",
+  "name": "Pared lisa 4",
+  "group": "Paredes",
+  "kind": "neutral",
+  "source": "NUEVAS SUPERFICIES/Pared blanca texturizada con sutiles imperfecciones.png",
+  "tileMm": [
+   259.01,
+   259.01
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 678.675,
+  "detailStd": 0.0405,
+  "color": [
+   229,
+   225,
+   224
+  ],
+  "translucency": 0.0,
+  "bytes": 1036219,
+  "seam": [
+   0.98,
+   0.89
+  ],
+  "material": "surface",
+  "surface": "pared_lisa",
+  "colorable": true,
+  "dispMm": 0.45,
+  "heightMm": 0.5,
+  "ageK": 0.2,
+  "rough": 0.04004,
+  "grainMm": 0.4466
+ },
+ {
+  "id": "pared_lisa_5",
+  "name": "Pared lisa 5",
+  "group": "Paredes",
+  "kind": "neutral",
+  "source": "NUEVAS SUPERFICIES/Textura de pared blanca rugosa.png",
+  "tileMm": [
+   259.01,
+   259.01
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 894.942,
+  "detailStd": 0.0307,
+  "color": [
+   230,
+   228,
+   227
+  ],
+  "translucency": 0.0,
+  "bytes": 1033196,
+  "seam": [
+   1.0,
+   0.86
+  ],
+  "material": "surface",
+  "surface": "pared_lisa",
+  "colorable": true,
+  "dispMm": 0.45,
+  "heightMm": 0.5,
+  "ageK": 0.2,
+  "rough": 0.03026,
+  "grainMm": 0.4466
+ },
+ {
+  "id": "pintura_1",
+  "name": "Pintura con grumos 1",
+  "group": "Paredes",
+  "kind": "neutral",
+  "source": "NUEVAS SUPERFICIES/Gemini_Generated_Image_5jrwey5jrwey5jrw.jpg",
+  "tileMm": [
+   277.51,
+   277.51
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 146.679,
+  "detailStd": 0.1875,
+  "color": [
+   102,
+   102,
+   102
+  ],
+  "translucency": 0.0,
+  "bytes": 1040602,
+  "seam": [
+   1.06,
+   1.1
+  ],
+  "material": "surface",
+  "surface": "pintura",
+  "colorable": true,
+  "dispMm": 0.9,
+  "heightMm": 0.7,
+  "ageK": 0.2,
+  "rough": 0.17416,
+  "grainMm": 0.4785
+ },
+ {
+  "id": "pintura_2",
+  "name": "Pintura con grumos 2",
+  "group": "Paredes",
+  "kind": "neutral",
+  "source": "NUEVAS SUPERFICIES/Gemini_Generated_Image_qk3f2bqk3f2bqk3f.jpg",
+  "tileMm": [
+   277.51,
+   277.51
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 118.959,
+  "detailStd": 0.2312,
+  "color": [
+   129,
+   129,
+   128
+  ],
+  "translucency": 0.0,
+  "bytes": 1000397,
+  "seam": [
+   0.8,
+   1.06
+  ],
+  "material": "surface",
+  "surface": "pintura",
+  "colorable": true,
+  "dispMm": 0.9,
+  "heightMm": 0.7,
+  "ageK": 0.2,
+  "rough": 0.20136,
+  "grainMm": 0.4785
+ },
+ {
+  "id": "pintura_3",
+  "name": "Pintura con grumos 3",
+  "group": "Paredes",
+  "kind": "neutral",
+  "source": "NUEVAS SUPERFICIES/Textura de pintura gris con grumos y relieves.png",
+  "tileMm": [
+   277.51,
+   277.51
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 558.137,
+  "detailStd": 0.0493,
+  "color": [
+   133,
+   132,
+   132
+  ],
+  "translucency": 0.0,
+  "bytes": 1008116,
+  "seam": [
+   0.85,
+   0.87
+  ],
+  "material": "surface",
+  "surface": "pintura",
+  "colorable": true,
+  "dispMm": 0.9,
+  "heightMm": 0.7,
+  "ageK": 0.2,
+  "rough": 0.04737,
+  "grainMm": 0.4785
+ },
+ {
+  "id": "pintura_4",
+  "name": "Pintura con grumos 4",
+  "group": "Paredes",
+  "kind": "neutral",
+  "source": "NUEVAS SUPERFICIES/Textura de pared gris envejecida.png",
+  "tileMm": [
+   277.51,
+   277.51
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 488.962,
+  "detailStd": 0.0562,
+  "color": [
+   143,
+   144,
+   146
+  ],
+  "translucency": 0.0,
+  "bytes": 988037,
+  "seam": [
+   0.75,
+   0.66
+  ],
+  "material": "surface",
+  "surface": "pintura",
+  "colorable": true,
+  "dispMm": 0.9,
+  "heightMm": 0.7,
+  "ageK": 0.2,
+  "rough": 0.05474,
+  "grainMm": 0.4785
+ },
+ {
+  "id": "pintura_5",
+  "name": "Pintura con grumos 5",
+  "group": "Paredes",
+  "kind": "neutral",
+  "source": "NUEVAS SUPERFICIES/Textura rugosa de pared gris beige.png",
+  "tileMm": [
+   277.51,
+   277.51
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 349.494,
+  "detailStd": 0.0787,
+  "color": [
+   172,
+   165,
+   155
+  ],
+  "translucency": 0.0,
+  "bytes": 1109153,
+  "seam": [
+   0.91,
+   0.98
+  ],
+  "material": "surface",
+  "surface": "pintura",
+  "colorable": true,
+  "dispMm": 0.9,
+  "heightMm": 0.7,
+  "ageK": 0.2,
+  "rough": 0.07545,
+  "grainMm": 0.2392
+ },
+ {
+  "id": "yeso_1",
+  "name": "Yeso veneciano 1",
+  "group": "Paredes",
+  "kind": "neutral",
+  "source": "NUEVAS SUPERFICIES/Textura de yeso veneciano beige.png",
+  "tileMm": [
+   323.76,
+   323.76
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 863.901,
+  "detailStd": 0.0318,
+  "color": [
+   192,
+   183,
+   170
+  ],
+  "translucency": 0.0,
+  "bytes": 972820,
+  "seam": [
+   0.94,
+   0.92
+  ],
+  "material": "surface",
+  "surface": "yeso",
+  "colorable": true,
+  "dispMm": 0.5,
+  "heightMm": 1.5,
+  "ageK": 0.2,
+  "rough": 0.02156,
+  "grainMm": 0.5582
+ },
+ {
+  "id": "yeso_2",
+  "name": "Yeso veneciano 2",
+  "group": "Paredes",
+  "kind": "neutral",
+  "source": "NUEVAS SUPERFICIES/Textura de yeso veneciano en tonos cálidos.png",
+  "tileMm": [
+   323.76,
+   323.76
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 821.08,
+  "detailStd": 0.0335,
+  "color": [
+   190,
+   180,
+   166
+  ],
+  "translucency": 0.0,
+  "bytes": 1030179,
+  "seam": [
+   1.03,
+   0.82
+  ],
+  "material": "surface",
+  "surface": "yeso",
+  "colorable": true,
+  "dispMm": 0.5,
+  "heightMm": 1.5,
+  "ageK": 0.2,
+  "rough": 0.02511,
+  "grainMm": 0.5582
+ },
+ {
+  "id": "yeso_3",
+  "name": "Yeso veneciano 3",
+  "group": "Paredes",
+  "kind": "neutral",
+  "source": "NUEVAS SUPERFICIES/Textura abstracta de estuco beige y gris.png",
+  "tileMm": [
+   323.76,
+   323.76
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 718.728,
+  "detailStd": 0.0383,
+  "color": [
+   192,
+   182,
+   168
+  ],
+  "translucency": 0.0,
+  "bytes": 1052141,
+  "seam": [
+   0.96,
+   0.95
+  ],
+  "material": "surface",
+  "surface": "yeso",
+  "colorable": true,
+  "dispMm": 0.5,
+  "heightMm": 1.5,
+  "ageK": 0.2,
+  "rough": 0.03098,
+  "grainMm": 0.5582
+ },
+ {
+  "id": "yeso_4",
+  "name": "Yeso veneciano 4",
+  "group": "Paredes",
+  "kind": "neutral",
+  "source": "NUEVAS SUPERFICIES/Textura abstracta de pared beige.png",
+  "tileMm": [
+   323.76,
+   323.76
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 788.266,
+  "detailStd": 0.0349,
+  "color": [
+   190,
+   178,
+   164
+  ],
+  "translucency": 0.0,
+  "bytes": 1035156,
+  "seam": [
+   0.76,
+   0.94
+  ],
+  "material": "surface",
+  "surface": "yeso",
+  "colorable": true,
+  "dispMm": 0.5,
+  "heightMm": 1.5,
+  "ageK": 0.2,
+  "rough": 0.02616,
+  "grainMm": 0.2791
+ },
+ {
+  "id": "hormigon_1",
+  "name": "Hormigón 1",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de hormigón gris desgastado.png",
+  "tileMm": [
+   323.76,
+   323.76
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 470.316,
+  "detailStd": 0.0585,
+  "color": [
+   147,
+   146,
+   142
+  ],
+  "translucency": 0.0,
+  "bytes": 1097345,
+  "chroma": 4,
+  "seam": [
+   0.95,
+   0.97
+  ],
+  "material": "surface",
+  "surface": "hormigon",
+  "colorable": false,
+  "dispMm": 0.6,
+  "heightMm": 0.8,
+  "ageK": 0.2,
+  "rough": 0.05257,
+  "grainMm": 0.5582
+ },
+ {
+  "id": "hormigon_2",
+  "name": "Hormigón 2",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de hormigón gris desgastado (1).png",
+  "tileMm": [
+   323.76,
+   323.76
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 507.157,
+  "detailStd": 0.0542,
+  "color": [
+   152,
+   150,
+   145
+  ],
+  "translucency": 0.0,
+  "bytes": 1103136,
+  "chroma": 4,
+  "seam": [
+   0.91,
+   0.95
+  ],
+  "material": "surface",
+  "surface": "hormigon",
+  "colorable": false,
+  "dispMm": 0.6,
+  "heightMm": 0.8,
+  "ageK": 0.2,
+  "rough": 0.04835,
+  "grainMm": 0.5582
+ },
+ {
+  "id": "hormigon_3",
+  "name": "Hormigón 3",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de hormigón gris desgastado-1.png",
+  "tileMm": [
+   323.76,
+   323.76
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 190.526,
+  "detailStd": 0.1443,
+  "color": [
+   134,
+   132,
+   127
+  ],
+  "translucency": 0.0,
+  "bytes": 1128075,
+  "chroma": 4,
+  "seam": [
+   0.88,
+   0.92
+  ],
+  "material": "surface",
+  "surface": "hormigon",
+  "colorable": false,
+  "dispMm": 0.6,
+  "heightMm": 0.8,
+  "ageK": 0.2,
+  "rough": 0.13914,
+  "grainMm": 0.5582
+ },
+ {
+  "id": "hormigon_4",
+  "name": "Hormigón 4",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de hormigón desgastado-2.png",
+  "tileMm": [
+   323.76,
+   323.76
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 285.174,
+  "detailStd": 0.0964,
+  "color": [
+   160,
+   156,
+   149
+  ],
+  "translucency": 0.0,
+  "bytes": 1092838,
+  "chroma": 4,
+  "seam": [
+   1.0,
+   0.97
+  ],
+  "material": "surface",
+  "surface": "hormigon",
+  "colorable": false,
+  "dispMm": 0.6,
+  "heightMm": 0.8,
+  "ageK": 0.2,
+  "rough": 0.08928,
+  "grainMm": 0.5582
+ },
+ {
+  "id": "hormigon_5",
+  "name": "Hormigón 5",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de concreto gris desgastado.png",
+  "tileMm": [
+   323.76,
+   323.76
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 452.378,
+  "detailStd": 0.0608,
+  "color": [
+   143,
+   142,
+   139
+  ],
+  "translucency": 0.0,
+  "bytes": 1099073,
+  "chroma": 4,
+  "seam": [
+   0.87,
+   0.96
+  ],
+  "material": "surface",
+  "surface": "hormigon",
+  "colorable": false,
+  "dispMm": 0.6,
+  "heightMm": 0.8,
+  "ageK": 0.2,
+  "rough": 0.05382,
+  "grainMm": 0.5582
+ },
+ {
+  "id": "hormigon_6",
+  "name": "Hormigón 6",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de hormigón gris claro.png",
+  "tileMm": [
+   323.76,
+   323.76
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 355.373,
+  "detailStd": 0.0774,
+  "color": [
+   169,
+   161,
+   152
+  ],
+  "translucency": 0.0,
+  "bytes": 1144120,
+  "chroma": 4,
+  "seam": [
+   0.93,
+   0.93
+  ],
+  "material": "surface",
+  "surface": "hormigon",
+  "colorable": false,
+  "dispMm": 0.6,
+  "heightMm": 0.8,
+  "ageK": 0.2,
+  "rough": 0.07583,
+  "grainMm": 0.2791
+ },
+ {
+  "id": "hormigon_7",
+  "name": "Hormigón 7",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de hormigón gris mate.png",
+  "tileMm": [
+   323.76,
+   323.76
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 364.931,
+  "detailStd": 0.0754,
+  "color": [
+   154,
+   147,
+   139
+  ],
+  "translucency": 0.0,
+  "bytes": 1153597,
+  "chroma": 4,
+  "seam": [
+   0.9,
+   0.93
+  ],
+  "material": "surface",
+  "surface": "hormigon",
+  "colorable": false,
+  "dispMm": 0.6,
+  "heightMm": 0.8,
+  "ageK": 0.2,
+  "rough": 0.0729,
+  "grainMm": 0.2791
+ },
+ {
+  "id": "hormigon_8",
+  "name": "Hormigón 8",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de hormigón beige grisáceo.png",
+  "tileMm": [
+   323.76,
+   323.76
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 442.754,
+  "detailStd": 0.0621,
+  "color": [
+   169,
+   159,
+   146
+  ],
+  "translucency": 0.0,
+  "bytes": 1139875,
+  "chroma": 4,
+  "seam": [
+   0.92,
+   0.92
+  ],
+  "material": "surface",
+  "surface": "hormigon",
+  "colorable": false,
+  "dispMm": 0.6,
+  "heightMm": 0.8,
+  "ageK": 0.2,
+  "rough": 0.05939,
+  "grainMm": 0.2791
+ },
+ {
+  "id": "encofrado_1",
+  "name": "Hormigón encofrado 1",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de hormigón gris con poros y vetas.png",
+  "tileMm": [
+   209.53,
+   226.87
+  ],
+  "size": [
+   1051,
+   1138
+  ],
+  "gain": 247.431,
+  "detailStd": 0.1111,
+  "color": [
+   156,
+   155,
+   151
+  ],
+  "translucency": 0.0,
+  "bytes": 968356,
+  "chroma": 4,
+  "seam": [
+   1.01,
+   1.09
+  ],
+  "material": "surface",
+  "surface": "encofrado",
+  "colorable": false,
+  "dispMm": 0.9,
+  "heightMm": 0.8,
+  "ageK": 0.2,
+  "mix": "none",
+  "rough": 0.09913,
+  "grainMm": 0.3987
+ },
+ {
+  "id": "encofrado_2",
+  "name": "Hormigón encofrado 2",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de hormigón gris industrial.png",
+  "tileMm": [
+   228.87,
+   229.27
+  ],
+  "size": [
+   1148,
+   1150
+  ],
+  "gain": 247.933,
+  "detailStd": 0.1109,
+  "color": [
+   147,
+   143,
+   138
+  ],
+  "translucency": 0.0,
+  "bytes": 1084082,
+  "chroma": 4,
+  "seam": [
+   1.04,
+   0.93
+  ],
+  "material": "surface",
+  "surface": "encofrado",
+  "colorable": false,
+  "dispMm": 0.9,
+  "heightMm": 0.8,
+  "ageK": 0.2,
+  "mix": "none",
+  "rough": 0.10199,
+  "grainMm": 0.3987
+ },
+ {
+  "id": "encofrado_3",
+  "name": "Hormigón encofrado 3",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de hormigón industrial envejecido.png",
+  "tileMm": [
+   230.86,
+   198.76
+  ],
+  "size": [
+   1158,
+   997
+  ],
+  "gain": 370.929,
+  "detailStd": 0.0741,
+  "color": [
+   146,
+   143,
+   138
+  ],
+  "translucency": 0.0,
+  "bytes": 942341,
+  "chroma": 4,
+  "seam": [
+   1.02,
+   1.01
+  ],
+  "material": "surface",
+  "surface": "encofrado",
+  "colorable": false,
+  "dispMm": 0.9,
+  "heightMm": 0.8,
+  "ageK": 0.2,
+  "mix": "none",
+  "rough": 0.0666,
+  "grainMm": 0.1994
+ },
+ {
+  "id": "encofrado_4",
+  "name": "Hormigón encofrado 4",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de hormigón industrial envejecido (1).png",
+  "tileMm": [
+   226.48,
+   224.28
+  ],
+  "size": [
+   1136,
+   1125
+  ],
+  "gain": 265.779,
+  "detailStd": 0.1035,
+  "color": [
+   153,
+   152,
+   147
+  ],
+  "translucency": 0.0,
+  "bytes": 1030829,
+  "chroma": 4,
+  "seam": [
+   0.94,
+   0.98
+  ],
+  "material": "surface",
+  "surface": "encofrado",
+  "colorable": false,
+  "dispMm": 0.9,
+  "heightMm": 0.8,
+  "ageK": 0.2,
+  "mix": "none",
+  "rough": 0.09056,
+  "grainMm": 0.3987
+ },
+ {
+  "id": "adoquin_1",
+  "name": "Adoquín 1",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de adoquines de granito gris.png",
+  "tileMm": [
+   213.01,
+   155.02
+  ],
+  "size": [
+   1113,
+   810
+  ],
+  "gain": 102.319,
+  "detailStd": 0.2688,
+  "color": [
+   123,
+   122,
+   122
+  ],
+  "translucency": 0.0,
+  "bytes": 710803,
+  "chroma": 4,
+  "seam": [
+   0.89,
+   1.12
+  ],
+  "material": "surface",
+  "surface": "adoquin",
+  "colorable": false,
+  "dispMm": 1.9,
+  "heightMm": 0.8,
+  "ageK": 0.2,
+  "mix": "none",
+  "rough": 0.24583,
+  "grainMm": 0.3828
+ },
+ {
+  "id": "adoquin_2",
+  "name": "Adoquín 2",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Pavimento de adoquines de granito envejecido.png",
+  "tileMm": [
+   218.56,
+   198.09
+  ],
+  "size": [
+   1142,
+   1035
+  ],
+  "gain": 90.95,
+  "detailStd": 0.3024,
+  "color": [
+   124,
+   123,
+   121
+  ],
+  "translucency": 0.0,
+  "bytes": 941497,
+  "chroma": 4,
+  "seam": [
+   1.03,
+   0.99
+  ],
+  "material": "surface",
+  "surface": "adoquin",
+  "colorable": false,
+  "dispMm": 1.9,
+  "heightMm": 0.8,
+  "ageK": 0.2,
+  "mix": "none",
+  "rough": 0.27717,
+  "grainMm": 0.3828
+ },
+ {
+  "id": "adoquin_3",
+  "name": "Adoquín 3",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Pavimento de adoquines de granito envejecido (1).png",
+  "tileMm": [
+   218.56,
+   190.43
+  ],
+  "size": [
+   1142,
+   995
+  ],
+  "gain": 104.314,
+  "detailStd": 0.2636,
+  "color": [
+   142,
+   139,
+   136
+  ],
+  "translucency": 0.0,
+  "bytes": 910244,
+  "chroma": 4,
+  "seam": [
+   1.02,
+   1.09
+  ],
+  "material": "surface",
+  "surface": "adoquin",
+  "colorable": false,
+  "dispMm": 1.9,
+  "heightMm": 0.8,
+  "ageK": 0.2,
+  "mix": "none",
+  "rough": 0.24162,
+  "grainMm": 0.3828
+ },
+ {
+  "id": "adoquin_4",
+  "name": "Adoquín 4",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Pavimento de piedra gris texturizada.png",
+  "tileMm": [
+   120.0,
+   222.01
+  ],
+  "size": [
+   627,
+   1160
+  ],
+  "gain": 117.388,
+  "detailStd": 0.2343,
+  "color": [
+   139,
+   138,
+   140
+  ],
+  "translucency": 0.0,
+  "bytes": 579646,
+  "chroma": 4,
+  "seam": [
+   0.98,
+   1.23
+  ],
+  "material": "surface",
+  "surface": "adoquin",
+  "colorable": false,
+  "dispMm": 1.9,
+  "heightMm": 0.8,
+  "ageK": 0.2,
+  "mix": "none",
+  "rough": 0.21889,
+  "grainMm": 0.3828
+ },
+ {
+  "id": "terrazo_1",
+  "name": "Terrazo 1",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Superficie de terrazo en tonos neutros.png",
+  "tileMm": [
+   310.81,
+   310.81
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 148.013,
+  "detailStd": 0.1858,
+  "color": [
+   174,
+   170,
+   166
+  ],
+  "translucency": 0.0,
+  "bytes": 971160,
+  "chroma": 4,
+  "seam": [
+   0.92,
+   0.91
+  ],
+  "material": "surface",
+  "surface": "terrazo",
+  "colorable": false,
+  "dispMm": 0.3,
+  "heightMm": 0.5,
+  "ageK": 0.2,
+  "rough": 0.1521,
+  "grainMm": 0.5359
+ },
+ {
+  "id": "terrazo_2",
+  "name": "Terrazo 2",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de terrazo gris con fragmentos de mármol.png",
+  "tileMm": [
+   310.81,
+   310.81
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 131.867,
+  "detailStd": 0.2085,
+  "color": [
+   165,
+   161,
+   157
+  ],
+  "translucency": 0.0,
+  "bytes": 1002401,
+  "chroma": 4,
+  "seam": [
+   0.89,
+   1.01
+  ],
+  "material": "surface",
+  "surface": "terrazo",
+  "colorable": false,
+  "dispMm": 0.3,
+  "heightMm": 0.5,
+  "ageK": 0.2,
+  "rough": 0.17696,
+  "grainMm": 0.5359
+ },
+ {
+  "id": "terrazo_3",
+  "name": "Terrazo 3",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de terrazo gris con fragmentos minerales.png",
+  "tileMm": [
+   310.81,
+   310.81
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 154.068,
+  "detailStd": 0.1785,
+  "color": [
+   172,
+   168,
+   165
+  ],
+  "translucency": 0.0,
+  "bytes": 947464,
+  "chroma": 4,
+  "seam": [
+   1.17,
+   0.97
+  ],
+  "material": "surface",
+  "surface": "terrazo",
+  "colorable": false,
+  "dispMm": 0.3,
+  "heightMm": 0.5,
+  "ageK": 0.2,
+  "rough": 0.13735,
+  "grainMm": 0.8038
+ },
+ {
+  "id": "terrazo_4",
+  "name": "Terrazo 4",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de terrazo gris con piedras incrustadas.png",
+  "tileMm": [
+   310.81,
+   310.81
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 159.433,
+  "detailStd": 0.1725,
+  "color": [
+   178,
+   173,
+   169
+  ],
+  "translucency": 0.0,
+  "bytes": 1019531,
+  "chroma": 4,
+  "seam": [
+   0.93,
+   1.04
+  ],
+  "material": "surface",
+  "surface": "terrazo",
+  "colorable": false,
+  "dispMm": 0.3,
+  "heightMm": 0.5,
+  "ageK": 0.2,
+  "rough": 0.13877,
+  "grainMm": 0.5359
+ },
+ {
+  "id": "granito_1",
+  "name": "Granito 1",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de granito gris moteado.png",
+  "tileMm": [
+   259.01,
+   259.01
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 83.645,
+  "detailStd": 0.3288,
+  "color": [
+   143,
+   145,
+   147
+  ],
+  "translucency": 0.0,
+  "bytes": 1016771,
+  "chroma": 4,
+  "seam": [
+   0.92,
+   0.97
+  ],
+  "material": "surface",
+  "surface": "granito",
+  "colorable": false,
+  "dispMm": 0.3,
+  "heightMm": 0.4,
+  "ageK": 0.2,
+  "rough": 0.30613,
+  "grainMm": 0.6699
+ },
+ {
+  "id": "granito_2",
+  "name": "Granito 2",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de granito gris moteado (1).png",
+  "tileMm": [
+   259.01,
+   259.01
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 96.077,
+  "detailStd": 0.2862,
+  "color": [
+   147,
+   147,
+   146
+  ],
+  "translucency": 0.0,
+  "bytes": 984846,
+  "chroma": 4,
+  "seam": [
+   0.85,
+   0.99
+  ],
+  "material": "surface",
+  "surface": "granito",
+  "colorable": false,
+  "dispMm": 0.3,
+  "heightMm": 0.4,
+  "ageK": 0.2,
+  "rough": 0.25995,
+  "grainMm": 0.6699
+ },
+ {
+  "id": "granito_3",
+  "name": "Granito 3",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de granito gris moteado (2).png",
+  "tileMm": [
+   259.01,
+   259.01
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 96.294,
+  "detailStd": 0.2856,
+  "color": [
+   144,
+   144,
+   144
+  ],
+  "translucency": 0.0,
+  "bytes": 1039668,
+  "chroma": 4,
+  "seam": [
+   1.01,
+   0.95
+  ],
+  "material": "surface",
+  "surface": "granito",
+  "colorable": false,
+  "dispMm": 0.3,
+  "heightMm": 0.4,
+  "ageK": 0.2,
+  "rough": 0.26737,
+  "grainMm": 0.4466
+ },
+ {
+  "id": "granito_4",
+  "name": "Granito 4",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de granito gris moteado (3).png",
+  "tileMm": [
+   259.01,
+   259.01
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 94.346,
+  "detailStd": 0.2915,
+  "color": [
+   140,
+   140,
+   141
+  ],
+  "translucency": 0.0,
+  "bytes": 1030879,
+  "chroma": 4,
+  "seam": [
+   0.9,
+   1.04
+  ],
+  "material": "surface",
+  "surface": "granito",
+  "colorable": false,
+  "dispMm": 0.3,
+  "heightMm": 0.4,
+  "ageK": 0.2,
+  "rough": 0.27657,
+  "grainMm": 0.4466
+ },
+ {
+  "id": "asfalto_1",
+  "name": "Asfalto 1",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de asfalto rugoso.png",
+  "tileMm": [
+   323.76,
+   323.76
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 69.409,
+  "detailStd": 0.3962,
+  "color": [
+   98,
+   96,
+   94
+  ],
+  "translucency": 0.0,
+  "bytes": 1078482,
+  "chroma": 4,
+  "seam": [
+   0.95,
+   0.91
+  ],
+  "material": "surface",
+  "surface": "asfalto",
+  "colorable": false,
+  "dispMm": 0.8,
+  "heightMm": 0.5,
+  "ageK": 0.2,
+  "rough": 0.38896,
+  "grainMm": 0.5582
+ },
+ {
+  "id": "asfalto_2",
+  "name": "Asfalto 2",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de asfalto rugoso con grava.png",
+  "tileMm": [
+   323.76,
+   323.76
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 60.766,
+  "detailStd": 0.4526,
+  "color": [
+   90,
+   89,
+   89
+  ],
+  "translucency": 0.0,
+  "bytes": 1084133,
+  "chroma": 4,
+  "seam": [
+   1.0,
+   1.04
+  ],
+  "material": "surface",
+  "surface": "asfalto",
+  "colorable": false,
+  "dispMm": 0.8,
+  "heightMm": 0.5,
+  "ageK": 0.2,
+  "rough": 0.4419,
+  "grainMm": 0.5582
+ },
+ {
+  "id": "asfalto_3",
+  "name": "Asfalto 3",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de asfalto granulado.png",
+  "tileMm": [
+   323.76,
+   323.76
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 67.531,
+  "detailStd": 0.4072,
+  "color": [
+   90,
+   88,
+   84
+  ],
+  "translucency": 0.0,
+  "bytes": 1100213,
+  "chroma": 4,
+  "seam": [
+   0.92,
+   1.02
+  ],
+  "material": "surface",
+  "surface": "asfalto",
+  "colorable": false,
+  "dispMm": 0.8,
+  "heightMm": 0.5,
+  "ageK": 0.2,
+  "rough": 0.39901,
+  "grainMm": 0.5582
+ },
+ {
+  "id": "asfalto_4",
+  "name": "Asfalto 4",
+  "group": "Suelos y piedra",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura granular de asfalto oscuro.png",
+  "tileMm": [
+   323.76,
+   323.76
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 68.011,
+  "detailStd": 0.4043,
+  "color": [
+   81,
+   77,
+   74
+  ],
+  "translucency": 0.0,
+  "bytes": 1079768,
+  "chroma": 4,
+  "seam": [
+   1.01,
+   0.9
+  ],
+  "material": "surface",
+  "surface": "asfalto",
+  "colorable": false,
+  "dispMm": 0.8,
+  "heightMm": 0.5,
+  "ageK": 0.2,
+  "rough": 0.39486,
+  "grainMm": 0.5582
+ },
+ {
+  "id": "acero_1",
+  "name": "Acero cepillado 1",
+  "group": "Metal",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de Acero Cepillado.png",
+  "tileMm": [
+   231.26,
+   231.26
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 276.923,
+  "detailStd": 0.0993,
+  "color": [
+   144,
+   144,
+   145
+  ],
+  "translucency": 0.0,
+  "bytes": 968940,
+  "chroma": 4,
+  "seam": [
+   0.8,
+   0.97
+  ],
+  "material": "surface",
+  "surface": "acero",
+  "colorable": false,
+  "dispMm": 0.15,
+  "heightMm": 0.2,
+  "ageK": 0.2,
+  "rough": 0.09418,
+  "grainMm": 0.3987
+ },
+ {
+  "id": "acero_2",
+  "name": "Acero cepillado 2",
+  "group": "Metal",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de Acero Cepillado Horizontალური.png",
+  "tileMm": [
+   231.26,
+   231.26
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 357.017,
+  "detailStd": 0.077,
+  "color": [
+   170,
+   169,
+   170
+  ],
+  "translucency": 0.0,
+  "bytes": 902037,
+  "chroma": 4,
+  "seam": [
+   0.82,
+   0.94
+  ],
+  "material": "surface",
+  "surface": "acero",
+  "colorable": false,
+  "dispMm": 0.15,
+  "heightMm": 0.2,
+  "ageK": 0.2,
+  "rough": 0.07463,
+  "grainMm": 0.3987
+ },
+ {
+  "id": "acero_3",
+  "name": "Acero cepillado 3",
+  "group": "Metal",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de acero inoxidable cepillado.png",
+  "tileMm": [
+   231.26,
+   231.26
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 347.503,
+  "detailStd": 0.0791,
+  "color": [
+   156,
+   156,
+   155
+  ],
+  "translucency": 0.0,
+  "bytes": 960356,
+  "chroma": 4,
+  "seam": [
+   0.81,
+   1.08
+  ],
+  "material": "surface",
+  "surface": "acero",
+  "colorable": false,
+  "dispMm": 0.15,
+  "heightMm": 0.2,
+  "ageK": 0.2,
+  "rough": 0.07714,
+  "grainMm": 0.3987
+ },
+ {
+  "id": "acero_4",
+  "name": "Acero cepillado 4",
+  "group": "Metal",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de acero inoxidable cepillado (1).png",
+  "tileMm": [
+   231.26,
+   231.26
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 275.268,
+  "detailStd": 0.0999,
+  "color": [
+   148,
+   148,
+   146
+  ],
+  "translucency": 0.0,
+  "bytes": 927659,
+  "chroma": 4,
+  "seam": [
+   0.92,
+   1.06
+  ],
+  "material": "surface",
+  "surface": "acero",
+  "colorable": false,
+  "dispMm": 0.15,
+  "heightMm": 0.2,
+  "ageK": 0.2,
+  "rough": 0.09655,
+  "grainMm": 0.3987
+ },
+ {
+  "id": "oxido_1",
+  "name": "Metal oxidado 1",
+  "group": "Metal",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de metal oxidado.png",
+  "tileMm": [
+   277.51,
+   277.51
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 140.398,
+  "detailStd": 0.1959,
+  "color": [
+   131,
+   72,
+   43
+  ],
+  "translucency": 0.0,
+  "bytes": 1186356,
+  "chroma": 4,
+  "seam": [
+   0.92,
+   0.91
+  ],
+  "material": "surface",
+  "surface": "oxido",
+  "colorable": false,
+  "dispMm": 0.8,
+  "heightMm": 0.5,
+  "ageK": 0.2,
+  "rough": 0.18602,
+  "grainMm": 0.4785
+ },
+ {
+  "id": "oxido_2",
+  "name": "Metal oxidado 2",
+  "group": "Metal",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de metal oxidado (1).png",
+  "tileMm": [
+   277.51,
+   277.51
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 115.955,
+  "detailStd": 0.2372,
+  "color": [
+   113,
+   59,
+   31
+  ],
+  "translucency": 0.0,
+  "bytes": 1173217,
+  "chroma": 4,
+  "seam": [
+   0.94,
+   0.91
+  ],
+  "material": "surface",
+  "surface": "oxido",
+  "colorable": false,
+  "dispMm": 0.8,
+  "heightMm": 0.5,
+  "ageK": 0.2,
+  "rough": 0.22461,
+  "grainMm": 0.4785
+ },
+ {
+  "id": "oxido_3",
+  "name": "Metal oxidado 3",
+  "group": "Metal",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de metal oxidado (2).png",
+  "tileMm": [
+   277.51,
+   277.51
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 180.221,
+  "detailStd": 0.1526,
+  "color": [
+   138,
+   78,
+   53
+  ],
+  "translucency": 0.0,
+  "bytes": 1182748,
+  "chroma": 4,
+  "seam": [
+   0.89,
+   0.91
+  ],
+  "material": "surface",
+  "surface": "oxido",
+  "colorable": false,
+  "dispMm": 0.8,
+  "heightMm": 0.5,
+  "ageK": 0.2,
+  "rough": 0.14524,
+  "grainMm": 0.4785
+ },
+ {
+  "id": "oxido_4",
+  "name": "Metal oxidado 4",
+  "group": "Metal",
+  "kind": "color",
+  "source": "NUEVAS SUPERFICIES/Textura de metal oxidado (3).png",
+  "tileMm": [
+   277.51,
+   277.51
+  ],
+  "size": [
+   1160,
+   1160
+  ],
+  "gain": 122.594,
+  "detailStd": 0.2243,
+  "color": [
+   131,
+   71,
+   47
+  ],
+  "translucency": 0.0,
+  "bytes": 1183289,
+  "chroma": 4,
+  "seam": [
+   0.95,
+   0.84
+  ],
+  "material": "surface",
+  "surface": "oxido",
+  "colorable": false,
+  "dispMm": 0.8,
+  "heightMm": 0.5,
+  "ageK": 0.2,
+  "rough": 0.21341,
+  "grainMm": 0.4785
  }
 ]

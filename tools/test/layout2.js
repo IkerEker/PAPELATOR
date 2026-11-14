@@ -29,8 +29,11 @@ const boot = `
   const out = [];
   for (const [W, H, theme, setup, tag] of [
     [330, 900, 'dark', s => s, 'papel'],
+    [330, 900, 'dark', s => Object.assign(s, { paper: 'kraft', color: '#3a6ea5' }), 'kraft'],
     [330, 900, 'dark', s => Object.assign(s, { paper: 'pantalla_lcd', sobre: 'acanalado' }), 'pantalla'],
     [330, 900, 'dark', s => Object.assign(s, { paper: 'osb' }), 'madera'],
+    [330, 1100, 'dark', s => Object.assign(s, { paper: 'ladrillo_2' }), 'ladrillo'],
+    [330, 1100, 'light', s => Object.assign(s, { paper: 'gotele_1' }), 'gotele'],
     [270, 700, 'light', s => s, 'estrecho']]) {
     const p = await b.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 2, colorScheme: theme });
     await p.addInitScript(boot);

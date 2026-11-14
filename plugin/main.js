@@ -384,21 +384,57 @@ function chip(label, on, onClick, dot) {
   c.addEventListener('click', onClick);
   return c;
 }
+// ---------- color del papel
+function rgbHex(c) { return '#' + c.map(v => ('0' + Math.max(0, Math.min(255, Math.round(v))).toString(16)).slice(-2)).join(''); }
+function hexRgb(s) { const m = /^#?([0-9a-f]{6})$/i.exec(String(s || '').trim()); if (!m) return null; const n = parseInt(m[1], 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+function isOrigColor() { return !state.color || state.color === 'original'; }
+// ids antiguos ('marfil'…) -> hex
+function colorHex(c) { const k = P.COLORS.filter(x => x.id === c)[0]; if (k) return k.hex; const r = hexRgb(c); return r ? rgbHex(r) : null; }
+function colorSug() { return P.COLOR_SUGERIDOS[typeOf(state.paper).id] || P.COLOR_SUGERIDOS._; }
+// selector de color de Photoshop (no deja paso en el historial)
+async function pickColor(startHex) {
+  const c = hexRgb(startHex) || [242, 234, 216];
+  let out = null;
+  try {
+    await core.executeAsModal(async () => {
+      const r = await ps.action.batchPlay([{ _obj: 'showColorPicker', context: 'PAPELATOR · color del papel',
+        color: { _obj: 'RGBColor', red: c[0], grain: c[1], blue: c[2] } }], {});
+      const v = r && r[0] && (r[0].RGBFloatColor || r[0].color);
+      if (v && v.red != null) out = [v.red, v.grain != null ? v.grain : v.green, v.blue];
+    }, { commandName: 'Elegir color' });
+  } catch (e) { setStatus('No se pudo abrir el selector de color: ' + (e.message || e), 'warn'); }
+  return out ? rgbHex(out) : null;
+}
 // familias: el panel muestra pocas opciones; cada una agrupa variantes reales y ⟳ pasa a la siguiente
-const GROUPS = ['Oficina y escuela', 'Bellas artes', 'Rústicos', 'Maderas y cartones', 'Translúcidos', 'Pantallas'];
+const GROUPS = P.FAMILIAS_PAPEL.reduce((a, f) => a.concat(f.groups), []);
+function familyOfGroup(g) { return P.FAMILIAS_PAPEL.filter(f => f.groups.indexOf(g) >= 0)[0] || P.FAMILIAS_PAPEL[0]; }
 // Qué tiene sentido según el material elegido: lo que no se puede usar no se enseña.
 function materialOf(id) { const p = papers.filter(x => x.id === id)[0]; return (p && p.material) || 'paper'; }
+function paperOf(id) { return papers.filter(x => x.id === id)[0] || null; }
 function usable(what) {
-  const m = materialOf(state.paper);
+  const m = materialOf(state.paper), p = paperOf(state.paper);
   if (m === 'screen') return ['papel', 'sobre', 'foto', 'general', 'aplicar'].indexOf(what) >= 0;
+  if (m === 'surface') {
+    if (what === 'color') return !!(p && p.colorable);         // gotelé, estuco, azulejo… sí; ladrillo, piedra, metal no
+    return ['pliegues', 'calco'].indexOf(what) < 0;
+  }
   if (m === 'wood' || m === 'carton') return ['pliegues', 'calco', 'color'].indexOf(what) < 0;
   return true;
+}
+// estados que tienen sentido en este material
+// imperfecciones sueltas que no existen en este material (madera sin foxing, pared sin grapas…)
+function catUsable(cid) { const no = engine.MATERIAL_NO[materialOf(state.paper)]; return !no || !no[cid]; }
+function estadoFamilias() {
+  const allow = P.ESTADOS_POR_MATERIAL[materialOf(state.paper)];
+  return allow ? P.ESTADO_FAMILIAS.filter(f => allow.indexOf(f.id) >= 0) : P.ESTADO_FAMILIAS;
 }
 // en pantalla no hay escáner, ni luz de día, ni fotocopia: es una pantalla
 const SCREEN_NO = { escaner: 1, natural: 1, fotocopia: 1 };
 // el libro electrónico refleja la luz como el papel: con él sí tiene sentido la luz natural
 function famUsable(f) { return materialOf(state.paper) !== 'screen' || !SCREEN_NO[f.id] || (f.id === 'natural' && state.paper === 'pantalla_eink'); }
 function fixForMaterial() {
+  // si el estado elegido no existe para este material, vuelve a «Nuevo»
+  if (!state.custom && !famOf(estadoFamilias(), state.estado) && materialOf(state.paper) !== 'screen') { state.estado = 'nuevo'; state.edad = 0; }
   if (materialOf(state.paper) !== 'screen') return;
   const lf = P.LUZ_FAMILIAS.filter(f => f.items.indexOf(state.luz) >= 0)[0];
   if (lf && !famUsable(lf)) state.luz = 'ninguna';
@@ -415,7 +451,23 @@ function buildSimple() {
   if (!ui.group || GROUPS.indexOf(ui.group) < 0) ui.group = typeOf(state.paper).group;
   function renderGroups() {
     groupsEl.innerHTML = '';
-    GROUPS.forEach(g => groupsEl.appendChild(chip(g, g === ui.group, () => { ui.group = g; saveJSON('papelator2.ui', ui); renderGroups(); renderSwatches(); })));
+    const fam = familyOfGroup(ui.group);
+    const top = h('div', 'seg');
+    P.FAMILIAS_PAPEL.forEach(f => {
+      const b = h('div', 'segb' + (f.id === fam.id ? ' on' : ''), f.name);
+      b.addEventListener('click', () => {
+        if (f.id === fam.id) return;
+        const cur = typeOf(state.paper).group;
+        ui.group = f.groups.indexOf(cur) >= 0 ? cur : f.groups[0]; saveJSON('papelator2.ui', ui); renderGroups(); renderSwatches();
+      });
+      top.appendChild(b);
+    });
+    groupsEl.appendChild(top);
+    if (fam.groups.length > 1) {
+      const row = h('div', 'chips small');
+      fam.groups.forEach(g => row.appendChild(chip(g, g === ui.group, () => { ui.group = g; saveJSON('papelator2.ui', ui); renderGroups(); renderSwatches(); })));
+      groupsEl.appendChild(row);
+    }
   }
   function renderSwatches() {
     swEl.innerHTML = '';
@@ -430,15 +482,43 @@ function buildSimple() {
       swEl.appendChild(d);
     });
   }
+  // UXP no recalcula bien la altura de una fila con flex-wrap cuando cambia el ancho del panel o su contenido
+  // (dejaba huecos en blanco encima de los chips): se sustituye el contenedor por uno nuevo en cada pintada.
+  function fresh(el) {
+    if (!el || !el.cloneNode || !el.parentNode || !el.parentNode.replaceChild) { if (el) el.innerHTML = ''; return el; }
+    const n = el.cloneNode(false); el.parentNode.replaceChild(n, el); return n;
+  }
   function chipRow(el, list, isOn, set, dotFn) {
-    el.innerHTML = '';
+    el = fresh(el);
     list.forEach(it => el.appendChild(chip(it.name, isOn(it), () => { set(it); changed({ source: 'simple' }); }, dotFn ? dotFn(it) : null)));
   }
   // familia elegida: si ya estás en ella se conserva la variante; si no, la primera
   const pickFam = (key, it) => { if (it.items.indexOf(state[key]) < 0) state[key] = it.items[0]; };
+  // Color: el suyo · dos que existen en este papel · elegir (selector de Photoshop). Sin texto: sólo muestras.
+  function renderColors() {
+    const el = fresh(byId('s-colors'));
+    const p = paperOf(state.paper); if (!p) return;
+    const sug = colorSug(), cur = colorHex(state.color), orig = isOrigColor();
+    const known = orig || sug.some(s => s[0] === cur);
+    const sw = (fill, on, title, onClick, pick) => {
+      const d = h('div', 'csw' + (on ? ' on' : '') + (pick ? ' pick' : ''));
+      const f = h('div', 'cfill'); if (fill) f.style.backgroundColor = fill; d.appendChild(f);
+      if (pick) { const im = h('img', fill ? 'cbadge' : 'cwheel'); im.src = 'assets/ui/rueda.png'; d.appendChild(im); }
+      try { d.title = title; } catch (e) { /* sin tooltip */ }
+      d.addEventListener('click', onClick);
+      el.appendChild(d);
+    };
+    const pc = p.color || [240, 236, 226];
+    sw('rgb(' + pc.map(v => Math.round(v)).join(',') + ')', orig, 'Original', () => { state.color = 'original'; changed({ source: 'simple' }); });
+    sug.forEach(s => sw(s[0], cur === s[0], s[1], () => { state.color = s[0]; changed({ source: 'simple' }); }));
+    sw(known ? null : cur, !known, 'Elegir color…', async () => {
+      const hx = await pickColor(known ? (orig ? rgbHex(pc) : cur) : cur);
+      if (hx) { state.color = hx; changed({ source: 'simple' }); }
+    }, true);
+  }
   function renderChips() {
-    chipRow(byId('s-colors'), P.COLORS, it => state.color === it.id, it => { state.color = it.id; }, it => it.hex || 'transparent');
-    chipRow(byId('s-estado'), P.ESTADO_FAMILIAS, it => !state.custom && it.items.indexOf(state.estado) >= 0, it => {
+    renderColors();
+    chipRow(byId('s-estado'), estadoFamilias(), it => !state.custom && it.items.indexOf(state.estado) >= 0, it => {
       state.custom = null; pickFam('estado', it);
       const e = P.ESTADOS.filter(x => x.id === state.estado)[0]; if (e) state.edad = e.edad;
     });
@@ -477,7 +557,7 @@ function buildSimple() {
     const nm = (list, v) => { const f = list.filter(x => x.id === v)[0]; return f ? f.name : ''; };
     switch (id) {
       case 's-sec-papel': return (t ? t.name : '') + (t && t.papers.length > 1 ? ' ' + (t.papers.indexOf(state.paper) + 1) + '/' + t.papers.length : '');
-      case 's-sec-color': return nm(P.COLORS, state.color) || state.color;
+      case 's-sec-color': { if (isOrigColor()) return 'Original'; const s = colorSug().filter(x => x[0] === colorHex(state.color))[0]; return s ? s[1] : 'Personalizado'; }
       case 's-sec-estado': return (state.custom ? 'Personalizado' : fam(P.ESTADO_FAMILIAS, state.estado)) + (state.edad > 0.005 ? ' · ' + pct0(state.edad) : '');
       case 's-sec-pliegue': return nm(P.PLIEGUES, state.pliegue);
       case 's-sec-calco': return fam(P.CALCO_FAMILIAS, state.calco);
@@ -491,13 +571,23 @@ function buildSimple() {
     if (id === 's-sec-calco' && state.calco !== 'ninguno') { const c = P.CALCOS.filter(x => x.id === state.calco)[0]; return c && c.desc ? c.name + ': ' + c.desc.toLowerCase() : ''; }
     if (id === 's-sec-papel' && materialOf(state.paper) === 'screen') return 'Pantalla: sin pliegues, calco ni estado del papel.';
     if (id === 's-sec-papel' && (materialOf(state.paper) === 'wood' || materialOf(state.paper) === 'carton')) return 'Madera y cartón no se doblan ni transparentan.';
+    if (id === 's-sec-papel' && materialOf(state.paper) === 'surface') {
+      const p = paperOf(state.paper);
+      return (p && p.colorable ? 'Se puede pintar del color que quieras' : 'Color propio: no se puede pintar') + '; no se dobla ni transparenta. La tinta sigue el relieve.';
+    }
     return '';
   }
   function sections() {
     const show = { 's-sec-color': usable('color'), 's-sec-estado': usable('estado'), 's-sec-pliegue': usable('pliegues'), 's-sec-calco': usable('calco') };
     Object.keys(show).forEach(id => { const el = byId(id); if (el) el.style.display = show[id] ? 'block' : 'none'; });
-    const scr = materialOf(state.paper) === 'screen';
+    const mat = materialOf(state.paper), scr = mat === 'screen';
     byId('s-scalewrap').style.display = scr ? 'none' : 'block';
+    byId('s-reliefwrap').style.display = mat === 'surface' ? 'block' : 'none';
+    byId('s-relief').value = Math.round((state.grain == null ? 1 : state.grain) * 100); byId('s-reliefval').textContent = Math.round((state.grain == null ? 1 : state.grain) * 100) + '%';
+    // los títulos dicen lo que es: papel, superficie o pantalla
+    const ttl = (id, t) => { const el = byId(id), s = el && el.querySelector('.ttl'); if (s) s.textContent = t; };
+    ttl('s-sec-papel', mat === 'screen' ? 'Pantalla' : mat === 'surface' ? 'Superficie' : mat === 'wood' || mat === 'carton' ? 'Fondo' : 'Papel');
+    ttl('s-sec-color', mat === 'surface' ? 'Color de la pintura' : 'Color del papel');
     byId('s-screenopts').style.display = scr ? 'block' : 'none';
     byId('s-zoom').value = Math.round(state.screenZoom * 100); byId('s-zoomval').textContent = Math.round(state.screenZoom * 100) + '%';
     byId('s-bright').value = Math.round(state.screenBright * 100); byId('s-brightval').textContent = Math.round(state.screenBright * 100) + '%';
@@ -544,6 +634,7 @@ function buildSimple() {
     el.addEventListener('change', e => { apply(Number(e.target.value)); changed({ source: 'slider' }); });
   };
   bindSlider('s-scale', 's-scaleval', v => { state.scale = v / 100; }, v => v + '%');
+  bindSlider('s-relief', 's-reliefval', v => { state.grain = v / 100; }, v => v + '%');
   bindSlider('s-exposure', 's-expval', v => { state.exposure = v / 100; }, v => (v > 0 ? '+' : '') + v);
   bindSlider('s-edad', 's-edadval', v => { state.edad = v / 100; }, v => v + '%');
   bindSlider('s-plamt', 's-plamtval', v => { state.pliegueAmount = v / 100; }, v => v + '%');
@@ -589,7 +680,7 @@ const SPECIAL = { manoseo: 'Suciedad de las manos', cockle: 'Ondulación por hum
 function isPattern() { const p = papers.filter(x => x.id === state.paper)[0]; return !!(p && p.kind === 'pattern'); }
 function buildSections() {
   const estadoItems = [
-    { t: 'picker', path: 'estado', label: 'Preset de estado', options: () => P.ESTADOS.map(e => [e.id, e.name]).concat([['custom', 'Personalizado']]),
+    { t: 'picker', path: 'estado', label: 'Preset de estado', options: () => { const ok = estadoFamilias().reduce((a, f) => a.concat(f.items), []); return P.ESTADOS.filter(e => ok.indexOf(e.id) >= 0).map(e => [e.id, e.name]).concat([['custom', 'Personalizado']]); },
       onSet: v => { if (v === 'custom') { state.custom = clone(currentCounts()); } else { state.estado = v; state.custom = null; const e = P.ESTADOS.filter(x => x.id === v)[0]; if (e) state.edad = e.edad; } return true; } },
     { t: 'slider', path: 'edad', label: 'Antigüedad', min: 0, max: 1.2, step: 0.01, fmt: pct },
     { t: 'slider', path: 'estadoAmount', label: 'Cantidad general', min: 0, max: 2, step: 0.05, fmt: pct }
@@ -598,7 +689,7 @@ function buildSections() {
   cats.forEach(cid => {
     const name = SPECIAL[cid] || imperfCats[cid].name;
     const rg = CAT_RANGE[cid] || (imperfCats[cid] && imperfCats[cid].kind === 'stamp' ? [6, 1] : [4, 1]);
-    estadoItems.push({ t: 'slider', cat: cid, label: name, min: 0, max: rg[0], step: rg[1], fmt: v => (rg[1] < 1 ? pct(v) : String(v)) });
+    estadoItems.push({ t: 'slider', cat: cid, label: name, min: 0, max: rg[0], step: rg[1], fmt: v => (rg[1] < 1 ? pct(v) : String(v)), when: () => catUsable(cid) });
   });
   return [
     { id: 'general', title: 'General', items: [
@@ -643,7 +734,8 @@ function buildSections() {
     { id: 'aplicar', title: 'Aplicar (tinta)', when: () => materialOf(state.paper) !== 'screen', items: [
       { t: 'picker', path: 'impresion', label: 'Técnica de impresión', options: () => P.IMPRESIONES.map(c => [c.id, c.name]) },
       { t: 'picker', path: 'inkMode', label: 'Tipo de tinta', options: () => [['multiply', 'Transparente (se suma al papel)'], ['normal', 'Opaca (serigrafía, blanco)']] },
-      { t: 'slider', path: 'grain', label: 'Deformación por el grano del papel', min: 0, max: 4, step: 0.05, fmt: pct },
+      { t: 'slider', path: 'grain', label: 'Deformación por el grano del papel', min: 0, max: 4, step: 0.05, fmt: pct, when: () => materialOf(state.paper) !== 'surface' },
+      { t: 'slider', path: 'grain', label: 'Relieve de la superficie (desplazamiento de la tinta)', min: 0, max: 4, step: 0.05, fmt: pct, when: () => materialOf(state.paper) === 'surface' },
       { t: 'slider', path: 'inkAge', label: 'Envejecimiento de la tinta', min: 0, max: 2, step: 0.05, fmt: pct },
       { t: 'slider', path: 'absorb', label: 'Absorción (huecos en el grano)', min: 0, max: 3, step: 0.05, fmt: pct },
 
@@ -781,6 +873,10 @@ function fitHeights() {
   for (const root of shown) {
     const hgt = panelHeight(root);
     if (hgt && root._h !== hgt) { root._h = hgt; root.style.height = hgt + 'px'; }
+    // al cambiar el ancho del panel se vuelven a pintar las filas de chips (UXP no reajusta su altura)
+    let wd = 0; try { wd = root.clientWidth || root.offsetWidth || 0; } catch (e) { wd = 0; }
+    if (wd && root._w && Math.abs(root._w - wd) > 4) { root._w = wd; refreshers.forEach(fn => { try { fn('resize'); } catch (e) { /* nada */ } }); }
+    else if (wd && !root._w) root._w = wd;
   }
 }
 function attach(root, arg) {
