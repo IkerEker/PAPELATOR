@@ -2,7 +2,7 @@
 
 > Pega o adjunta este archivo al empezar el chat nuevo. Todo el proyecto está en GitHub:
 > **https://github.com/IkerEker/PAPELATOR** (rama `main`, último commit «Una sola ventana con dos pestañas: Presets y Avanzado»).
-> Versión actual del plugin: **3.14.1** (`plugin/manifest.json`). Instalable: `dist/PAPELATOR.ccx`.
+> Versión actual del plugin: **3.14.2** (`plugin/manifest.json`). Instalable: `dist/PAPELATOR.ccx`.
 
 ---
 
@@ -252,6 +252,10 @@ que las opciones que no tienen sentido en cada material desaparezcan (gotelé se
 - **v3.14.1 — tinta legible en superficies**: en `material:'surface'` la tinta (modo multiplicar) se mezcla con
   pintura que tapa (`opq` 0.45-0.9, más cuanto más oscura la superficie; la textura queda como luces y sombras) y el
   desplazamiento bajó a ×0.3 (antes ×0.5): en ladrillo/bloque el texto rojo apenas se leía.
+
+- **v3.14.2 — pantallas legibles**: tamaño del píxel con curva `zoom^0.6` (400 % ≈ ×2,3), tele de tubo con 380
+  líneas (antes 260), bandas ×0.6, desenfoque óptico menor, y la calidad de foto sobre una pantalla desenfoca la
+  mitad (`st._soft = 0.5`: resolución, foco, trepidación y bordes).
 
 ## 7. Pendiente / ideas que no se han hecho
 - Probar todo dentro de Photoshop real (las pruebas son en Node + simulación del DOM de UXP; el usuario es quien lo

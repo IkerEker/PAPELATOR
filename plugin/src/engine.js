@@ -868,7 +868,7 @@ const SCREENS = {
   pantalla_oled: { layout: 'pentile', across: 820, black: 0.0, contrast: 0.06, sat: 0.14, temp: [0.985, 1.0, 1.03], glow: 0.12, gloss: 1.0, bands: 0.3, moire: 0.9, floor: 0.6 },
   pantalla_lcd: { layout: 'stripe', across: 520, black: 0.07, contrast: 0, sat: 0, temp: [0.965, 1.0, 1.05], gap: 0.14, gapV: 0.1, glow: 0.04, gloss: 0.35, bands: 0.08, moire: 1.0, bleed: 0.1, ipsGlow: 0.12, mura: 0.03, floor: 0.58 },
   pantalla_vieja: { layout: 'stripe', across: 300, black: 0.13, contrast: -0.12, sat: -0.12, temp: [0.93, 1.0, 1.1], gap: 0.24, gapV: 0.2, glow: 0.03, gloss: 0.25, bands: 0.18, moire: 0.8, bleed: 0.26, dither: 63, viewAngle: 0.55, mura: 0.07, floor: 0.42 },
-  pantalla_crt: { layout: 'crt', across: 260, black: 0.035, contrast: 0.08, sat: 0.05, temp: [1.02, 1.0, 0.97], gap: 0.18, glow: 0.55, gloss: 0.8, bands: 0.42, moire: 0.7, curve: 0.07, converge: 0.22, vig: 0.55, echo: 0.08, jitter: 0.06, snow: 5, floor: 0.3 },
+  pantalla_crt: { layout: 'crt', across: 380, black: 0.035, contrast: 0.08, sat: 0.05, temp: [1.02, 1.0, 0.97], gap: 0.18, glow: 0.55, gloss: 0.8, bands: 0.42, moire: 0.7, curve: 0.07, converge: 0.22, vig: 0.55, echo: 0.08, jitter: 0.06, snow: 5, floor: 0.3 },
   pantalla_led: { layout: 'led', across: 190, black: 0.0, contrast: 0.1, sat: 0.2, temp: [1.0, 1.0, 1.0], glow: 0.35, gloss: 0.1, bands: 0.5, moire: 1.1, module: 16, dead: 0.0006, floor: 0.0 },
   pantalla_eink: { layout: 'eink', across: 1500, white: 0.8, black: 0.17, contrast: 0, temp: [0.985, 0.99, 0.955], gloss: 0.15, bands: 0, moire: 0, gray: 1, dither: 15, ghost: 0.06, grain: 1, reflective: 1, floor: 1 }
 };
@@ -882,7 +882,8 @@ async function renderScreen(opts, st, withArt) {
   const S = { w, h, ppm, N, seed: (def(st.seed, 1) | 0) * 7919 + 13 + (def(st.seedPaper, 0) | 0) * 104729, k };
   const D = SCREENS[st.paper] || SCREENS.pantalla_lcd;
   const longS = Math.max(w, h);
-  const pitch = st._pitch || Math.max(1.2, longS / D.across * clamp(def(st.screenZoom, 1), 0.3, 4));
+  // tamaño del píxel: curva suave (30 % → ×0,5 · 100 % → ×1 · 200 % → ×1,5 · 400 % → ×2,3) para que no se pase
+  const pitch = st._pitch || Math.max(1.2, longS / D.across * Math.pow(clamp(def(st.screenZoom, 1), 0.3, 4), 0.6));
   const bright = clamp(def(st.screenBright, 1), 0.3, 1.6);
   const r = rng(S.seed * 7 + 5);
   await prog(0.1, 'Encendiendo la pantalla…');
@@ -1005,7 +1006,7 @@ async function renderScreen(opts, st, withArt) {
   const tmp = new Float32Array(N), ch = [new Float32Array(N), new Float32Array(N), new Float32Array(N)];
   for (let o = 0; o < N; o++) { ch[0][o] = out[o * 4]; ch[1][o] = out[o * 4 + 1]; ch[2][o] = out[o * 4 + 2]; }
   const shot = st.luz !== 'ninguna' || ['movil', 'movil_antiguo', 'analogica'].indexOf(st.calidad) >= 0;
-  const optic = pitch * (D.layout === 'led' ? 0.05 : 0.08) * (shot ? 1.6 : 1);
+  const optic = pitch * (D.layout === 'led' ? 0.05 : 0.06) * (shot ? 1.3 : 1);
   if (def(D.glow, 0) > 0) {
     const gk = D.glow * kk;
     for (let c = 0; c < 3; c++) {
@@ -1044,7 +1045,8 @@ async function renderScreen(opts, st, withArt) {
   // ---- 7) fotografiar la pantalla
   if (shot) { await prog(0.85, 'Fotografiando la pantalla…'); screenShot(S, st, out, D, pitch, kk); }
   const cal = ['movil', 'movil_antiguo', 'analogica'].indexOf(st.calidad) >= 0 ? st.calidad : 'perfecta';
-  if (cal !== 'perfecta') quality(S, st, out, cal, k);
+  // la pantalla ya pixela y difumina: la foto desenfoca la mitad para que el texto siga leyéndose
+  if (cal !== 'perfecta') quality(S, Object.assign({}, st, { _soft: 0.5 }), out, cal, k);
   else if (def(st.encuadre, 0) > 0) captureGeometry(S, st, out, {}, k);
   await prog(1, 'Listo');
   return { rgba: new Uint8Array(out.buffer) };
@@ -1067,7 +1069,7 @@ function screenShot(S, st, px, D, pitch, kk) {
   const fseed = (r() * 1e5) | 0, fsc = longS / 3;
   const MA = mA ? lowField(w, h, 8, (x, y) => mA * smooth(0.2, 0.75, fbm2(x / fsc, y / fsc, fseed))) : null;
   // bandas del obturador (PWM / barrido): horizontales, con una más marcada
-  const bA = def(D.bands, 0) * kk * lerp(0.7, 1.25, r()), bPer = h / lerp(1.8, 7.5, r()), bPh = r() * 6.28;
+  const bA = def(D.bands, 0) * kk * 0.6 * lerp(0.7, 1.25, r()), bPer = h / lerp(1.8, 7.5, r()), bPh = r() * 6.28;
   const bTilt = (r() - 0.5) * 0.12, bSharp = lerp(2, 5, r()), bBig = lerp(0.3, 0.9, r()), bWob = lerp(0, 0.025, r()) * h, bWf = lerp(1, 3, r()) / w;
   // reflejos en el cristal según la luz
   const lamp = luz === 'lampara' || luz === 'foco', flash = luz === 'flash', me = luz === 'sombra', day = luz === 'dia' || luz === 'ventana';
@@ -1715,11 +1717,11 @@ function quality(S, st, px, cal, k) {
   const tmp = new Float32Array(N), bl = new Float32Array(N);
   if (Q.gray) for (let o = 0; o < N; o++) { const l = ch[0][o] * 0.3 + ch[1][o] * 0.59 + ch[2][o] * 0.11; ch[0][o] = ch[1][o] = ch[2][o] = l; }
   // 1) resolución efectiva + desenfoque del objetivo
-  const sigR = 0.55 * f + (Q.focus || 0) * f * kq;
+  const sigR = (0.55 * f + (Q.focus || 0) * f * kq) * def(st._soft, 1);
   if (sigR > 0.45) for (let c = 0; c < 3; c++) gaussBlur(ch[c], w, h, sigR, tmp);
   // 2) trepidación: barrido en una dirección
   if (Q.motion) {
-    const len = Q.motion * longS * kq * lerp(0.6, 1.2, r()), ang = (r() - 0.5) * 1.2 + (r() < 0.5 ? 0 : Math.PI / 2);
+    const len = Q.motion * longS * kq * def(st._soft, 1) * lerp(0.6, 1.2, r()), ang = (r() - 0.5) * 1.2 + (r() < 0.5 ? 0 : Math.PI / 2);
     if (len > 1) {
       const taps = Math.min(9, Math.max(3, Math.round(len))), dx = Math.cos(ang) * len / (taps - 1), dy = Math.sin(ang) * len / (taps - 1);
       for (let c = 0; c < 3; c++) {
@@ -1884,7 +1886,7 @@ function captureGeometry(S, st, px, Q, k) {
   // reparto: 0-25 % casi imperceptible (un pelo girada), 50 % foto normal de móvil, 100 % muy torcida y desenfocada
   const enc = clamp(def(st.encuadre, 0), 0, 1), ep = Math.pow(enc, 2.2), e2 = ep * ep, ef = Math.pow(enc, 1.6);
   const rot = (Q.rot || 0) * kk + 11 * ep, persp = (Q.persp || 0) * kk + 0.3 * ep,
-    barrel = (Q.barrel || 0) * kk + 0.04 * ep, edge = ((Q.edge || 0) * kk + 8 * Math.pow(enc, 1.8)) * Math.max(w, h) / 2000;
+    barrel = (Q.barrel || 0) * kk + 0.04 * ep, edge = ((Q.edge || 0) * kk * def(st._soft, 1) + 8 * Math.pow(enc, 1.8)) * Math.max(w, h) / 2000;
   if (rot <= 0 && persp <= 0 && edge <= 0 && barrel <= 0) return;
   const r = rng((S.seed + (def(st.seedFoto, 0) | 0) * 7717) * 3 + 41);
   const th = (r() < 0.5 ? -1 : 1) * rot * (0.6 + 0.4 * r()) * Math.PI / 180;

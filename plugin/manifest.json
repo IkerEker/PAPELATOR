@@ -2,7 +2,7 @@
   "manifestVersion": 5,
   "id": "com.ikereker.papelator",
   "name": "PAPELATOR",
-  "version": "3.14.1",
+  "version": "3.14.2",
   "main": "index.html",
   "host": {
     "app": "PS",
