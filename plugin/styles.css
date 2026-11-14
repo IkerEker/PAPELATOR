@@ -158,3 +158,6 @@ sp-slider { width: 100%; margin-top: -2px; }
 .segb:hover { opacity: 1; }
 .segb.on { opacity: 1; font-weight: bold; color: #1f1d1a; background-color: #e2b45a; }
 #s-groups .chips.small { margin-bottom: 4px; }
+
+/* marcador de lo que está fuera del panel (oculto) */
+.ph { display: none; width: 0; height: 0; margin: 0; padding: 0; }

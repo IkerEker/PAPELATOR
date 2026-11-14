@@ -138,10 +138,8 @@ const ESTADOS = [
 // barbas, el kraft fibra larga, la cartulina gris enseña su alma clara, el cartón ondulado sus ondas…
 const BORDES = [
   { id: 'ninguno', name: 'Sin borde' },
-  { id: 'recto', name: 'Recto' },
-  { id: 'gastado', name: 'Gastado' },
+  { id: 'limpio', name: 'Corte limpio' },
   { id: 'rasgado', name: 'Rasgado' },
-  { id: 'roto', name: 'Roto' },
   { id: 'quemado', name: 'Quemado' }
 ];
 // tipo de papel (PAPER_TYPES) -> familia de borde
@@ -155,17 +153,15 @@ const BORDE_FAM = {
   caja: 'carton', carton: 'carton', carton_kraft: 'carton_liso'
 };
 // qué es cada borde en cada familia (lo que se cuenta en el panel) y lo que no existe
-const BORDE_NO = { vegetal: ['quemado'], carton: ['quemado'], carton_liso: ['quemado'] };
+const BORDE_NO = {};
+// qué hace el slider de desgaste en cada borde (lo que se cuenta en el panel)
 const BORDE_DESC = {
-  recto: 'cortado limpio',
-  gastado: { _: 'cantos con muescas y alguna esquina doblada', carton: 'cantos aplastados y raspados', carton_liso: 'cantos aplastados y raspados',
-    periodico: 'cantos viejos con muescas y esquinas redondeadas', pergamino: 'cantos viejos con muescas y esquinas redondeadas' },
-  rasgado: { _: 'rasgado a mano', cuaderno: 'arrancada de la espiral', acuarela: 'barbas de papel de algodón', washi: 'fibras largas sueltas',
-    artesanal: 'barbas gruesas de papel hecho a mano', periodico: 'fibra corta y gris', kraft: 'fibra larga marrón', gris: 'se separa en capas y enseña el alma clara',
-    pergamino: 'quebradizo, a escamas', vegetal: 'nítido, con el filo blanquecino', carton: 'se ven las ondas de dentro', carton_liso: 'fibra gruesa deshilachada', reciclado: 'fibra corta, mullida' },
-  roto: { _: 'desgarros que entran en la hoja y solapas levantadas', periodico: 'quebradizo, le faltan trozos', pergamino: 'quebradizo, le faltan trozos',
-    gris: 'arrancado a capas', carton: 'cara arrancada: se ven las ondas', carton_liso: 'fibra arrancada', kraft: 'fibra arrancada a mechones' },
-  quemado: 'cantos quemados y tostados'
+  limpio: 'canto nítido; con desgaste, pelusa, muescas, esquinas redondeadas, orejas dobladas y algún desgarro',
+  rasgado: { _: 'a mano; con desgaste, más lados y más irregular', periodico: 'fibra corta y gris; con desgaste, más lados',
+    acuarela: 'barbas de algodón; con desgaste, más lados', washi: 'fibras largas sueltas; con desgaste, más lados',
+    kraft: 'fibra marrón; con desgaste, más lados', gris: 'se abre en capas y enseña el alma clara',
+    carton: 'se ven las ondas de dentro', vegetal: 'nítido, con el filo blanquecino', pergamino: 'quebradizo' },
+  quemado: 'filo carbonizado y chamuscado; con desgaste, más hondo y con agujeros'
 };
 
 // Pliegues: número de veces que se dobló (líneas de pliegue que se ven) o arrugado. ⟳ recorre las hojas reales
@@ -301,7 +297,7 @@ const DEFAULT_STATE = {
   sobreDirt: 0.25,                    // huellas, grasa y polvo sobre el vidrio
   sobreScale: 1,
   borde: 'ninguno',                   // borde de la hoja (alfa alrededor)
-  bordeAmount: 1,                     // cuánto: más lados rasgados, más irregular, más esquinas dobladas
+  bordeAmount: 0.35,                  // desgaste 0..1: más lados rasgados, más irregular, esquinas, quemado más hondo
   seedBorde: 0,                       // ⟳
   calco: 'ninguno',
   calcoAmount: 1,

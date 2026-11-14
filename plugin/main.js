@@ -67,8 +67,42 @@ function changed(opts) {
 // =============================================================== mensajes
 let busy = false, pending = null;
 let simpleRoot = null, proRoot = null;
+// Mostrar / ocultar sin huecos: en UXP lo que se oculta con display:none (sobre todo si lleva sliders de Spectrum)
+// sigue reservando su alto y deja espacios en blanco en las tarjetas. Lo que no se usa se SACA del documento (queda
+// un marcador vacío en su sitio) y se vuelve a meter al mostrarlo: el panel se ajusta siempre a lo que hay.
+const detached = {};
+let visGen = 0, detSeq = 0;
+// vuelve a meter en su sitio las tarjetas visibles: UXP recalcula su alto desde cero (sin huecos)
+function reattach(list) {
+  list.forEach(el => {
+    if (!isShown(el) || !canDetach(el)) return;
+    const par = el.parentNode, nx = el.nextSibling || null;
+    par.removeChild(el); par.insertBefore(el, nx);
+  });
+}
+function canDetach(el) { return el && el.parentNode && typeof el.parentNode.insertBefore === 'function' && typeof el.parentNode.removeChild === 'function'; }
+function vis(el, on, disp) {
+  if (!el) return;
+  if (on) {
+    const ph = el._ph;
+    if (ph || el.style.display === 'none') visGen++;
+    if (ph) { if (ph.parentNode) { ph.parentNode.insertBefore(el, ph); ph.parentNode.removeChild(ph); } el._ph = null; if (el._dk) delete detached[el._dk]; }
+    el.style.display = disp || 'block';
+    return;
+  }
+  if (el._ph) return;
+  visGen++;
+  if (!canDetach(el)) { el.style.display = 'none'; return; }
+  const ph = document.createElement('span'); ph.className = 'ph';
+  el.parentNode.insertBefore(ph, el); el.parentNode.removeChild(el);
+  el._ph = ph; el._dk = el.id || ('_d' + (++detSeq)); detached[el._dk] = el;
+}
+function isShown(el) { return !!el && !el._ph && el.style.display !== 'none'; }
 function byId(id) {
+  if (detached[id]) return detached[id];
   let el = document.getElementById(id);
+  // lo que está dentro de una parte sacada del panel (sección oculta) también se encuentra
+  if (!el) for (const k in detached) { const d = detached[k]; if (d && d.querySelector) { el = d.querySelector('#' + id); if (el) return el; } }
   if (!el && proRoot) el = proRoot.querySelector('#' + id);
   if (!el && simpleRoot) el = simpleRoot.querySelector('#' + id);
   return el;
@@ -326,7 +360,7 @@ async function doApply() {
     // queda seleccionado el resultado: así Ctrl/Cmd+E lo fusiona directamente con la capa de debajo
     restoreSelection(doc, [layer.id]);
     setStatus((reuse ? 'Actualizado' : 'Aplicado en') + ' «' + RESULT_NAME + '» (' + ((Date.now() - t0) / 1000).toFixed(1) + ' s). Ctrl/Cmd+Z lo deshace de una vez.'
-      + (state.borde && state.borde !== 'ninguno' && usable('borde') ? ' Alrededor de la hoja es transparente: oculta las capas de debajo para verla sola.' : ''));
+      );
   });
 }
 async function doRemove() {
@@ -459,6 +493,9 @@ function famUsable(f) { return materialOf(state.paper) !== 'screen' || !SCREEN_N
 function fixForMaterial() {
   // si el estado elegido no existe para este material, vuelve a «Nuevo»
   if (!state.custom && !famOf(estadoFamilias(), state.estado) && materialOf(state.paper) !== 'screen') { state.estado = 'nuevo'; state.edad = 0; }
+  if (state.borde === 'recto' || state.borde === 'gastado') state.borde = 'limpio';
+  if (state.borde === 'roto') state.borde = 'rasgado';
+  if (state.bordeAmount == null || state.bordeAmount > 1) state.bordeAmount = 0.35;
   if (state.borde && state.borde !== 'ninguno' && !bordeList().some(b => b.id === state.borde)) state.borde = 'ninguno';
   if (materialOf(state.paper) !== 'screen') return;
   const lf = P.LUZ_FAMILIAS.filter(f => f.items.indexOf(state.luz) >= 0)[0];
@@ -595,7 +632,7 @@ function buildSimple() {
   }
   function describe(id) {
     if (id === 's-sec-estado' && !state.custom) { const e = P.ESTADOS.filter(x => x.id === state.estado)[0]; return e ? e.name + ': ' + (e.desc || '').toLowerCase() : ''; }
-    if (id === 's-sec-borde' && state.borde && state.borde !== 'ninguno') return nm(P.BORDES, state.borde) + ': ' + bordeDesc() + '. Fuera de la hoja queda transparente.';
+    if (id === 's-sec-borde' && state.borde && state.borde !== 'ninguno') return nm(P.BORDES, state.borde) + ': ' + bordeDesc() + '.';
     if (id === 's-sec-calco' && state.calco !== 'ninguno') { const c = P.CALCOS.filter(x => x.id === state.calco)[0]; return c && c.desc ? c.name + ': ' + c.desc.toLowerCase() : ''; }
     if (id === 's-sec-papel' && materialOf(state.paper) === 'screen') return 'Pantalla: sin pliegues, calco ni estado del papel.';
     if (id === 's-sec-papel' && (materialOf(state.paper) === 'wood' || materialOf(state.paper) === 'carton')) return 'Madera y cartón no se doblan ni transparentan.';
@@ -607,28 +644,28 @@ function buildSimple() {
   }
   function sections() {
     const show = { 's-sec-borde': usable('borde'), 's-sec-color': usable('color'), 's-sec-estado': usable('estado'), 's-sec-pliegue': usable('pliegues'), 's-sec-calco': usable('calco') };
-    Object.keys(show).forEach(id => { const el = byId(id); if (el) el.style.display = show[id] ? 'block' : 'none'; });
+    Object.keys(show).forEach(id => vis(byId(id), show[id]));
     const mat = materialOf(state.paper), scr = mat === 'screen';
-    byId('s-scalewrap').style.display = scr ? 'none' : 'block';
-    byId('s-reliefwrap').style.display = mat === 'surface' ? 'block' : 'none';
+    vis(byId('s-scalewrap'), !scr);
+    vis(byId('s-reliefwrap'), mat === 'surface');
     byId('s-relief').value = Math.round((state.grain == null ? 1 : state.grain) * 100); byId('s-reliefval').textContent = Math.round((state.grain == null ? 1 : state.grain) * 100) + '%';
     // los títulos dicen lo que es: papel, superficie o pantalla
     const ttl = (id, t) => { const el = byId(id), s = el && el.querySelector('.ttl'); if (s) s.textContent = t; };
     ttl('s-sec-papel', mat === 'screen' ? 'Pantalla' : mat === 'surface' ? 'Superficie' : mat === 'wood' || mat === 'carton' ? 'Fondo' : 'Papel');
     ttl('s-sec-color', mat === 'surface' ? 'Color de la pintura' : 'Color del papel');
-    byId('s-screenopts').style.display = scr ? 'block' : 'none';
+    vis(byId('s-screenopts'), scr);
     byId('s-zoom').value = Math.round(state.screenZoom * 100); byId('s-zoomval').textContent = Math.round(state.screenZoom * 100) + '%';
     byId('s-bright').value = Math.round(state.screenBright * 100); byId('s-brightval').textContent = Math.round(state.screenBright * 100) + '%';
     // números seguidos aunque falten secciones; resumen y plegado
     let n = 0;
     SEC_IDS.forEach(id => {
-      const el = byId(id); if (!el || el.style.display === 'none') return;
+      const el = byId(id); if (!isShown(el)) return;
       const num = el.querySelector('.num'); if (num) num.textContent = String(++n);
       const closed = !!ui.closed[id];
-      if (el._body) el._body.style.display = closed ? 'none' : 'block';
+      if (el._body) vis(el._body, !closed);
       if (el._tw) el._tw.textContent = closed ? '▸' : '▾';
       if (el._sum) el._sum.textContent = summary(id);
-      if (el._desc) { const d = describe(id); el._desc.textContent = d; el._desc.style.display = d ? 'block' : 'none'; }
+      if (el._desc) { const d = describe(id); el._desc.textContent = d; vis(el._desc, !!d); }
       el.className = el.className.replace(/ closed/g, '') + (closed ? ' closed' : '');
     });
   }
@@ -638,25 +675,26 @@ function buildSimple() {
     const pa = byId('s-plamt'), pw = byId('s-plwear');
     pa.value = Math.round(state.pliegueAmount * 100); byId('s-plamtval').textContent = Math.round(state.pliegueAmount * 100) + '%';
     pw.value = Math.round(state.pliegueWear * 100); byId('s-plwearval').textContent = Math.round(state.pliegueWear * 100) + '%';
-    byId('s-plopts').style.display = state.pliegue && state.pliegue !== 'ninguno' ? 'block' : 'none';
-    byId('s-bordeopts').style.display = state.borde && state.borde !== 'ninguno' && state.borde !== 'recto' ? 'block' : 'none';
-    const ba = state.bordeAmount == null ? 1 : state.bordeAmount;
+    vis(byId('s-plopts'), state.pliegue && state.pliegue !== 'ninguno');
+    vis(byId('s-bordeopts'), state.borde && state.borde !== 'ninguno');
+    const ba = state.bordeAmount == null ? 0.35 : state.bordeAmount;
     byId('s-bordeamt').value = Math.round(ba * 100); byId('s-bordeamtval').textContent = Math.round(ba * 100) + '%';
     byId('s-enc').value = Math.round(state.encuadre * 100); byId('s-encval').textContent = Math.round(state.encuadre * 100) + '%';
-    byId('s-sobreopts').style.display = state.sobre && state.sobre !== 'ninguno' ? 'block' : 'none';
+    vis(byId('s-sobreopts'), state.sobre && state.sobre !== 'ninguno');
     byId('s-sobretrans').value = Math.round(state.sobreTrans * 100); byId('s-sobretransval').textContent = Math.round(state.sobreTrans * 100) + '%';
     byId('s-sobredist').value = Math.round(state.sobreDist * 100); byId('s-sobredistval').textContent = Math.round(state.sobreDist * 40) + ' mm';
-    byId('s-calcoopts').style.display = state.calco && state.calco !== 'ninguno' ? 'block' : 'none';
+    vis(byId('s-calcoopts'), state.calco && state.calco !== 'ninguno');
     byId('s-calcoamt').value = Math.round(state.calcoAmount * 100); byId('s-calcoval').textContent = Math.round(state.calcoAmount * 100) + '%';
     ed.value = Math.round(state.edad * 100); byId('s-edadval').textContent = Math.round(state.edad * 100) + '%';
     sc.value = Math.round(state.scale * 100); byId('s-scaleval').textContent = Math.round(state.scale * 100) + '%';
     ex.value = Math.round(state.exposure * 100); byId('s-expval').textContent = (state.exposure > 0 ? '+' : '') + Math.round(state.exposure * 100);
   }
-  renderGroups(); renderSwatches(); renderChips(); sliders();
+  renderGroups(); renderSwatches(); renderChips(); sliders(); reattach(SEC_IDS.map(byId));
   const live = byId('s-live'); live.checked = !!ui.live;
   refreshers.push(src => {
     if (src !== 'simple') { const g = typeOf(state.paper).group; if (g !== ui.group) { ui.group = g; renderGroups(); } }
-    renderSwatches(); renderChips(); sliders();
+    try { renderSwatches(); renderChips(); sliders(); reattach(SEC_IDS.map(byId)); }
+    catch (e) { setStatus('Error en el panel: ' + (e.message || e), true); }
     live.checked = !!ui.live;
   });
   const bindSlider = (id, valId, apply, fmt) => {
@@ -744,7 +782,7 @@ function buildSections() {
     { id: 'estado', title: 'Estado e imperfecciones', when: () => usable('estado'), items: estadoItems },
     { id: 'borde', title: 'Borde de la hoja', when: () => usable('borde'), items: [
       { t: 'picker', path: 'borde', label: 'Borde', options: () => bordeList().map(b => [b.id, b.name]) },
-      { t: 'slider', path: 'bordeAmount', label: 'Cuánto (lados rasgados, irregularidad, esquinas)', min: 0, max: 2, step: 0.05, fmt: pct, when: () => state.borde && state.borde !== 'ninguno' && state.borde !== 'recto' },
+      { t: 'slider', path: 'bordeAmount', label: 'Desgaste', min: 0, max: 1, step: 0.01, fmt: pct, when: () => state.borde && state.borde !== 'ninguno' },
       { t: 'slider', path: 'seedBorde', label: 'Variación del borde', min: 0, max: 99, step: 1, fmt: v => '#' + (v + 1), when: () => state.borde && state.borde !== 'ninguno' }
     ] },
     { id: 'pliegues', title: 'Pliegues y arrugas', when: () => usable('pliegues'), items: [
@@ -795,12 +833,14 @@ function getPath(path) { return path.split('.').reduce((o, k) => (o ? o[k] : und
 function setPath(path, v) { const ks = path.split('.'); let o = state; for (let i = 0; i < ks.length - 1; i++) o = o[ks[i]]; o[ks[ks.length - 1]] = v; }
 
 function buildPro() {
-  const whens = [];
+  const whens = [], groups = [];
+  let proGen = -1;
   const host = byId('p-sections');
   const controls = [];
   buildSections().forEach(sec => {
     const grp = h('div', 'grp'), head = h('div', 'grphead');
-    if (sec.when) whens.push(() => { grp.style.display = sec.when() ? 'block' : 'none'; });
+    groups.push(grp);
+    if (sec.when) whens.push(() => vis(grp, sec.when()));
     const tw = h('span', 'tw', ui.open[sec.id] ? '▾' : '▸');
     head.appendChild(tw); head.appendChild(h('span', 'tt', sec.title));
     const body = h('div', 'grpbody' + (ui.open[sec.id] ? '' : ' closed'));
@@ -857,12 +897,16 @@ function buildPro() {
         row.appendChild(tf);
         controls.push({ src, set: () => { tf.value = getPath(it.path) || ''; } });
       }
-      if (it.when) whens.push(() => { row.style.display = it.when() ? 'block' : 'none'; });
+      if (it.when) whens.push(() => vis(row, it.when()));
       body.appendChild(row);
     });
     host.appendChild(grp);
   });
-  const refreshAll = s => { controls.forEach(c => { if (s !== c.src) { try { c.set(); } catch (e) { /* aún no montado */ } } }); whens.forEach(f => f()); };
+  const refreshAll = s => {
+    controls.forEach(c => { if (s !== c.src) { try { c.set(); } catch (e) { /* aún no montado */ } } });
+    whens.forEach(f => f());
+    if (visGen !== proGen) { proGen = visGen; reattach(groups); }
+  };
   refreshAll();
   refreshers.push(s => { refreshAll(s); const live = byId('p-live'); if (live) live.checked = !!ui.live; });
   byId('p-paper').addEventListener('click', doPaper);

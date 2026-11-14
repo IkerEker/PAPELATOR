@@ -31,6 +31,14 @@ SRC = os.path.join(REPO, 'BORDES')
 TMP = os.environ.get('PAPELATOR_TMP', '/tmp/papelator_bordes')
 OUT = os.path.join(ASSETS, 'bordes')
 PPM = 10.0
+# las fotos generadas exageran el tamaño del rasgado: un borde real tiene dientes de 1-3 mm y fibras de 1 mm
+SCALE = 0.6
+# hasta dónde (mm, ya a escala real) se nota el borde hacia dentro; más allá es el papel elegido, sin nada de la foto
+FADE = {'blanco': 1.6, 'bisel': 2.4, 'blanco_roto': 5, 'espiral': 2.5, 'wire': 3, 'periodico': 1.6, 'reciclado': 2.5,
+        'acuarela': 2, 'washi': 2.5, 'artesanal': 3, 'viejo': 3.5, 'viejo_roto': 4, 'quemado': 6, 'kraft': 2.4,
+        'kraft_grueso': 4, 'gris': 3, 'gris_roto': 5, 'vegetal': 1.5, 'carton': 3, 'carton_rasgado': 8, 'carton_roto': 11}
+# sólo estos guardan el color del filo (tostado, quemado); en el resto el borde es luz y sombra y el color es el del papel
+TINT = {'viejo', 'viejo_roto', 'quemado'}
 
 # conjunto: (anchura real de la foto en mm, ficheros)
 STRIPS = {
@@ -110,7 +118,7 @@ def resize(arr, w, h):
     return np.stack([resize(arr[..., c], w, h) for c in range(arr.shape[2])], -1)
 
 
-def shade_and_core(F, a, body, rows_band):
+def shade_and_core(F, a, body, rows_band, tint=False):
     """Sh (color / color de su papel) y K (alma del papel que asoma), dentro de la banda del borde."""
     H, W, _ = F.shape
     bodyL = lumf(body)
@@ -139,10 +147,10 @@ def shade_and_core(F, a, body, rows_band):
     ratio = (F + eps) / (ref + eps)
     rl = np.maximum(lumf(ratio), 1e-3)[..., None]
     chroma = ratio / rl
-    mx, mn = body.max(-1), body.min(-1)
-    sat = (mx - mn) / np.maximum(mx, 1e-3)
-    cw = np.clip(1 - (sat - 0.2) / 0.35, 0, 1)[None, :, None]
-    Sh = shL[..., None] * (1 + (chroma - 1) * cw)
+    # nunca más verde que rojo/azul (restos del croma en las fibras)
+    chroma[..., 1] = np.minimum(chroma[..., 1], np.maximum(chroma[..., 0], chroma[..., 2]))
+    Sh = shL[..., None] * (chroma if tint else 1.0)
+    if not tint: Sh = np.repeat(Sh, 3, -1) if Sh.shape[-1] == 1 else Sh
     Sh = np.where(a[..., None] > 0.01, Sh, 1.0)
     return np.clip(Sh, 0.03, 2.0).astype(np.float32), K.astype(np.float32), core
 
@@ -164,7 +172,8 @@ def loop_seam(a, Sh, e, lo, hi, ov):
     return bx
 
 
-def process_strip(sid, fname, widthMm):
+def process_strip(sid, fname, widthMm, sset=''):
+    widthMm = widthMm * SCALE
     F, a = matted(fname)
     F = F.astype(np.float32); a = a.astype(np.float32)
     H, W = a.shape
@@ -206,19 +215,26 @@ def process_strip(sid, fname, widthMm):
     body = np.stack([ndimage.gaussian_filter1d(body[:, c], 40, mode='nearest') for c in range(3)], -1)
     rows = np.arange(H)[:, None]
     band0 = (rows >= e[None, :]) & (rows < e[None, :] + H * 0.05)
-    Sh, K, core = shade_and_core(F, a, body, band0)
+    Sh, K, core = shade_and_core(F, a, body, band0, sset in TINT)
+    # el borde sólo se nota cerca del filo: distancia (dentro del papel) a lo transparente
+    mmpx0 = widthMm / W
+    d1 = FADE.get(sset, 2.5) / mmpx0
+    dist = ndimage.distance_transform_edt(a > 0.5)
+    fade = np.clip((d1 - dist) / (d1 * 0.45), 0, 1).astype(np.float32)
+    fade = ndimage.gaussian_filter(fade, max(1, d1 * 0.08))
+    Sh = 1 + (Sh - 1) * fade[..., None]; K = K * fade
     # hasta dónde se nota el borde: desviación respecto del papel, fila a fila
     dev = np.median(np.abs(Sh[:, lo:hi] - 1).mean(-1) + K[:, lo:hi], 1)
     base = np.median(dev[y1:y2]) if y2 > y1 else 0.02
     sm = ndimage.gaussian_filter1d(dev, 3)
-    yB = int(yE + H * 0.03)
+    yB = int(yE + H * 0.01)
     for y in range(int(yE), y1):
-        if sm[y] > base * 1.6 + 0.015: yB = y
+        if sm[y] > base * 1.6 + 0.004: yB = y
     # además, lo más hondo que llega el papel arrancado (muescas, solapas, agujeros)
     holes = (a[int(yE):y1, lo:hi] < 0.5)
     if holes.any():
         yB = max(yB, int(yE) + int(np.nonzero(holes.any(1))[0][-1]))
-    ramp = int(H * 0.03)
+    ramp = int(H * 0.012) + 2
     yB = min(yB + ramp, y1)
     w = np.clip((yB + ramp - rows[:, 0]) / ramp, 0, 1).astype(np.float32)
     Sh = 1 + (Sh - 1) * w[:, None, None]; K = K * w[:, None]
@@ -341,7 +357,7 @@ if __name__ == '__main__':
         if only and sset not in only: continue
         lst = []
         for j, f in enumerate(files):
-            r = process_strip(f'{sset}_{j + 1}', f, mm)
+            r = process_strip(f'{sset}_{j + 1}', f, mm, sset)
             if r: lst.append(r); print(sset, r['id'], r['w'], 'x', r['h'], 'borde', r['edge'], 'alma' if r['core'] else '', flush=True)
         cat['strips'][sset] = lst
     for cset, (mm, files) in CORNERS.items():
