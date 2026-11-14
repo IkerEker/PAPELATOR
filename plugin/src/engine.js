@@ -1217,7 +1217,7 @@ async function renderFinal(opts) {
     let b2 = 0, bn = 0;
     for (let y = 1; y < h - 1; y += 3) for (let x = 1; x < w - 1; x += 3) { const o = y * w + x; const a = Hb[o + 1] - Hb[o - 1], c = Hb[o + w] - Hb[o - w]; b2 += a * a + c * c; bn++; }
     gbInv = 1 / (Math.sqrt(b2 / Math.max(1, bn)) || 1e-4);
-    dispB = paper.dispMm * ppm * Math.pow(scale, 0.8) * clamp(def(st.grain, 1), 0, 4) * Math.pow(kk, 0.8) * 0.5;
+    dispB = paper.dispMm * ppm * Math.pow(scale, 0.8) * clamp(def(st.grain, 1), 0, 4) * Math.pow(kk, 0.8) * 0.3;
   }
   const methK = { offset: 1, tipografia: 0.75, inkjet: 1.25, laser: 0.4 }[method] || 1;
   // desplazamiento (px): papel liso casi nada, rugoso e irregular bastante; crece con la escala del grano
@@ -1268,6 +1268,14 @@ async function renderFinal(opts) {
   };
   const cA = [0, 0, 0, 0], cB2 = [0, 0, 0, 0];
   const dinv = 1 / (S.dstd || 0.01);
+  // superficies: lo que se pinta en una pared es pintura que tapa (si no, en un ladrillo oscuro no se lee nada);
+  // tapa más cuanto más oscura es la superficie, y la textura sigue viéndose como luces y sombras
+  let opq = 0, sL = 1;
+  if (paper.material === 'surface' && inkMode === 'multiply') {
+    let sm = 0, n = 0; for (let o = 0; o < N; o += 53) { const q = o * 4; sm += alb[q] * 0.2126 + alb[q + 1] * 0.7152 + alb[q + 2] * 0.0722; n++; }
+    sL = Math.max(8, sm / Math.max(1, n));
+    opq = clamp(0.45 + 0.5 * (1 - sL / 235), 0.45, 0.9);
+  }
   // ---- pliegues: normales (sombreado con la luz de la toma), desplazamiento de la tinta y desgaste de las aristas
   const FD = B.fold, fq = [0, 0, 0, 0];
   const fShK = FOLD_LIGHT[st.luz] || FOLD_LIGHT.ninguna;
@@ -1363,7 +1371,14 @@ async function renderFinal(opts) {
       }
       if (gloss && method !== 'laser') cover *= 1 - gloss[o] / 255 * 0.1;
       let r, g, b;
-      if (inkMode === 'multiply') { r = pr * (1 - a0 * cover); g = pg * (1 - a1 * cover); b = pb * (1 - a2 * cover); }
+      if (inkMode === 'multiply') {
+        r = pr * (1 - a0 * cover); g = pg * (1 - a1 * cover); b = pb * (1 - a2 * cover);
+        if (opq > 0 && al > 0.003) {
+          const tm = Math.pow(clamp((pr * 0.2126 + pg * 0.7152 + pb * 0.0722) / sL, 0.45, 1.5), 0.55);
+          const t = opq * al * cover * Math.min(1, (a0 + a1 + a2) / Math.max(0.05, 3 * al) * 3);
+          r = lerp(r, cA[0] * 255 * tm, t); g = lerp(g, cA[1] * 255 * tm, t); b = lerp(b, cA[2] * 255 * tm, t);
+        }
+      }
       else { const t = al * cover, dd = 1 + D[o] * 0.6; r = lerp(pr, cA[0] * 255 * dd, t); g = lerp(pg, cA[1] * 255 * dd, t); b = lerp(pb, cA[2] * 255 * dd, t); }
       // lo que se vería sin efectos (para intensidades bajas)
       const o0 = (y * w + x) * comps, al0 = comps === 4 ? art[o0 + 3] / 255 : 1;
