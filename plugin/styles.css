@@ -139,3 +139,11 @@ sp-slider { width: 100%; margin-top: -2px; }
 .iconbtn.wide { width: auto; padding: 0 9px; margin-right: 6px; font-size: 11px; }
 .hint b { font-weight: bold; opacity: 1; }
 @media (max-width: 300px) { .sw .lbl { font-size: 9px; } .sechead .sum { max-width: 42%; } }
+
+/* familia de fondos: Papel · Superficies · Pantallas */
+.seg { display: flex; flex-direction: row; padding: 2px; margin-bottom: 7px; border-radius: 7px; background-color: rgba(128,128,128,0.16); }
+.segb { flex: 1 1 0; min-width: 0; text-align: center; padding: 4px 2px; border-radius: 5px; cursor: pointer; font-size: 11px; opacity: 0.75;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.segb:hover { opacity: 1; }
+.segb.on { opacity: 1; font-weight: bold; color: #1f1d1a; background-color: #e2b45a; }
+#s-groups .chips.small { margin-bottom: 4px; }

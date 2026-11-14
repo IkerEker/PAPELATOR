@@ -64,7 +64,19 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   $('s-apply').fire('click'); await sleep(2500);
   console.log('tras fusionar/pintar el resultado:', $('s-status').textContent.slice(0, 40), '|', doc.layers.map(l => l.name).join(' | '));
   // pantalla: se ocultan las secciones de papel y se filtran luz y calidad
-  const gch = $('s-groups').querySelectorAll('.chip'); gch[gch.length - 1].fire('click');
+  // superficies: ladrillo no se pinta (sin color), gotelé sí; nunca pliegues ni calco
+  const seg = () => $('s-groups').querySelectorAll('.segb');
+  seg()[1].fire('click'); await sleep(200);
+  const subs = () => $('s-groups').querySelectorAll('.chip');
+  console.log('superficies: subgrupos', subs().length, subs().map ? subs().map(c => c.textContent).join(',') : '');
+  const pick = async (label) => { const c = Array.from(subs()).filter(x => x.textContent.indexOf(label) >= 0)[0]; if (c) c.fire('click'); await sleep(200); };
+  subs()[1].fire('click'); await sleep(200);
+  const sws = $('s-swatches').querySelectorAll('.sw'); sws[0].fire('click'); await sleep(300);
+  const show = () => ['color', 'estado', 'pliegue', 'calco'].map(k => k + ':' + $('s-sec-' + k).style.display).join(' ') + ' relieve:' + $('s-reliefwrap').style.display + ' estados:' + $('s-estado').querySelectorAll('.chip').length;
+  console.log(' ', JSON.parse(store['papelator3.state']).paper, show());
+  const goteleIdx = 4;
+  console.log('  gotelé swatch', goteleIdx); if (goteleIdx >= 0) { sws[goteleIdx].fire('click'); await sleep(300); console.log(' ', JSON.parse(store['papelator3.state']).paper, show()); }
+  seg()[seg().length - 1].fire('click'); await sleep(200);
   $('s-swatches').querySelectorAll('.sw')[1].fire('click'); await sleep(300);
   console.log('pantalla:', JSON.parse(store['papelator3.state']).paper, 'pliegues', $('s-sec-pliegue').style.display, 'estado', $('s-sec-estado').style.display,
     'opciones', $('s-screenopts').style.display, 'luces', $('s-luz').querySelectorAll('.chip').length, 'calidades', $('s-calidad').querySelectorAll('.chip').length);

@@ -35,6 +35,22 @@ reflejos reales de la textura, el tinte del vidrio, la malla del armado y (en Av
 **Maderas y cartones**: madera de abedul, OSB, aglomerado, cartón de caja, cartón kraft y cartón ondulado. No se
 doblan ni transparentan y no cogen imperfecciones propias del papel (foxing, fibras, hendiduras de escritura…).
 
+**Dónde está cada fondo** (sección 1): arriba se elige la familia y debajo el grupo.
+- **Papel** → Oficina y escuela · Bellas artes · Rústicos · Translúcidos
+- **Superficies** → Madera y cartón · Paredes · Suelos y piedra · Metal
+- **Pantallas** → móviles, monitores, televisores, LED, libro electrónico
+
+**Superficies construidas** (16 tipos, 71 texturas tileables; ⟳ pasa a la siguiente):
+- *Paredes*: ladrillo, bloque de hormigón, sillería, azulejo, gotelé, pared lisa, pintura con grumos, yeso veneciano.
+- *Suelos y piedra*: hormigón, hormigón encofrado, adoquín, terrazo, granito, asfalto.
+- *Metal*: acero cepillado, metal oxidado.
+
+Cada una tiene su **relieve**: la tinta se desplaza y se rompe en las juntas, los grumos y los poros, y la luz de la
+foto lo sombrea. Slider **Relieve** para más o menos. Sólo se pueden **pintar** las que en la vida real se pintan
+(gotelé, pared lisa, pintura, yeso, azulejo, bloque de hormigón); ladrillo, piedra, hormigón visto, asfalto y metal
+guardan su color y la sección de color desaparece. En ninguna hay pliegues ni calco, y de estado sólo Nuevo, Usado,
+Con manchas y Humedad (sin foxing, grapas, escritura ni nada propio del papel).
+
 **Intensidad del filtro**: 0 % deja la lámina prácticamente igual; 50 % (por defecto) es sutil; 100 % es muy marcado.
 
 ## Estructura
@@ -50,6 +66,7 @@ tools/                scripts que procesan las fuentes y generan los assets del 
   build_extras.py     rugosidad y tamaño de grano de cada papel, manchas de envejecimiento a hoja completa
   build_imperf2.py    imperfecciones sutiles: grapas, agujeros de grapa, clip, pinza, medias lunas, arruguitas
   build_boards.py     maderas (abedul, OSB, aglomerado) y cartones (de caja, kraft) desde NUEVAS_NUEVAS/
+  build_surfaces.py   superficies de NUEVAS SUPERFICIES/: aparejo recortado a su periodo, colorable, relieve (dispMm)
   build_overlays.py   Sobreponer: vidrios y plásticos de SOBREPONER/ -> reflejos + mapa de desplazamiento (+ malla)
   build_rotulador.py  calco de rotulador: notas, etiqueta y lista escritas a mano (cursiva) con charcos de tinta
   build_folds.py      pliegues y arrugas: sombreado real de cada foto (fold_sources.json), agrupado por nº de pliegues
@@ -71,6 +88,7 @@ python3 build_calco.py
 python3 build_imperf2.py
 python3 build_folds.py       # ~2 min
 python3 build_boards.py      # maderas y cartones
+python3 build_surfaces.py    # paredes, suelos, piedra y metal (PAPELATOR_TMP=carpeta temporal)
 python3 build_overlays.py    # vidrios y plásticos (~10 min)
 python3 build_grids.py && python3 papers_fix.py
 python3 imperf_tune.py       # una sola vez, sobre los mapas originales

@@ -15,7 +15,7 @@ from common import ASSETS, REPO
 
 SCR = os.environ.get('PAPELATOR_TMP', '/tmp')
 N = 'NUEVAS_NUEVAS/'
-G = 'Maderas y cartones'
+G = 'Madera y cartón'
 BOARDS = [
   ('madera', 'Madera de abedul', G, N + 'Textura de madera de abedul claro.png', 'color', {'mm': 300, 'chroma': 4}, 'wood'),
   ('madera_vetas', 'Madera de vetas onduladas', G, N + 'Textura de madera clara con vetas onduladas.png', 'color', {'mm': 300, 'chroma': 4}, 'wood'),

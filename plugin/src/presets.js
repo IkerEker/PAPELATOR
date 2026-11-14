@@ -14,6 +14,19 @@ const COLORS = [
 ];
 
 // Tipos de papel (lo que se elige). Cada tipo agrupa sus variantes reales; ⟳ pasa a la siguiente.
+// Organización: tres familias (Papel · Superficies · Pantallas) y dentro, grupos; cada tipo agrupa variantes (⟳).
+const FAMILIAS_PAPEL = [
+  { id: 'papel', name: 'Papel', groups: ['Oficina y escuela', 'Bellas artes', 'Rústicos', 'Translúcidos'] },
+  { id: 'superficies', name: 'Superficies', groups: ['Madera y cartón', 'Paredes', 'Suelos y piedra', 'Metal'] },
+  { id: 'pantallas', name: 'Pantallas', groups: ['Pantallas'] }
+];
+// Qué estados tienen sentido en cada material (en los demás, desaparecen)
+const ESTADOS_POR_MATERIAL = {
+  paper: null,
+  carton: ['nuevo', 'usado', 'oficina', 'manchas', 'humedad'],
+  wood: ['nuevo', 'usado', 'manchas', 'humedad'],
+  surface: ['nuevo', 'usado', 'manchas', 'humedad']
+};
 const PAPER_TYPES = [
   { id: 'folio', name: 'Folio', group: 'Oficina y escuela', papers: ['folio', 'papel_fino', 'bristol'] },
   { id: 'periodico', name: 'Periódico', group: 'Oficina y escuela', papers: ['periodico', 'periodico_gris'] },
@@ -34,12 +47,28 @@ const PAPER_TYPES = [
   { id: 'hecho_mano', name: 'Hecho a mano', group: 'Rústicos', papers: ['hecho_mano', 'hecho_mano_fibroso', 'hecho_mano_grumos'] },
   { id: 'pergamino', name: 'Pergamino', group: 'Rústicos', papers: ['pergamino', 'pergamino_oscuro'] },
 
-  { id: 'madera', name: 'Madera', group: 'Maderas y cartones', papers: ['madera', 'madera_vetas', 'madera_clara', 'madera_nudos'] },
-  { id: 'osb', name: 'OSB', group: 'Maderas y cartones', papers: ['osb', 'osb_realista', 'osb_prensado', 'osb_detalle', 'osb_detalle2', 'osb_fino', 'osb_viejo'] },
-  { id: 'aglomerado', name: 'Aglomerado', group: 'Maderas y cartones', papers: ['aglomerado', 'aglomerado_marron', 'aglomerado_granular', 'aglomerado_uniforme', 'particulas', 'virutas'] },
-  { id: 'caja', name: 'Cartón de caja', group: 'Maderas y cartones', papers: ['caja', 'caja_4', 'caja_kraft_2', 'caja_kraft_3', 'caja_kraft_4', 'caja_reciclado', 'caja_3', 'caja_kraft', 'caja_kraft_5'] },
-  { id: 'carton_kraft', name: 'Cartón kraft', group: 'Maderas y cartones', papers: ['carton_kraft', 'carton_kraft_2', 'carton_kraft_3'] },
-  { id: 'carton', name: 'Cartón ondulado', group: 'Maderas y cartones', papers: ['corrugado', 'corrugado_fino'] },
+  { id: 'madera', name: 'Madera', group: 'Madera y cartón', papers: ['madera', 'madera_vetas', 'madera_clara', 'madera_nudos'] },
+  { id: 'osb', name: 'OSB', group: 'Madera y cartón', papers: ['osb', 'osb_realista', 'osb_prensado', 'osb_detalle', 'osb_detalle2', 'osb_fino', 'osb_viejo'] },
+  { id: 'aglomerado', name: 'Aglomerado', group: 'Madera y cartón', papers: ['aglomerado', 'aglomerado_marron', 'aglomerado_granular', 'aglomerado_uniforme', 'particulas', 'virutas'] },
+  { id: 'caja', name: 'Cartón de caja', group: 'Madera y cartón', papers: ['caja', 'caja_4', 'caja_kraft_2', 'caja_kraft_3', 'caja_kraft_4', 'caja_reciclado', 'caja_3', 'caja_kraft', 'caja_kraft_5'] },
+  { id: 'carton_kraft', name: 'Cartón kraft', group: 'Madera y cartón', papers: ['carton_kraft', 'carton_kraft_2', 'carton_kraft_3'] },
+  { id: 'carton', name: 'Cartón ondulado', group: 'Madera y cartón', papers: ['corrugado', 'corrugado_fino'] },
+  { id: 'sup_ladrillo', name: 'Ladrillo', group: 'Paredes', papers: ['ladrillo_1', 'ladrillo_2', 'ladrillo_3', 'ladrillo_4', 'ladrillo_5'] },
+  { id: 'sup_bloques', name: 'Bloque de hormigón', group: 'Paredes', papers: ['bloques_1', 'bloques_2', 'bloques_3', 'bloques_4'] },
+  { id: 'sup_sillar', name: 'Sillería', group: 'Paredes', papers: ['sillar_1', 'sillar_2', 'sillar_3', 'sillar_4'] },
+  { id: 'sup_azulejo', name: 'Azulejo', group: 'Paredes', papers: ['azulejo_1', 'azulejo_2', 'azulejo_3', 'azulejo_4'] },
+  { id: 'sup_gotele', name: 'Gotelé', group: 'Paredes', papers: ['gotele_1', 'gotele_2', 'gotele_3', 'gotele_4'] },
+  { id: 'sup_pared_lisa', name: 'Pared lisa', group: 'Paredes', papers: ['pared_lisa_1', 'pared_lisa_2', 'pared_lisa_3', 'pared_lisa_4', 'pared_lisa_5'] },
+  { id: 'sup_pintura', name: 'Pintura con grumos', group: 'Paredes', papers: ['pintura_1', 'pintura_2', 'pintura_3', 'pintura_4', 'pintura_5'] },
+  { id: 'sup_yeso', name: 'Yeso veneciano', group: 'Paredes', papers: ['yeso_1', 'yeso_2', 'yeso_3', 'yeso_4'] },
+  { id: 'sup_hormigon', name: 'Hormigón', group: 'Suelos y piedra', papers: ['hormigon_1', 'hormigon_2', 'hormigon_3', 'hormigon_4', 'hormigon_5', 'hormigon_6', 'hormigon_7', 'hormigon_8'] },
+  { id: 'sup_encofrado', name: 'Hormigón encofrado', group: 'Suelos y piedra', papers: ['encofrado_1', 'encofrado_2', 'encofrado_3', 'encofrado_4'] },
+  { id: 'sup_adoquin', name: 'Adoquín', group: 'Suelos y piedra', papers: ['adoquin_1', 'adoquin_2', 'adoquin_3', 'adoquin_4'] },
+  { id: 'sup_terrazo', name: 'Terrazo', group: 'Suelos y piedra', papers: ['terrazo_1', 'terrazo_2', 'terrazo_3', 'terrazo_4'] },
+  { id: 'sup_granito', name: 'Granito', group: 'Suelos y piedra', papers: ['granito_1', 'granito_2', 'granito_3', 'granito_4'] },
+  { id: 'sup_asfalto', name: 'Asfalto', group: 'Suelos y piedra', papers: ['asfalto_1', 'asfalto_2', 'asfalto_3', 'asfalto_4'] },
+  { id: 'sup_acero', name: 'Acero cepillado', group: 'Metal', papers: ['acero_1', 'acero_2', 'acero_3', 'acero_4'] },
+  { id: 'sup_oxido', name: 'Metal oxidado', group: 'Metal', papers: ['oxido_1', 'oxido_2', 'oxido_3', 'oxido_4'] },
   { id: 'pantalla_oled', name: 'Móvil OLED', group: 'Pantallas', papers: ['pantalla_oled'] },
   { id: 'pantalla_lcd', name: 'Monitor LCD', group: 'Pantallas', papers: ['pantalla_lcd'] },
   { id: 'pantalla_vieja', name: 'Portátil viejo', group: 'Pantallas', papers: ['pantalla_vieja'] },
@@ -220,4 +249,4 @@ const DEFAULT_STATE = {
   hideOriginals: false
 };
 
-module.exports = { COLORS, SOBRES, PAPER_TYPES, ESTADO_FAMILIAS, CALCO_FAMILIAS, LUZ_FAMILIAS, CALIDAD_FAMILIAS, PLIEGUE_ALIAS, ESTADOS, PLIEGUES, CALCOS, IMPRESIONES, LUCES, CALIDADES, DEFAULT_STATE };
+module.exports = { FAMILIAS_PAPEL, ESTADOS_POR_MATERIAL, COLORS, SOBRES, PAPER_TYPES, ESTADO_FAMILIAS, CALCO_FAMILIAS, LUZ_FAMILIAS, CALIDAD_FAMILIAS, PLIEGUE_ALIAS, ESTADOS, PLIEGUES, CALCOS, IMPRESIONES, LUCES, CALIDADES, DEFAULT_STATE };

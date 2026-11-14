@@ -22,11 +22,15 @@
 
     <div id="s-sec-papel" class="sec">
       <div class="sechead"><span class="num">1</span><span class="ttl">Papel</span><span class="mini" id="s-r-papel" title="Otra versión">⟳</span></div>
-      <div class="chips small" id="s-groups"></div>
+      <div id="s-groups"></div>
       <div class="swatches" id="s-swatches"></div>
       <div id="s-scalewrap">
         <div class="rl"><span>Escala de la textura</span><span class="rv" id="s-scaleval"></span></div>
         <sp-slider id="s-scale" min="5" max="400" step="1" value="100"></sp-slider>
+      </div>
+      <div id="s-reliefwrap">
+        <div class="rl"><span>Relieve (la tinta se rompe en juntas y grumos)</span><span class="rv" id="s-reliefval"></span></div>
+        <sp-slider id="s-relief" min="0" max="300" step="5" value="100"></sp-slider>
       </div>
       <div id="s-screenopts">
         <div class="rl"><span>Tamaño del píxel</span><span class="rv" id="s-zoomval"></span></div>

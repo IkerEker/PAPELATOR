@@ -137,8 +137,10 @@ async function genPaper(S, st, assets, B) {
   const texK = def(st.texture, 1) * Math.pow(clamp(k, 0, 2), 0.6) * def(st._texLight, 1);
   S.texK = texK;
   // color del papel
-  let C = hexToRgb(st.color);
-  if (!C) { const c = P.COLORS.filter(x => x.id === st.color)[0]; C = c && c.hex ? hexToRgb(c.hex) : null; }
+  // lo que tiene color propio (ladrillo, piedra, metal, madera, cartón, pantalla) no se pinta aunque quede un color elegido
+  const fixedColor = paper.material && paper.material !== 'paper' && !paper.colorable;
+  let C = fixedColor ? null : hexToRgb(st.color);
+  if (!C && !fixedColor) { const c = P.COLORS.filter(x => x.id === st.color)[0]; C = c && c.hex ? hexToRgb(c.hex) : null; }
   const original = !C;
   if (!C) C = paper.color.slice();
   const Lmean = (paper.color[0] * 0.2126 + paper.color[1] * 0.7152 + paper.color[2] * 0.0722);
@@ -231,7 +233,10 @@ function fbm2(x, y, seed) { return vnoise(x, y, seed) * 0.57 + vnoise(x * 2.07, 
 const MATERIAL_NO = {
   wood: { fibras: 1, nodulos: 1, descamacion: 1, foxing: 1, escritura: 1, mecano: 1, sello_seco: 1, goma: 1, matasellos: 1, manchado: 1,
     clip_huella: 1, pinza: 1, arruguita: 1, media_luna: 1, grapa_marca: 1, cockle: 1 },
-  carton: { fibras: 1, nodulos: 1, escritura: 1, mecano: 1, goma: 1, arruguita: 1 }
+  carton: { fibras: 1, nodulos: 1, escritura: 1, mecano: 1, goma: 1, arruguita: 1 },
+  // paredes, suelos, metal: nada propio del papel; sí manchas, agua, grasa, barro, polvo, quemaduras, cera, cinta
+  surface: { fibras: 1, nodulos: 1, descamacion: 1, foxing: 1, escritura: 1, mecano: 1, sello_seco: 1, goma: 1, matasellos: 1, manchado: 1,
+    clip_huella: 1, pinza: 1, arruguita: 1, media_luna: 1, grapa_marca: 1, grapa_agujero: 1, cockle: 1, manoseo: 1, huella_tinta: 1, grafito: 1, sangrado: 1 }
 };
 function materialOf(st) { const p = paperById(st.paper); return (p && p.material) || 'paper'; }
 function allowed(st, cid) { const no = MATERIAL_NO[materialOf(st)]; return !no || !no[cid]; }
@@ -460,6 +465,7 @@ async function genAging(S, st, assets, B, paper, counts) {
 // F = altura en mm: ondulación por humedad alineada con la fibra + leve curvatura de la hoja
 function genShape(S, st, B, counts) {
   const { w, h, ppm, N } = S;
+  const mat = materialOf(st); if (mat === 'wood' || mat === 'surface') return;   // un tablero o una pared no se curvan
   const kk = clamp(S.k, 0, 2);
   const cock = allowed(st, 'cockle') ? (def(counts.cockle, 0) + clamp(def(st.edad, 0), 0, 1) * 0.25) * kk : 0;
   const r = rng(S.seedE * 17 + 3);
@@ -1149,6 +1155,17 @@ async function renderFinal(opts) {
   let g2 = 0, gn = 0;
   for (let y = 1; y < h - 1; y += 3) for (let x = 1; x < w - 1; x += 3) { const o = y * w + x; const gx = Hs[o + 1] - Hs[o - 1], gy = Hs[o + w] - Hs[o - w]; g2 += gx * gx + gy * gy; gn++; }
   const ginv = 1 / (Math.sqrt(g2 / Math.max(1, gn)) || 1e-4);
+  // superficies construidas: relieve grande (juntas, grumos, poros) que rompe y desvía la tinta, y que la luz revela
+  let Hb = null, gbInv = 1, dispB = 0, rkB = 0;
+  if (paper.dispMm) {
+    Hb = new Float32Array(N);
+    for (let o = 0; o < N; o++) Hb[o] = D[o] * tk;
+    gaussBlur(Hb, w, h, Math.max(0.8, def(paper.heightMm, 0.6) * ppm * scale), tmp);
+    let b2 = 0, bn = 0;
+    for (let y = 1; y < h - 1; y += 3) for (let x = 1; x < w - 1; x += 3) { const o = y * w + x; const a = Hb[o + 1] - Hb[o - 1], c = Hb[o + w] - Hb[o - w]; b2 += a * a + c * c; bn++; }
+    gbInv = 1 / (Math.sqrt(b2 / Math.max(1, bn)) || 1e-4);
+    dispB = paper.dispMm * ppm * Math.pow(scale, 0.8) * clamp(def(st.grain, 1), 0, 4) * Math.pow(kk, 0.8) * 0.5;
+  }
   const methK = { offset: 1, tipografia: 0.75, inkjet: 1.25, laser: 0.4 }[method] || 1;
   // desplazamiento (px): papel liso casi nada, rugoso e irregular bastante; crece con la escala del grano
   const disp = ppm * 0.045 * Math.min(reliefK, 2.2) * Math.pow(scale, 0.75) * clamp(def(st.grain, 1), 0, 4) * Math.pow(kk, 0.8) * methK;
@@ -1186,6 +1203,7 @@ async function renderFinal(opts) {
   const inkMode = st.inkMode === 'normal' ? 'normal' : 'multiply';
   const [Lx, Ly, Lp] = lightDir(st.luz);
   const rk = Lp.rk * kk * 0.05 * Math.sqrt(reliefK), fk = Lp.fk * kk * 0.9;
+  if (Hb) rkB = (0.025 + Lp.rk * 0.06) * kk * Math.min(2, paper.dispMm);
   const sampleArt = (sx, sy, outc) => {
     sx = sx < 0 ? 0 : sx > w - 1.001 ? w - 1.001 : sx; sy = sy < 0 ? 0 : sy > h - 1.001 ? h - 1.001 : sy;
     const ix = sx | 0, iy = sy | 0, fx = sx - ix, fy = sy - iy;
@@ -1217,6 +1235,11 @@ async function renderFinal(opts) {
       let sx = x - gx * disp, sy = y - gy * disp;
       if (camK) { const f = F[o]; sx -= f * (x - cxp) * camK / ppm; sy -= f * (y - cyp) * camK / ppm; }
       if (FD) { FD.sample(x, y, fq); sx -= fq[1] * fDisp; sy -= fq[1] * fDisp * 0.65; }
+      let gbx = 0, gby = 0;
+      if (Hb) {
+        gbx = (Hb[o + 1] - Hb[o - 1]) * gbInv; gby = (Hb[o + w] - Hb[o - w]) * gbInv;
+        sx -= clamp(gbx, -3, 3) * dispB; sy -= clamp(gby, -3, 3) * dispB;
+      }
       sampleArt(sx, sy, cA);
       if (feather > 0) {
         // la tinta líquida se abre siguiendo las fibras
@@ -1296,6 +1319,7 @@ async function renderFinal(opts) {
       // la luz de la foto revela el relieve del grano y la forma de la hoja
       let shade = 1;
       if (rk) shade += clamp(-(gx * Lx + gy * Ly) * rk, -0.12, 0.12);
+      if (Hb) shade += clamp(-(gbx * Lx + gby * Ly) * rkB, -0.25, 0.2);
       if (fk) shade += clamp(-((F[o + 1] - F[o - 1]) * Lx + (F[o + w] - F[o - w]) * Ly) * 0.5 * ppm * fk * 0.06, -0.14, 0.14);
       if (Cb && rk) shade += clamp(((Cb[o + 1] - Cb[o - 1]) * Lx + (Cb[o + w] - Cb[o - w]) * Ly) * 0.06 * kk, -0.05, 0.05);
       if (FD) shade *= clamp(1 + fq[0] * fShK, 0.3, 1.6);
@@ -1853,4 +1877,4 @@ function pxPerMm(w, h, resolution) {
   return Math.max(w, h) / 297;
 }
 
-module.exports = { renderPaper, renderFinal, pxPerMm, catalogs, presets: P, _cache: cache };
+module.exports = { renderPaper, renderFinal, pxPerMm, catalogs, presets: P, MATERIAL_NO, _cache: cache };

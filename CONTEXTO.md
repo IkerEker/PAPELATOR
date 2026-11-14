@@ -2,7 +2,7 @@
 
 > Pega o adjunta este archivo al empezar el chat nuevo. Todo el proyecto está en GitHub:
 > **https://github.com/IkerEker/PAPELATOR** (rama `main`, último commit «Una sola ventana con dos pestañas: Presets y Avanzado»).
-> Versión actual del plugin: **3.12.1** (`plugin/manifest.json`). Instalable: `dist/PAPELATOR.ccx`.
+> Versión actual del plugin: **3.13.0** (`plugin/manifest.json`). Instalable: `dist/PAPELATOR.ccx`.
 
 ---
 
@@ -104,6 +104,8 @@ Semillas por sección: `seed`, `seedPaper`, `seedEstado`, `seedCalco`, `seedFoto
 
 ## 5. Catálogo actual
 
+**Superficies** (71 texturas en 16 tipos, ver 6i): Paredes · Suelos y piedra · Metal. **Fondos** de madera y cartón (29).
+
 **Papeles** (46 texturas en 21 tipos; ⟳ recorre las variantes):
 - *Oficina y escuela*: Folio (folio, papel_fino, bristol), Periódico (periodico, periodico_gris), Rayado 8 mm,
   Cuadriculado 5 mm (cuadricula, cuadricula_clara), Milimetrado (azul, naranja, azul y rojo), Punteado 5 mm,
@@ -204,6 +206,33 @@ escaner_oficina, movil, movil_antiguo, fotocopia, analogica.
   (Ctrl/Cmd+E) o pintado, se trata como parte de tu imagen y el nuevo se genera encima, en otra capa. El resultado
   queda seleccionado (Ctrl/Cmd+E lo fusiona con la de debajo).
 
+## 6i. v3.13 — superficies construidas y organización de fondos
+Pedido: analizar todas las fotos de `NUEVAS SUPERFICIES/` (ladrillos, cemento, hormigón, suelos, metal…), hacerlas
+tileables, sacar su mapa de desplazamiento (que se note MUCHÍSIMO), organizar todos los fondos de forma deducible y
+que las opciones que no tienen sentido en cada material desaparezcan (gotelé se puede pintar; ladrillo naranja no).
+- `tools/build_surfaces.py`: tabla `TYPES` tid → (grupo, colorable, aparejo, docMm, dispMm, heightMm, ficheros).
+  Con aparejo (ladrillo, bloques, sillar, azulejo, encofrado, adoquín) recorta la foto a un nº entero de piezas
+  (periodo por autocorrelación) antes de `BP.process`, así las juntas casan y `mix:'none'` (no se mezclan dos
+  lecturas). Colorables → `kind:'neutral'` (sólo relieve, el color lo pones tú). 71 tiles: `ladrillo_1..5`,
+  `bloques_1..4`, `sillar_1..4`, `azulejo_1..4`, `gotele_1..4`, `pared_lisa_1..5`, `pintura_1..5`, `yeso_1..4`,
+  `hormigon_1..8`, `encofrado_1..4`, `adoquin_1..4`, `terrazo_1..4`, `granito_1..4`, `asfalto_1..4`, `acero_1..4`,
+  `oxido_1..4`. En papers.json: `material:'surface'`, `surface`, `colorable`, `dispMm`, `heightMm`.
+  Ejecutar: `PAPELATOR_TMP=/tmp/sup python3 build_surfaces.py [tid…]` y luego `node swatches.js <ids>`.
+- Motor: si el papel tiene `dispMm`, en `renderFinal` se hace un mapa de alturas del detalle (blur heightMm), la
+  tinta se desplaza por su gradiente (`dispB` ∝ dispMm × grain) y se sombrea con la luz (`rkB`). Sin curvatura de
+  hoja (`genShape`) en superficies. `MATERIAL_NO.surface` quita todo lo propio del papel. Lo que no es papel ni
+  `colorable` ignora `st.color` aunque quede uno elegido.
+- Valores ajustados tras probar: gotelé 0.75/0.6, pintura 0.9/0.7, asfalto 0.8/0.5, granito 0.3/0.4 (antes la
+  tinta quedaba ilegible, tipo «licuar»); ladrillo 1.7, sillería 1.9, adoquín 1.9 (la tinta se hunde en la junta).
+- Organización (presets.js `FAMILIAS_PAPEL`): control segmentado **Papel / Superficies / Pantallas** y debajo los
+  grupos (Papel: Oficina y escuela, Bellas artes, Rústicos, Translúcidos · Superficies: Madera y cartón, Paredes,
+  Suelos y piedra, Metal · Pantallas). «Maderas y cartones» pasó a llamarse «Madera y cartón».
+- Qué aparece por material (`usable()`, `ESTADOS_POR_MATERIAL`, `catUsable()` en main.js):
+  superficie → sin pliegues ni calco; color sólo si colorable (título «Color de la pintura»); estado Nuevo/Usado/
+  Con manchas/Humedad; slider **Relieve** (= `state.grain`) en Presets; en Avanzado el preset de estado se filtra,
+  las imperfecciones imposibles se ocultan y «Deformación por el grano» pasa a «Relieve de la superficie».
+  El título de la sección 1 dice Papel / Fondo / Superficie / Pantalla.
+
 ## 7. Pendiente / ideas que no se han hecho
 - Probar todo dentro de Photoshop real (las pruebas son en Node + simulación del DOM de UXP; el usuario es quien lo
   prueba en Photoshop).
@@ -234,7 +263,7 @@ node run2.js '{"final":1,"art":"art.raw","out":"/ruta/salida.png","state":{"pape
 node batch.js trabajos.json      # muchas configuraciones en un proceso
 node smoke2.js                   # simula la UI de UXP + Photoshop (debe acabar en «Aplicado en …»)
 node layout.js                   # capturas de las pestañas (lay1.png / lay2.png)
-node swatches.js id1 id2         # regenera miniaturas de papeles
+node swatches.js id1 id2         # regenera miniaturas (superficies: a escala ~45 % del tile)
 ```
 (`art.raw` = RGBA 1240×1754; `python3 mkart.py W H` genera otro.)
 

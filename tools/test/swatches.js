@@ -12,7 +12,9 @@ function png(file, w, h, rgba) { // RGB
 }
 (async () => {
   for (const id of process.argv.slice(2)) {
-    const res = await E.renderPaper({ w: 112, h: 112, ppm: 3.5, state: { paper: id, seed: 5, intensity: 60 }, assets });
+    const P0 = require('../../plugin/assets/papers.json').filter(p => p.id === id)[0];
+    const ppm = P0 && P0.material === 'surface' ? 112 / (P0.tileMm[0] * 0.45) : 3.5;
+    const res = await E.renderPaper({ w: 112, h: 112, ppm, state: { paper: id, seed: 5, intensity: 60 }, assets });
     png(path.resolve(__dirname, '../../plugin/assets/swatches/' + id + '.png'), 112, 112, res.rgba);
     console.log(id);
   }
