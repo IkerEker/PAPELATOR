@@ -23,11 +23,11 @@ let lid = 10; const W = 300, H = 420;
 function layer(name) { return { id: lid++, name, visible: true, isBackgroundLayer: false, async move(t, p) { const L = doc.layers; L.splice(L.indexOf(this), 1); let i = L.indexOf(t); if (p === 'placeAfter') i++; L.splice(i, 0, this); }, async delete() { doc.layers.splice(doc.layers.indexOf(this), 1); } }; }
 const bg = layer('Fondo'); bg.isBackgroundLayer = true;
 const doc = { id: 1, width: W, height: H, resolution: 72, mode: 'RGBColorMode', bitsPerChannel: 'bitDepth8', layers: [layer('Texto'), bg], async createPixelLayer(o) { const l = layer(o.name); this.layers.unshift(l); return l; }, activeLayers: [] };
-const puts = [];
+const puts = []; const layerData = {};
 const ps = { app: { activeDocument: doc }, constants: { ElementPlacement: { PLACEAFTER: 'placeAfter', PLACEBEFORE: 'placeBefore' } },
   core: { async executeAsModal(fn) { return fn({ hostControl: { async suspendHistory() { return 5; }, async resumeHistory() {} }, reportProgress() {}, isCancelled: false }); } },
-  imaging: { async createImageDataFromBuffer(b, o) { if (b.length !== o.width * o.height * o.components) throw new Error('size'); return { dispose() {} }; }, async encodeImageData() { return 'QUJD'; }, async putPixels(o) { puts.push(o); },
-    async getPixels(o) { const tw = o.targetSize ? o.targetSize.width : W; const th = o.targetSize ? Math.round(H * tw / W) : H; const d = new Uint8Array(tw * th * 4); for (let i = 0; i < d.length; i += 4) { d[i] = d[i + 1] = d[i + 2] = (i / 4 % tw < tw / 2) ? 20 : 255; d[i + 3] = 255; } return { imageData: { width: tw, height: th, components: 4, async getData() { return d; }, dispose() {} }, sourceBounds: { left: 0, top: 0 } }; } },
+  imaging: { async createImageDataFromBuffer(b, o) { if (b.length !== o.width * o.height * o.components) throw new Error('size'); return { buf: new Uint8Array(b), w: o.width, h: o.height, c: o.components, dispose() {} }; }, async encodeImageData() { return 'QUJD'; }, async putPixels(o) { puts.push(o); layerData[o.layerID] = o.imageData; },
+    async getPixels(o) { if (o.layerID) { const L = layerData[o.layerID]; if (!L) throw new Error('vacía'); return { imageData: { width: L.w, height: L.h, components: L.c, async getData() { return L.buf; }, dispose() {} }, sourceBounds: { left: 0, top: 0 } }; } const tw = o.targetSize ? o.targetSize.width : W; const th = o.targetSize ? Math.round(H * tw / W) : H; const d = new Uint8Array(tw * th * 4); for (let i = 0; i < d.length; i += 4) { d[i] = d[i + 1] = d[i + 2] = (i / 4 % tw < tw / 2) ? 20 : 255; d[i + 3] = 255; } return { imageData: { width: tw, height: th, components: 4, async getData() { return d; }, dispose() {} }, sourceBounds: { left: 0, top: 0 } }; } },
   action: { async batchPlay() {}, addNotificationListener() {} } };
 function fsEntry(p) { return { async getEntry(n) { return fsEntry(path.join(p, n)); }, async read(o) { return o.format === 'utf8' ? fs.readFileSync(p, 'utf8') : new Uint8Array(fs.readFileSync(p)).buffer; } }; }
 let panels = null;
@@ -42,7 +42,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   console.log('swatches', $('s-swatches').querySelectorAll('.sw').length, 'thumb', String(($('p-thumb') || {}).src).slice(0, 25));
   console.log('chips color/estado/calco/luz/calidad', ['s-colors', 's-estado', 's-calco', 's-luz', 's-calidad'].map(i => $(i).querySelectorAll('.chip').length).join('/'));
   $('s-estado').querySelectorAll('.chip')[3].fire('click');
-  $('s-calco').querySelectorAll('.chip')[3].fire('click'); $('s-pliegue').querySelectorAll('.chip')[2].fire('click'); $('s-r-pliegue').fire('click'); $('s-r-estado').fire('click'); $('s-r-papel').fire('click');
+  $('s-calco').querySelectorAll('.chip')[3].fire('click'); $('s-pliegue').querySelectorAll('.chip')[2].fire('click'); $('s-r-pliegue').fire('click'); $('s-r-estado').fire('click'); $('s-r-papel').fire('click'); $('s-sobre').querySelectorAll('.chip')[1].fire('click'); $('s-r-sobre').fire('click');
   $('s-colors').querySelectorAll('.chip')[2].fire('click');
   const sl = $('p-sections').querySelectorAll('sp-slider'); console.log('sliders', sl.length);
   sl[5].value = 3; sl[5].fire('change');
@@ -53,6 +53,22 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   $('s-apply').fire('click'); await sleep(3000);
   console.log('status:', $('s-status').textContent);
   console.log('layers:', doc.layers.map(l => l.name + (l.visible ? '' : '(oculta)')).join(' | '));
+  $('s-r-luz').fire('click'); $('s-apply').fire('click'); await sleep(3000);
+  console.log('2ª vez:', $('s-status').textContent);
+  console.log('layers:', doc.layers.map(l => l.name).join(' | '));
+  // Ctrl+Z / fusionar: 3ª vez sin tocar nada → reescribe; tras «fusionar» (pintar sobre el resultado) → capa nueva encima
+  await sleep(1500);
+  $('s-apply').fire('click'); await sleep(2500);
+  console.log('3ª vez (sin cambios de arte):', $('s-status').textContent.slice(0, 40), '|', doc.layers.map(l => l.name).join(' | '));
+  const res = doc.layers.filter(l => l.name === 'PAPELATOR · Resultado')[0]; layerData[res.id].buf.fill(77, 0, 4000);
+  $('s-apply').fire('click'); await sleep(2500);
+  console.log('tras fusionar/pintar el resultado:', $('s-status').textContent.slice(0, 40), '|', doc.layers.map(l => l.name).join(' | '));
+  // pantalla: se ocultan las secciones de papel y se filtran luz y calidad
+  const gch = $('s-groups').querySelectorAll('.chip'); gch[gch.length - 1].fire('click');
+  $('s-swatches').querySelectorAll('.sw')[1].fire('click'); await sleep(300);
+  console.log('pantalla:', JSON.parse(store['papelator3.state']).paper, 'pliegues', $('s-sec-pliegue').style.display, 'estado', $('s-sec-estado').style.display,
+    'opciones', $('s-screenopts').style.display, 'luces', $('s-luz').querySelectorAll('.chip').length, 'calidades', $('s-calidad').querySelectorAll('.chip').length);
+  $('s-apply').fire('click'); await sleep(3000); console.log('aplicar pantalla:', $('s-status').textContent);
   const st = JSON.parse(store['papelator3.state']); console.log('state', st.paper, st.estado, st.calco, st.color, st.luz, st.calidad, !!st.custom);
   process.exit(0); // fin
 })().catch(e => { console.error('FAIL', e); process.exit(1); });

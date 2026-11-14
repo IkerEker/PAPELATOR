@@ -16,32 +16,40 @@
     <div class="brand">
       <span class="logo">PAPELATOR</span>
       <span class="spacer"></span>
-      <div class="iconbtn" id="s-dice" title="Nueva variación">⟳</div>
+      <div class="iconbtn wide" id="s-reset" title="Quitar todos los efectos">Limpiar</div><div class="iconbtn" id="s-dice" title="Otra variación de todo">⟳</div>
     </div>
 
 
-    <div class="sec">
-      <div class="sechead">1 · Papel<span class="spacer"></span><span class="mini" id="s-r-papel" title="Otra versión">⟳</span></div>
+    <div id="s-sec-papel" class="sec">
+      <div class="sechead"><span class="num">1</span><span class="ttl">Papel</span><span class="mini" id="s-r-papel" title="Otra versión">⟳</span></div>
       <div class="chips small" id="s-groups"></div>
       <div class="swatches" id="s-swatches"></div>
-      <div class="rl"><span>Escala de la textura</span><span class="rv" id="s-scaleval"></span></div>
-      <sp-slider id="s-scale" min="25" max="400" step="5" value="100"></sp-slider>
+      <div id="s-scalewrap">
+        <div class="rl"><span>Escala de la textura</span><span class="rv" id="s-scaleval"></span></div>
+        <sp-slider id="s-scale" min="5" max="400" step="1" value="100"></sp-slider>
+      </div>
+      <div id="s-screenopts">
+        <div class="rl"><span>Tamaño del píxel</span><span class="rv" id="s-zoomval"></span></div>
+        <sp-slider id="s-zoom" min="30" max="400" step="5" value="100"></sp-slider>
+        <div class="rl"><span>Brillo de la pantalla</span><span class="rv" id="s-brightval"></span></div>
+        <sp-slider id="s-bright" min="30" max="160" step="5" value="100"></sp-slider>
+      </div>
     </div>
 
-    <div class="sec">
-      <div class="sechead">2 · Color del papel</div>
+    <div id="s-sec-color" class="sec">
+      <div class="sechead"><span class="num">2</span><span class="ttl">Color del papel</span></div>
       <div class="chips" id="s-colors"></div>
     </div>
 
-    <div class="sec">
-      <div class="sechead">3 · Estado<span class="spacer"></span><span class="mini" id="s-r-estado" title="Otra versión">⟳</span></div>
+    <div id="s-sec-estado" class="sec">
+      <div class="sechead"><span class="num">3</span><span class="ttl">Estado</span><span class="mini" id="s-r-estado" title="Otra versión">⟳</span></div>
       <div class="chips" id="s-estado"></div>
       <div class="rl"><span>Antigüedad</span><span class="rv" id="s-edadval"></span></div>
       <sp-slider id="s-edad" min="0" max="120" step="1" value="0"></sp-slider>
     </div>
 
-    <div class="sec">
-      <div class="sechead">4 · Pliegues<span class="spacer"></span><span class="mini" id="s-r-pliegue" title="Otra versión">⟳</span></div>
+    <div id="s-sec-pliegue" class="sec">
+      <div class="sechead"><span class="num">4</span><span class="ttl">Pliegues</span><span class="mini" id="s-r-pliegue" title="Otra versión">⟳</span></div>
       <div class="chips" id="s-pliegue"></div>
       <div id="s-plopts">
         <div class="rl"><span>Intensidad</span><span class="rv" id="s-plamtval"></span></div>
@@ -51,8 +59,8 @@
       </div>
     </div>
 
-    <div class="sec">
-      <div class="sechead">5 · Calco (lo que hay detrás)<span class="spacer"></span><span class="mini" id="s-r-calco" title="Otra versión">⟳</span></div>
+    <div id="s-sec-calco" class="sec">
+      <div class="sechead"><span class="num">5</span><span class="ttl">Calco<span class="note">· lo que hay detrás</span></span><span class="mini" id="s-r-calco" title="Otra versión">⟳</span></div>
       <div class="chips" id="s-calco"></div>
       <div id="s-calcoopts">
         <div class="rl"><span>Intensidad del calco</span><span class="rv" id="s-calcoval"></span></div>
@@ -60,22 +68,35 @@
       </div>
     </div>
 
-    <div class="sec photo">
-      <div class="sechead">6 · Al aplicar</div>
-      <div class="sublabel">Luz<span class="spacer"></span><span class="mini" id="s-r-luz" title="Otra versión">⟳</span></div>
+    <div id="s-sec-sobre" class="sec">
+      <div class="sechead"><span class="num">6</span><span class="ttl">Sobreponer<span class="note">· delante</span></span><span class="mini" id="s-r-sobre" title="Otra versión">⟳</span></div>
+      <div class="chips" id="s-sobre"></div>
+      <div id="s-sobreopts">
+        <div class="rl"><span>Distancia al papel</span><span class="rv" id="s-sobredistval"></span></div>
+        <sp-slider id="s-sobredist" min="0" max="100" step="1" value="25"></sp-slider>
+        <div class="rl"><span>Transparencia</span><span class="rv" id="s-sobretransval"></span></div>
+        <sp-slider id="s-sobretrans" min="0" max="100" step="1" value="100"></sp-slider>
+      </div>
+    </div>
+
+    <div id="s-sec-foto" class="sec photo">
+      <div class="sechead"><span class="num">7</span><span class="ttl">Al aplicar</span></div>
+      <div class="sublabel"><span class="spacer">Luz</span><span class="mini" id="s-r-luz" title="Otra versión">⟳</span></div>
       <div class="chips" id="s-luz"></div>
       <div class="rl"><span>Más oscura · Más clara</span><span class="rv" id="s-expval"></span></div>
       <sp-slider id="s-exposure" min="-100" max="100" step="5" value="0"></sp-slider>
-      <div class="sublabel">Calidad<span class="spacer"></span><span class="mini" id="s-r-calidad" title="Otra versión">⟳</span></div>
+      <div class="sublabel"><span class="spacer">Calidad</span><span class="mini" id="s-r-calidad" title="Otra versión">⟳</span></div>
       <div class="chips" id="s-calidad"></div>
+      <div class="rl"><span>Encuadre · de frente → torcido</span><span class="rv" id="s-encval"></span></div>
+      <sp-slider id="s-enc" min="0" max="100" step="1" value="0"></sp-slider>
     </div>
 
-    <div class="hint">«Papel de fondo» crea el papel en la capa inferior para trabajar encima. «Aplicar» imprime todas las capas en ese papel (tinta, grano, relieve) y le da el aspecto de fotografía elegido.</div>
+    <div class="hint"><b>Papel de fondo</b>: el papel debajo, para trabajar encima. <b>Aplicar</b>: lo imprime todo en él. Toca un título para plegar su sección.</div>
    </div>
    <div class="footer">
     <div class="actions">
-      <sp-button variant="secondary" id="s-paper" class="grow">Papel de fondo</sp-button>
-      <sp-button variant="cta" id="s-apply" class="grow">Aplicar</sp-button>
+      <div class="btn secondary" id="s-paper" title="Crea el papel en la capa inferior">Papel de fondo</div>
+      <div class="btn cta" id="s-apply" title="Imprime todas las capas en el papel">Aplicar</div>
     </div>
     <div class="linkrow">
       <span class="link" id="s-remove">Quitar papel de fondo</span>
@@ -99,8 +120,8 @@
    </div>
    <div class="footer">
     <div class="actions">
-      <sp-button variant="secondary" id="p-paper" class="grow">Papel de fondo</sp-button>
-      <sp-button variant="cta" id="p-apply" class="grow">Aplicar</sp-button>
+      <div class="btn secondary" id="p-paper" title="Crea el papel en la capa inferior">Papel de fondo</div>
+      <div class="btn cta" id="p-apply" title="Imprime todas las capas en el papel">Aplicar</div>
     </div>
     <div class="linkrow">
       <span class="link" id="p-remove">Quitar papel de fondo</span>

@@ -2,7 +2,7 @@
 
 > Pega o adjunta este archivo al empezar el chat nuevo. Todo el proyecto está en GitHub:
 > **https://github.com/IkerEker/PAPELATOR** (rama `main`, último commit «Una sola ventana con dos pestañas: Presets y Avanzado»).
-> Versión actual del plugin: **3.5.0** (`plugin/manifest.json`). Instalable: `dist/PAPELATOR.ccx`.
+> Versión actual del plugin: **3.12.1** (`plugin/manifest.json`). Instalable: `dist/PAPELATOR.ccx`.
 
 ---
 
@@ -141,6 +141,68 @@ escaner_oficina, movil, movil_antiguo, fotocopia, analogica.
    panel principal; pliegues sin luces quemadas.
 7. v3.4.1: Aplicar deja las capas tal cual; papeles bien catalogados.
 8. v3.5.0: **una sola ventana con dos pestañas** (Presets / Avanzado).
+
+## 6b. v3.6.0 — maderas, cartones y Sobreponer
+- `NUEVAS_NUEVAS/` (subido por el usuario): 31 fotos → 29 fondos (2 duplicados) en el grupo «Maderas y cartones»:
+  Madera (4), OSB (7), Aglomerado (6), Cartón de caja (9), Cartón kraft (3) + Cartón ondulado (2, ya existía).
+  `material: wood|carton` en papers.json: sin pliegues, sin calco y sin imperfecciones de papel (MATERIAL_NO en el motor).
+- `SOBREPONER/`: 49 vidrios/plásticos sacados de `IkerEker/NEONIZADOR` (TEXTURAS_02 y TEXTURAS_04; los demás de
+  ese repo —humo, fuego, VHS, mármol…— no se usan aquí). 7 tipos (acanalado 8, ondulado 6, martillado 6, armado 7,
+  esmerilado 3, lluvia 4, plástico 15). Sección «6 · Sobreponer» con ⟳ y slider **Distancia al papel** (0–40 mm);
+  en Avanzado: reflejos, huellas/polvo, escala y textura concreta. Sólo actúa al **Aplicar** (va delante del papel).
+
+## 6c. v3.7 — transparencia del vidrio y luz/calidad mucho más marcadas
+- Sobreponer › **Transparencia** (Presets y Avanzado): 100 % limpio; al bajar, vidrio gastado: velo lechoso
+  desigual, grupos de arañazos paralelos + sueltos, y más difusión.
+- **Luz** (`LUZ` en engine.js) y **Calidad** (`QUAL`) reescritas para que se noten mucho a intensidad 50:
+  escáner con sombra del canto levantado; día apagado y frío; ventana lateral con sombra del marco; lámpara
+  tungsteno naranja con charco de luz; foco circular definido; flash con centro quemado y caída cos⁴; sombra del
+  móvil y la mano. Calidad por **resolución efectiva** (móvil 1700 px, antiguo 900, fotocopia 1300, analógica 1500):
+  trepidación, reducción de ruido «acuarelada», HDR, halos de enfoque, ruido en manchas y de color, JPEG, aberración,
+  barril, giro/perspectiva/desenfoque de márgenes más fuertes; fotocopia con curva dura, tóner, rayas de tambor y
+  bordes; analógica con grano a dos escalas, halation, difusión, polvo y pelos.
+- Aplicar sobrescribe el resultado anterior si el arte no ha cambiado (huella del compuesto).
+
+## 6d. v3.9 — Pantalla
+- Grupo «Pantallas» en «1 · Papel» con 4 pantallas (de mejor a peor): Móvil OLED (PenTile en diamante, negro absoluto),
+  Monitor LCD (tira RGB, negro grisáceo, brillo IPS), Portátil viejo (TN: píxel gordo, rejilla marcada, 6 bits con
+  tramado, color según el ángulo, fugas de luz), Tele de tubo (rejilla de apertura, líneas de barrido que engordan
+  con el brillo, resplandor, convergencia, pantalla curva). `material: 'screen'` en papers.json; motor `renderScreen`.
+- Con pantalla se ocultan Color, Estado, Pliegues, Calco y la escala; aparecen «Tamaño del píxel» y «Brillo».
+  Luz sin Escáner ni Luz natural; Calidad sin Escáner ni Fotocopia. Madera/cartón ocultan Color, Pliegues y Calco.
+  Los números de sección se renumeran según lo visible. En Avanzado se ocultan los grupos que no aplican.
+- Fotografiar la pantalla (cualquier luz o calidad móvil/analógica): moiré de colores, bandas del obturador,
+  reflejos (lámpara, flash, tu propio reflejo con «Sombra»), huellas que sólo se ven en el reflejo.
+
+## 6e. v3.10 — Pantallas revisadas + LED gigante y libro electrónico
+- 6 pantallas: OLED, LCD (con mura), portátil viejo, tubo (bloom + halation, eco, temblor de línea, nieve),
+  **LED gigante** (paquetes SMD con 3 chips, viseras, módulos 16×16 desiguales, LEDs muertos) y **libro electrónico**
+  (refleja la luz: gris de 16 niveles con tramado, blanco grisáceo, fantasma de la página anterior; admite luz natural).
+- Foto de pantalla: moiré con dos familias de franjas curvadas, modulado por zonas; bandas del obturador con una
+  más marcada; reflejos de lámpara, flash, ventana/día y tu propio reflejo; huellas sólo en el reflejo.
+
+## 6f. v3.11 — interfaz más amable
+- Arranque limpio: al abrir Photoshop, estado Nuevo, sin pliegues, sin calco, sin sobreponer, sin foto, calidad
+  perfecta (se conserva el papel elegido). Botón «Limpiar» junto al ⟳ grande hace lo mismo en cualquier momento.
+- Tarjetas plegables (clic en el título) con resumen de lo elegido a la derecha y una línea de descripción.
+- Corregido: las secciones no disponibles (pantalla, madera, cartón) ahora desaparecen enteras (antes sólo el título).
+- Avanzado: cada control aparece sólo si sirve (líneas impresas sólo en papeles con patrón, sliders de pliegue/calco/
+  vidrio sólo si hay pliegue/calco/vidrio, tinta y textura ocultas en pantalla).
+- Prueba de la interfaz real en navegador: `tools/test/layout2.js` (main.js con UXP simulado).
+
+## 6g. v3.12 — encuadre y muy arrugado
+- Slider **Encuadre** bajo Calidad (y en Avanzado › Fotografía): 0 = de frente; al subir, giro (hasta 11°),
+  perspectiva, barril, descentrado y acercamiento (sólo recorta), con la zona enfocada cada vez más pequeña.
+  Funciona con cualquier calidad (también Perfecta) y en pantallas; ⟳ de Luz/Calidad cambia la dirección.
+- Pliegues: «Arrugado» (16 hojas: arrugas suaves y pliegues sueltos) y «Muy arrugado» (13 hojas densas).
+
+## 6h. v3.12.1 — historial y convivencia con otros plugins
+- Cada acción = un paso del historial. «En vivo» reemplaza su propio paso anterior (no llena el historial).
+- Si Photoshop está ocupado por otro plugin o un diálogo, espera y reintenta (hasta ~5 s) en vez de dar error.
+- Papel de fondo: reutiliza su capa y devuelve la selección a la capa en la que estabas.
+- Aplicar: si el resultado anterior sigue intacto y el arte no ha cambiado → lo reescribe; si lo has fusionado
+  (Ctrl/Cmd+E) o pintado, se trata como parte de tu imagen y el nuevo se genera encima, en otra capa. El resultado
+  queda seleccionado (Ctrl/Cmd+E lo fusiona con la de debajo).
 
 ## 7. Pendiente / ideas que no se han hecho
 - Probar todo dentro de Photoshop real (las pruebas son en Node + simulación del DOM de UXP; el usuario es quien lo

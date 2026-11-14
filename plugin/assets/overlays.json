@@ -1,0 +1,815 @@
+{
+ "acanalado": {
+  "name": "Acanalado",
+  "refr": 0.7,
+  "refl": 0.6,
+  "frost": 0.12,
+  "tint": [
+   0.955,
+   0.975,
+   0.965
+  ],
+  "dirt": true,
+  "items": [
+   {
+    "id": "acanalado_0",
+    "r": "acanalado_0_r.png",
+    "n": "acanalado_0_n.png",
+    "w": 895,
+    "h": 1024,
+    "src": "Vidrio acanalado en blanco y negro.png",
+    "tileMm": [
+     160.0,
+     183.1
+    ],
+    "flutes": 16,
+    "rMean": 0.0772
+   },
+   {
+    "id": "acanalado_1",
+    "r": "acanalado_1_r.png",
+    "n": "acanalado_1_n.png",
+    "w": 925,
+    "h": 1024,
+    "src": "Vidrio acanalado negro y plateado.png",
+    "tileMm": [
+     170.0,
+     188.2
+    ],
+    "flutes": 17,
+    "rMean": 0.1229
+   },
+   {
+    "id": "acanalado_2",
+    "r": "acanalado_2_r.png",
+    "n": "acanalado_2_n.png",
+    "w": 963,
+    "h": 1024,
+    "src": "Cristal acanalado negro brillante.png",
+    "tileMm": [
+     220.0,
+     233.8
+    ],
+    "flutes": 22,
+    "rMean": 0.1011
+   },
+   {
+    "id": "acanalado_3",
+    "r": "acanalado_3_r.png",
+    "n": "acanalado_3_n.png",
+    "w": 930,
+    "h": 1024,
+    "src": "Textura abstracta de vidrio acanalado oscuro.png",
+    "tileMm": [
+     190.0,
+     209.3
+    ],
+    "flutes": 19,
+    "rMean": 0.0895
+   },
+   {
+    "id": "acanalado_4",
+    "r": "acanalado_4_r.png",
+    "n": "acanalado_4_n.png",
+    "w": 962,
+    "h": 1024,
+    "src": "Rayas verticales de vidrio texturizado.png",
+    "tileMm": [
+     210.0,
+     223.6
+    ],
+    "flutes": 21,
+    "rMean": 0.1162
+   },
+   {
+    "id": "acanalado_5",
+    "r": "acanalado_5_r.png",
+    "n": "acanalado_5_n.png",
+    "w": 914,
+    "h": 1024,
+    "src": "Vidrio estriado vertical translúcido.png",
+    "tileMm": [
+     200.0,
+     224.0
+    ],
+    "flutes": 20,
+    "rMean": 0.1467
+   },
+   {
+    "id": "acanalado_6",
+    "r": "acanalado_6_r.png",
+    "n": "acanalado_6_n.png",
+    "w": 934,
+    "h": 1024,
+    "src": "Textura de vidrio acanalado en gris.png",
+    "tileMm": [
+     170.0,
+     186.4
+    ],
+    "flutes": 17,
+    "rMean": 0.1016
+   },
+   {
+    "id": "acanalado_7",
+    "r": "acanalado_7_r.png",
+    "n": "acanalado_7_n.png",
+    "w": 931,
+    "h": 1024,
+    "src": "Textura de vidrio estriado translúcido.png",
+    "tileMm": [
+     210.0,
+     230.9
+    ],
+    "flutes": 21,
+    "rMean": 0.0722
+   }
+  ]
+ },
+ "ondulado": {
+  "name": "Ondulado",
+  "refr": 0.7,
+  "refl": 0.55,
+  "frost": 0.08,
+  "tint": [
+   0.96,
+   0.975,
+   0.97
+  ],
+  "dirt": true,
+  "items": [
+   {
+    "id": "ondulado_0",
+    "r": "ondulado_0_r.png",
+    "n": "ondulado_0_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Textura de vidrio ondulado en blanco y negro.png",
+    "tileMm": [
+     200.0,
+     200.0
+    ],
+    "rMean": 0.1024
+   },
+   {
+    "id": "ondulado_1",
+    "r": "ondulado_1_r.png",
+    "n": "ondulado_1_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Vidrio ondulado en blanco y negro.png",
+    "tileMm": [
+     200.0,
+     200.0
+    ],
+    "rMean": 0.1303
+   },
+   {
+    "id": "ondulado_2",
+    "r": "ondulado_2_r.png",
+    "n": "ondulado_2_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Ondas de vidrio líquido en blanco y negro.png",
+    "tileMm": [
+     200.0,
+     200.0
+    ],
+    "rMean": 0.0798
+   },
+   {
+    "id": "ondulado_3",
+    "r": "ondulado_3_r.png",
+    "n": "ondulado_3_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Ondas de vidrio negro brillante.png",
+    "tileMm": [
+     200.0,
+     200.0
+    ],
+    "rMean": 0.124
+   },
+   {
+    "id": "ondulado_4",
+    "r": "ondulado_4_r.png",
+    "n": "ondulado_4_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Ondulaciones de vidrio brillante.png",
+    "tileMm": [
+     200.0,
+     200.0
+    ],
+    "rMean": 0.095
+   },
+   {
+    "id": "ondulado_5",
+    "r": "ondulado_5_r.png",
+    "n": "ondulado_5_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Textura ondulada de vidrio translúcido.png",
+    "tileMm": [
+     200.0,
+     200.0
+    ],
+    "rMean": 0.0815
+   }
+  ]
+ },
+ "martillado": {
+  "name": "Martillado",
+  "refr": 0.55,
+  "refl": 0.55,
+  "frost": 0.2,
+  "tint": [
+   0.955,
+   0.972,
+   0.965
+  ],
+  "dirt": true,
+  "items": [
+   {
+    "id": "martillado_0",
+    "r": "martillado_0_r.png",
+    "n": "martillado_0_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Textura de vidrio martillado brillante.png",
+    "tileMm": [
+     120.0,
+     120.0
+    ],
+    "rMean": 0.073
+   },
+   {
+    "id": "martillado_1",
+    "r": "martillado_1_r.png",
+    "n": "martillado_1_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Textura de vidrio martillado oscuro.png",
+    "tileMm": [
+     120.0,
+     120.0
+    ],
+    "rMean": 0.0566
+   },
+   {
+    "id": "martillado_2",
+    "r": "martillado_2_r.png",
+    "n": "martillado_2_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Vidrio martillado en relieve.png",
+    "tileMm": [
+     120.0,
+     120.0
+    ],
+    "rMean": 0.0988
+   },
+   {
+    "id": "martillado_3",
+    "r": "martillado_3_r.png",
+    "n": "martillado_3_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Cristal martillado en sombras-1.png",
+    "tileMm": [
+     120.0,
+     120.0
+    ],
+    "rMean": 0.0564
+   },
+   {
+    "id": "martillado_4",
+    "r": "martillado_4_r.png",
+    "n": "martillado_4_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Textura abstracta de vidrio ondulado.png",
+    "tileMm": [
+     120.0,
+     120.0
+    ],
+    "rMean": 0.0778
+   },
+   {
+    "id": "martillado_5",
+    "r": "martillado_5_r.png",
+    "n": "martillado_5_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Textura abstracta de vidrio rugoso-2.png",
+    "tileMm": [
+     120.0,
+     120.0
+    ],
+    "rMean": 0.0508
+   }
+  ]
+ },
+ "armado": {
+  "name": "Armado",
+  "refr": 0.55,
+  "refl": 0.5,
+  "frost": 0.18,
+  "tint": [
+   0.94,
+   0.965,
+   0.955
+  ],
+  "dirt": true,
+  "items": [
+   {
+    "id": "armado_0",
+    "r": "armado_0_r.png",
+    "n": "armado_0_n.png",
+    "w": 981,
+    "h": 981,
+    "src": "Textura de vidrio armado con malla metálica.png",
+    "m": "armado_0_m.png",
+    "meshColor": [
+     1.025,
+     1.004,
+     0.971
+    ],
+    "tileMm": [
+     125.0,
+     125.0
+    ],
+    "cells": [
+     10,
+     10
+    ],
+    "rMean": 0.0517
+   },
+   {
+    "id": "armado_1",
+    "r": "armado_1_r.png",
+    "n": "armado_1_n.png",
+    "w": 826,
+    "h": 945,
+    "src": "Vidrio armado con rejilla metálica.png",
+    "m": "armado_1_m.png",
+    "meshColor": [
+     1.036,
+     1.004,
+     0.96
+    ],
+    "tileMm": [
+     87.5,
+     100.0
+    ],
+    "cells": [
+     7,
+     8
+    ],
+    "rMean": 0.0562
+   },
+   {
+    "id": "armado_2",
+    "r": "armado_2_r.png",
+    "n": "armado_2_n.png",
+    "w": 998,
+    "h": 968,
+    "src": "Vidrio armado con reflejos ondulados.png",
+    "m": "armado_2_m.png",
+    "meshColor": [
+     1.003,
+     1.008,
+     0.989
+    ],
+    "tileMm": [
+     100.0,
+     100.0
+    ],
+    "cells": [
+     8,
+     8
+    ],
+    "rMean": 0.0534
+   },
+   {
+    "id": "armado_3",
+    "r": "armado_3_r.png",
+    "n": "armado_3_n.png",
+    "w": 936,
+    "h": 934,
+    "src": "Vidrio armado oscuro con textura martillada.png",
+    "m": "armado_3_m.png",
+    "meshColor": [
+     1.006,
+     1.008,
+     0.985
+    ],
+    "tileMm": [
+     75.0,
+     75.0
+    ],
+    "cells": [
+     6,
+     6
+    ],
+    "rMean": 0.0659
+   },
+   {
+    "id": "armado_4",
+    "r": "armado_4_r.png",
+    "n": "armado_4_n.png",
+    "w": 875,
+    "h": 859,
+    "src": "Vidrio armado oscuro con textura ondulada.png",
+    "m": "armado_4_m.png",
+    "meshColor": [
+     1.017,
+     1.0,
+     0.983
+    ],
+    "tileMm": [
+     87.5,
+     87.5
+    ],
+    "cells": [
+     7,
+     7
+    ],
+    "rMean": 0.0352
+   },
+   {
+    "id": "armado_5",
+    "r": "armado_5_r.png",
+    "n": "armado_5_n.png",
+    "w": 848,
+    "h": 851,
+    "src": "Cristal armado oscuro con reflejos metálicos.png",
+    "m": "armado_5_m.png",
+    "meshColor": [
+     1.021,
+     1.01,
+     0.969
+    ],
+    "tileMm": [
+     100.0,
+     100.0
+    ],
+    "cells": [
+     8,
+     8
+    ],
+    "rMean": 0.056
+   },
+   {
+    "id": "armado_6",
+    "r": "armado_6_r.png",
+    "n": "armado_6_n.png",
+    "w": 806,
+    "h": 1001,
+    "src": "Textura de vidrio armado oxidado.png",
+    "m": "armado_6_m.png",
+    "meshColor": [
+     1.013,
+     1.003,
+     0.985
+    ],
+    "tileMm": [
+     75.0,
+     87.5
+    ],
+    "cells": [
+     6,
+     7
+    ],
+    "rMean": 0.0598
+   }
+  ]
+ },
+ "esmerilado": {
+  "name": "Esmerilado",
+  "refr": 0.06,
+  "refl": 0.12,
+  "frost": 1.0,
+  "tint": [
+   0.97,
+   0.975,
+   0.975
+  ],
+  "dirt": true,
+  "items": [
+   {
+    "id": "esmerilado_0",
+    "r": "esmerilado_0_r.png",
+    "n": "esmerilado_0_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Textura de vidrio esmerilado oscuro.png",
+    "tileMm": [
+     80.0,
+     80.0
+    ],
+    "rMean": 0.1776
+   },
+   {
+    "id": "esmerilado_1",
+    "r": "esmerilado_1_r.png",
+    "n": "esmerilado_1_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Textura de vidrio esmerilado oscuro (1).png",
+    "tileMm": [
+     80.0,
+     80.0
+    ],
+    "rMean": 0.1647
+   },
+   {
+    "id": "esmerilado_2",
+    "r": "esmerilado_2_r.png",
+    "n": "esmerilado_2_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Textura granulada negra mate.png",
+    "tileMm": [
+     80.0,
+     80.0
+    ],
+    "rMean": 0.1468
+   }
+  ]
+ },
+ "lluvia": {
+  "name": "Lluvia",
+  "refr": 0.45,
+  "refl": 0.85,
+  "frost": 0.0,
+  "tint": [
+   0.97,
+   0.975,
+   0.98
+  ],
+  "dirt": false,
+  "items": [
+   {
+    "id": "lluvia_0",
+    "r": "lluvia_0_r.png",
+    "n": "lluvia_0_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Gotas de lluvia sobre cristal negro.png",
+    "tileMm": [
+     150.0,
+     150.0
+    ],
+    "rMean": 0.0361
+   },
+   {
+    "id": "lluvia_1",
+    "r": "lluvia_1_r.png",
+    "n": "lluvia_1_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Gotas de lluvia sobre cristal negro (1).png",
+    "tileMm": [
+     150.0,
+     150.0
+    ],
+    "rMean": 0.0316
+   },
+   {
+    "id": "lluvia_2",
+    "r": "lluvia_2_r.png",
+    "n": "lluvia_2_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Gotas de lluvia sobre cristal negro (2).png",
+    "tileMm": [
+     150.0,
+     150.0
+    ],
+    "rMean": 0.0356
+   },
+   {
+    "id": "lluvia_3",
+    "r": "lluvia_3_r.png",
+    "n": "lluvia_3_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Gotas de lluvia sobre cristal negro (3).png",
+    "tileMm": [
+     150.0,
+     150.0
+    ],
+    "rMean": 0.0325
+   }
+  ]
+ },
+ "plastico": {
+  "name": "Plástico",
+  "refr": 0.3,
+  "refl": 1.0,
+  "frost": 0.04,
+  "tint": [
+   0.975,
+   0.975,
+   0.975
+  ],
+  "dirt": true,
+  "items": [
+   {
+    "id": "plastico_0",
+    "r": "plastico_0_r.png",
+    "n": "plastico_0_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Plástico transparente arrugado sobre fondo negro.png",
+    "tileMm": [
+     260.0,
+     260.0
+    ],
+    "rMean": 0.0132
+   },
+   {
+    "id": "plastico_1",
+    "r": "plastico_1_r.png",
+    "n": "plastico_1_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Plástico transparente arrugado sobre negro brillante.png",
+    "tileMm": [
+     260.0,
+     260.0
+    ],
+    "rMean": 0.0214
+   },
+   {
+    "id": "plastico_2",
+    "r": "plastico_2_r.png",
+    "n": "plastico_2_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Pliegues brillantes de plástico transparente.png",
+    "tileMm": [
+     260.0,
+     260.0
+    ],
+    "rMean": 0.0297
+   },
+   {
+    "id": "plastico_3",
+    "r": "plastico_3_r.png",
+    "n": "plastico_3_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Textura abstracta de plástico transparente arrugado.png",
+    "tileMm": [
+     260.0,
+     260.0
+    ],
+    "rMean": 0.0255
+   },
+   {
+    "id": "plastico_4",
+    "r": "plastico_4_r.png",
+    "n": "plastico_4_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Plástico translúcido sobre fondo negro.png",
+    "tileMm": [
+     260.0,
+     260.0
+    ],
+    "rMean": 0.012
+   },
+   {
+    "id": "plastico_5",
+    "r": "plastico_5_r.png",
+    "n": "plastico_5_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Textura de plástico arrugado brillante.png",
+    "tileMm": [
+     260.0,
+     260.0
+    ],
+    "rMean": 0.0396
+   },
+   {
+    "id": "plastico_6",
+    "r": "plastico_6_r.png",
+    "n": "plastico_6_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Pliegues Brillantes sobre Negro.png",
+    "tileMm": [
+     260.0,
+     260.0
+    ],
+    "rMean": 0.0257
+   },
+   {
+    "id": "plastico_7",
+    "r": "plastico_7_r.png",
+    "n": "plastico_7_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Plástico arrugado sobre negro reluciente.png",
+    "tileMm": [
+     260.0,
+     260.0
+    ],
+    "rMean": 0.0162
+   },
+   {
+    "id": "plastico_8",
+    "r": "plastico_8_r.png",
+    "n": "plastico_8_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Brillo arrugado sobre negro.png",
+    "tileMm": [
+     260.0,
+     260.0
+    ],
+    "rMean": 0.0098
+   },
+   {
+    "id": "plastico_9",
+    "r": "plastico_9_r.png",
+    "n": "plastico_9_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Textura de Plástico Arrugado sobre Vidrio Negro.png",
+    "tileMm": [
+     260.0,
+     260.0
+    ],
+    "rMean": 0.0178
+   },
+   {
+    "id": "plastico_10",
+    "r": "plastico_10_r.png",
+    "n": "plastico_10_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Textura de plástico brillante sobre fondo negro.png",
+    "tileMm": [
+     260.0,
+     260.0
+    ],
+    "rMean": 0.0132
+   },
+   {
+    "id": "plastico_11",
+    "r": "plastico_11_r.png",
+    "n": "plastico_11_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Textura de plástico brillante sobre negro.png",
+    "tileMm": [
+     260.0,
+     260.0
+    ],
+    "rMean": 0.0266
+   },
+   {
+    "id": "plastico_12",
+    "r": "plastico_12_r.png",
+    "n": "plastico_12_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Plástico negro arrugado y brillante.png",
+    "tileMm": [
+     260.0,
+     260.0
+    ],
+    "rMean": 0.0264
+   },
+   {
+    "id": "plastico_13",
+    "r": "plastico_13_r.png",
+    "n": "plastico_13_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Textura abstracta de plástico negro brillante.png",
+    "tileMm": [
+     260.0,
+     260.0
+    ],
+    "rMean": 0.023
+   },
+   {
+    "id": "plastico_14",
+    "r": "plastico_14_r.png",
+    "n": "plastico_14_n.png",
+    "w": 1024,
+    "h": 1024,
+    "src": "Textura negra con plástico arrugado.png",
+    "tileMm": [
+     260.0,
+     260.0
+    ],
+    "rMean": 0.017
+   }
+  ]
+ }
+}

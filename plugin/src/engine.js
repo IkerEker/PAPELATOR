@@ -86,6 +86,7 @@ async function catalogs(assets) {
     cache.imperf = await assets.json('imperf.json');
     cache.calco = await assets.json('calco.json');
     try { cache.folds = await assets.json('folds.json'); } catch (e) { cache.folds = {}; }
+    try { cache.overlays = await assets.json('overlays.json'); } catch (e) { cache.overlays = {}; }
   }
   return cache;
 }
@@ -123,10 +124,10 @@ async function genPaper(S, st, assets, B) {
   const iimg = paper.kind === 'pattern' ? await loadImg(assets, 'papers/' + paper.id + '_ink.png') : null;
   const tw = dimg.width, th = dimg.height;
   // px de textura por px de documento
-  const scale = clamp(def(st.scale, 1), 0.1, 10);
+  const scale = clamp(def(st.scale, 1), 0.04, 10);
   const kx = tw / (paper.tileMm[0] * ppm * scale), ky = th / (paper.tileMm[1] * ppm * scale);
   let level = 0; let kk = Math.max(kx, ky);
-  while (kk > 1.5 && level < 6) { kk /= 2; level++; }
+  while (kk > 1.5 && level < 8) { kk /= 2; level++; }
   const lv = 1 << level;
   const dm = mipLevel(paper.id + '_d', dimg, level);
   const im = iimg ? mipLevel(paper.id + '_i', iimg, level) : null;
@@ -225,6 +226,15 @@ function lowField(w, h, step, fn) {
 function fbm2(x, y, seed) { return vnoise(x, y, seed) * 0.57 + vnoise(x * 2.07, y * 2.07, seed + 1) * 0.29 + vnoise(x * 4.3, y * 4.3, seed + 2) * 0.14; }
 
 // ================================================================ IMPERFECCIONES
+// Qué le puede pasar a cada material. La madera no se dobla, no transparenta y no coge marcas propias del papel
+// (foxing, fibras, hendiduras de escritura, goma…); el cartón casi todo menos lo de papel fino.
+const MATERIAL_NO = {
+  wood: { fibras: 1, nodulos: 1, descamacion: 1, foxing: 1, escritura: 1, mecano: 1, sello_seco: 1, goma: 1, matasellos: 1, manchado: 1,
+    clip_huella: 1, pinza: 1, arruguita: 1, media_luna: 1, grapa_marca: 1, cockle: 1 },
+  carton: { fibras: 1, nodulos: 1, escritura: 1, mecano: 1, goma: 1, arruguita: 1 }
+};
+function materialOf(st) { const p = paperById(st.paper); return (p && p.material) || 'paper'; }
+function allowed(st, cid) { const no = MATERIAL_NO[materialOf(st)]; return !no || !no[cid]; }
 function estadoCounts(st) {
   if (st.custom && typeof st.custom === 'object') return st.custom;
   const e = P.ESTADOS.filter(x => x.id === st.estado)[0] || P.ESTADOS[0];
@@ -385,7 +395,7 @@ async function genAging(S, st, assets, B, paper, counts) {
   // nunca blanquea ni azulea el papel.
   let sheet = null, sheet2 = null, sOp = 0, flipX = false, flipY = false, hiA = [1, 1, 1], hiB = [1, 1, 1];
   const scat = cache.imperf.manchado;
-  if (scat && (edad > 0.15 || manchado > 0)) {
+  if (scat && (edad > 0.15 || manchado > 0) && allowed(st, 'manchado')) {
     const ia = (r() * scat.items.length) | 0, ib = (ia + 1 + ((r() * (scat.items.length - 1)) | 0)) % scat.items.length;
     sheet = await loadImg(assets, 'imperf/' + scat.items[ia].file);
     sheet2 = await loadImg(assets, 'imperf/' + scat.items[ib].file);
@@ -451,7 +461,7 @@ async function genAging(S, st, assets, B, paper, counts) {
 function genShape(S, st, B, counts) {
   const { w, h, ppm, N } = S;
   const kk = clamp(S.k, 0, 2);
-  const cock = (def(counts.cockle, 0) + clamp(def(st.edad, 0), 0, 1) * 0.25) * kk;
+  const cock = allowed(st, 'cockle') ? (def(counts.cockle, 0) + clamp(def(st.edad, 0), 0, 1) * 0.25) * kk : 0;
   const r = rng(S.seedE * 17 + 3);
   const s1 = (r() * 1e6) | 0, s2 = (r() * 1e6) | 0;
   const along = h >= w;   // la fibra suele ir a lo largo de la hoja
@@ -481,6 +491,7 @@ function genShape(S, st, B, counts) {
 const FOLD_LIGHT = { ninguna: 1, escaner: 0.8, dia: 1, ventana: 1.2, foco: 1, flash: 0.75, sombra: 1, lampara: 1.12 };
 function cubic(a, b, c, d, t) { return b + 0.5 * t * (c - a + t * (2 * a - 5 * b + 4 * c - d + t * (3 * (b - c) + d - a))); }
 async function genFolds(S, st, assets, B) {
+  if (materialOf(st) !== 'paper') return null;      // madera y cartón no se doblan como el papel
   const pid = st.pliegue || 'ninguno';
   const pre = (P.PLIEGUES || []).filter(p => p.id === pid)[0];
   const cat = cache.folds && pre && pre.group ? cache.folds[pre.group] : null;
@@ -577,7 +588,7 @@ async function genEstado(S, st, assets, B) {
     'huella_grasa', 'goma', 'escritura', 'mecano', 'sello_seco', 'arruguita', 'media_luna', 'pinza', 'clip_huella', 'grapa_marca', 'grapa_agujero'];
   for (const cid of order) {
     let n = counts[cid]; const C = cats[cid];
-    if (!n || !C) continue;
+    if (!n || !C || !allowed(st, cid)) continue;
     const op0 = C.opacity * opK;
     const base = { absorb: def(C.absorb, 0), erode: def(C.erode, 0), cellPx: def(C.cellMm, 5) * ppm, cockle: def(C.cockle, 0) };
     if (C.kind === 'stamp') {
@@ -677,7 +688,7 @@ function calcoFile(info, key, st) {
 }
 async function genCalco(S, st, assets, B, paper, backArt) {
   const id = st.calco;
-  if (!id || id === 'ninguno') return;
+  if (!id || id === 'ninguno' || materialOf(st) !== 'paper') return;   // madera y cartón no transparentan
   const { w, h, ppm, N } = S;
   const k = S.k;
   const amount = clamp(def(st.calcoAmount, 1), 0, 3) * clamp(k, 0, 2) * def(st._calcoBoost, 1);
@@ -777,12 +788,289 @@ function applyRelief(S, B) {
   }
 }
 
+// ================================================================ PANTALLA
+// Lo que hay encima se ve EN una pantalla. Seis pantallas:
+//  oled     móvil OLED: subpíxeles en diamante (PenTile: verde en cada píxel, rojo y azul compartidos en rombo),
+//           negro absoluto, color saturado, cristal muy brillante
+//  lcd      monitor LCD IPS: tira RGB vertical con rejilla negra, negro grisáceo, brillo IPS en esquinas, «mura»
+//           (nubes de brillo desigual del panel)
+//  vieja    portátil viejo TN: píxel gordo, rejilla marcada (screen door), 6 bits con tramado, color que cambia con el
+//           ángulo (arriba lavado, abajo oscuro), azulada, fugas de luz, mura marcada
+//  crt      tele de tubo: rejilla de apertura (franjas RGB continuas), líneas de barrido gaussianas que engordan con el
+//           brillo, resplandor de fósforos (bloom + halation), convergencia imperfecta, eco de señal, temblor de línea,
+//           nieve, cristal curvo con esquinas oscuras
+//  led      pantalla LED gigante (valla, estadio): LEDs redondos con sus 3 chips sobre negro, viseras horizontales,
+//           módulos de 16×16 con brillo y tono algo distintos, algún LED muerto; muy brillante; fotografiada saca bandas
+//  eink     libro electrónico (tinta electrónica): no emite luz, la refleja como el papel; gris de 16 niveles con
+//           tramado, blanco grisáceo y negro poco profundo, grano de microcápsulas, fantasma de la página anterior
+// Fotografiarla añade moiré (dos rejillas de franjas de colores que se cruzan, curvadas por el objetivo), bandas del
+// obturador, reflejos en el cristal (lámpara, flash, tu propio reflejo) y huellas que sólo se ven en el reflejo.
+const SCREENS = {
+  pantalla_oled: { layout: 'pentile', across: 820, black: 0.0, contrast: 0.06, sat: 0.14, temp: [0.985, 1.0, 1.03], glow: 0.12, gloss: 1.0, bands: 0.3, moire: 0.9, floor: 0.6 },
+  pantalla_lcd: { layout: 'stripe', across: 520, black: 0.07, contrast: 0, sat: 0, temp: [0.965, 1.0, 1.05], gap: 0.14, gapV: 0.1, glow: 0.04, gloss: 0.35, bands: 0.08, moire: 1.0, bleed: 0.1, ipsGlow: 0.12, mura: 0.03, floor: 0.58 },
+  pantalla_vieja: { layout: 'stripe', across: 300, black: 0.13, contrast: -0.12, sat: -0.12, temp: [0.93, 1.0, 1.1], gap: 0.24, gapV: 0.2, glow: 0.03, gloss: 0.25, bands: 0.18, moire: 0.8, bleed: 0.26, dither: 63, viewAngle: 0.55, mura: 0.07, floor: 0.42 },
+  pantalla_crt: { layout: 'crt', across: 260, black: 0.035, contrast: 0.08, sat: 0.05, temp: [1.02, 1.0, 0.97], gap: 0.18, glow: 0.55, gloss: 0.8, bands: 0.42, moire: 0.7, curve: 0.07, converge: 0.22, vig: 0.55, echo: 0.08, jitter: 0.06, snow: 5, floor: 0.3 },
+  pantalla_led: { layout: 'led', across: 190, black: 0.0, contrast: 0.1, sat: 0.2, temp: [1.0, 1.0, 1.0], glow: 0.35, gloss: 0.1, bands: 0.5, moire: 1.1, module: 16, dead: 0.0006, floor: 0.0 },
+  pantalla_eink: { layout: 'eink', across: 1500, white: 0.8, black: 0.17, contrast: 0, temp: [0.985, 0.99, 0.955], gloss: 0.15, bands: 0, moire: 0, gray: 1, dither: 15, ghost: 0.06, grain: 1, reflective: 1, floor: 1 }
+};
+function isScreen(st) { const p = paperById(st.paper); return !!(p && p.material === 'screen'); }
+
+async function renderScreen(opts, st, withArt) {
+  const { w, h, ppm, assets } = opts;
+  const prog = opts.onProgress || (async () => {});
+  const art = withArt ? opts.art : null, comps = opts.artComponents || 4;
+  const N = w * h, k = clamp(clamp(def(st.intensity, 50), 0, 100) / 50, 0, 2), kk = Math.min(1.5, k), k1 = Math.min(1, kk);
+  const S = { w, h, ppm, N, seed: (def(st.seed, 1) | 0) * 7919 + 13 + (def(st.seedPaper, 0) | 0) * 104729, k };
+  const D = SCREENS[st.paper] || SCREENS.pantalla_lcd;
+  const longS = Math.max(w, h);
+  const pitch = st._pitch || Math.max(1.2, longS / D.across * clamp(def(st.screenZoom, 1), 0.3, 4));
+  const bright = clamp(def(st.screenBright, 1), 0.3, 1.6);
+  const r = rng(S.seed * 7 + 5);
+  await prog(0.1, 'Encendiendo la pantalla…');
+  // ---- 1) lo que muestra: el arte (sobre blanco) promediado en cada píxel de la pantalla
+  const lw = Math.ceil(w / pitch) + 2, lh = Math.ceil(h / pitch) + 2, LN = lw * lh;
+  const C = [new Float32Array(LN), new Float32Array(LN), new Float32Array(LN)], cnt = new Float32Array(LN);
+  if (art) for (let y = 0; y < h; y++) {
+    const ly = (y / pitch) | 0;
+    for (let x = 0; x < w; x++) {
+      const o = ly * lw + ((x / pitch) | 0), s = (y * w + x) * comps, al = comps === 4 ? art[s + 3] / 255 : 1;
+      C[0][o] += 1 - al + al * art[s] / 255; C[1][o] += 1 - al + al * art[s + 1] / 255; C[2][o] += 1 - al + al * art[s + 2] / 255; cnt[o]++;
+    }
+  }
+  for (let o = 0; o < LN; o++) { const n = cnt[o]; if (n) { C[0][o] /= n; C[1][o] /= n; C[2][o] /= n; } else C[0][o] = C[1][o] = C[2][o] = 1; }
+  // tinta electrónica: el fantasma de la página anterior (otro trozo del mismo contenido, desplazado) se queda
+  let ghost = null;
+  if (D.ghost && art) {
+    ghost = new Float32Array(LN); const gy = Math.round(lh * lerp(0.28, 0.42, r())), gx = Math.round(lw * (r() - 0.5) * 0.1);
+    for (let y = 0; y < lh; y++) for (let x = 0; x < lw; x++) {
+      const yy = (y + gy) % lh, xx = clamp(x + gx, 0, lw - 1), o2 = yy * lw + xx;
+      ghost[y * lw + x] = 1 - (C[0][o2] * 0.3 + C[1][o2] * 0.59 + C[2][o2] * 0.11);
+    }
+  }
+  // ---- 2) cómo reproduce el color cada pantalla
+  const bayer = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+  const blk = def(D.black, 0) * kk, wht = 1 - (1 - def(D.white, 1)) * k1, con = def(D.contrast, 0) * kk, sat = def(D.sat, 0) * kk;
+  const temp = D.temp.map(t => 1 + (t - 1) * kk);
+  const mod = D.module ? [] : null;
+  if (mod) for (let i = 0; i < 4096; i++) mod.push([1 + (r() - 0.5) * 0.12 * kk, (r() - 0.5) * 0.05 * kk, (r() - 0.5) * 0.05 * kk]);
+  for (let ly = 0; ly < lh; ly++) for (let lx = 0; lx < lw; lx++) {
+    const o = ly * lw + lx;
+    let c0 = C[0][o], c1 = C[1][o], c2 = C[2][o];
+    const l = c0 * 0.2126 + c1 * 0.7152 + c2 * 0.0722;
+    if (D.gray) { c0 = c1 = c2 = lerp(l, c0 * 0.3 + c1 * 0.59 + c2 * 0.11, 1); }
+    else { c0 = l + (c0 - l) * (1 + sat); c1 = l + (c1 - l) * (1 + sat); c2 = l + (c2 - l) * (1 + sat); }
+    const cc = [c0, c1, c2];
+    for (let c = 0; c < 3; c++) {
+      let v = clamp(cc[c], 0, 1);
+      v = 0.5 + (v - 0.5) * (1 + con);
+      if (ghost) v -= ghost[o] * D.ghost * kk;
+      if (D.viewAngle) {             // TN: el gamma cambia con el ángulo de visión (de arriba a abajo)
+        const t = ly / lh - 0.5, va = D.viewAngle * kk;
+        v = Math.pow(clamp(v, 0, 1), 1 + va * t * 1.6) * (1 - va * 0.25 * t) + va * 0.12 * Math.max(0, -t);
+      }
+      if (D.dither) {                // pocos niveles con tramado ordenado (bandas en los degradados)
+        const q = lerp(255, D.dither, k1), th = (bayer[(ly & 3) * 4 + (lx & 3)] + 0.5) / 16 - 0.5;
+        v = Math.round(clamp(v, 0, 1) * q + th) / q;
+      }
+      v = blk + (wht - blk) * clamp(v, 0, 1);
+      if (mod) { const mi = (((ly / D.module) | 0) * 64 + ((lx / D.module) | 0)) & 4095, md = mod[mi]; v *= md[0] * (1 + (c === 0 ? md[1] : c === 2 ? md[2] : 0)); }
+      cc[c] = clamp(v * temp[c] * bright, 0, 1.4);
+    }
+    if (D.dead && r() < D.dead * kk) { const t = r(); if (t < 0.6) cc[0] = cc[1] = cc[2] = 0; else cc[(r() * 3) | 0] = 1.2; }
+    C[0][o] = cc[0]; C[1][o] = cc[1]; C[2][o] = cc[2];
+  }
+  // ---- 3) subpíxeles: cada píxel con su estructura física
+  await prog(0.3, 'Subpíxeles…');
+  const out = new Uint8ClampedArray(N * 4);
+  const vis = smooth(1.6, 5, pitch) * Math.min(1, kk * 1.2);
+  const ae = Math.min(0.45, 1.8 / pitch);
+  const bar = (u, a, b) => smooth(a - ae, a + ae, u) * (1 - smooth(b - ae, b + ae, u));
+  const disk = (dx, dy, rad) => 1 - smooth(rad - ae, rad + ae, Math.hypot(dx, dy));
+  const curve = def(D.curve, 0) * kk, conv = def(D.converge, 0) * kk, echo = def(D.echo, 0) * kk, jit = def(D.jitter, 0) * kk;
+  const cxw = w / 2, cyh = h / 2;
+  const at = (c, fx, fy) => C[c][clamp(fy | 0, 0, lh - 1) * lw + clamp(fx | 0, 0, lw - 1)];
+  const fl = lerp(1, def(D.floor, 0.5), k1), expoM = 1 / (fl + (1 - fl) * 0.42);
+  const gG = D.layout === 'stripe' ? 3 / ((1 - D.gap) * (1 - (D.gapV || 0))) : D.layout === 'crt' ? 3 / (1 - D.gap) * 1.25 : D.layout === 'led' ? 5.5 : 2.6;
+  const jitRow = new Float32Array(lh); for (let i = 0; i < lh; i++) jitRow[i] = (hashi(i, 7, S.seed) - 0.5) * jit + Math.sin(i * 0.05 + r() * 6) * jit * 0.5;
+  const grain = D.grain ? 0.05 * kk : 0;
+  for (let y = 0; y < h; y++) {
+    if ((y & 511) === 0) await prog(0.3 + 0.35 * y / h, 'Subpíxeles…');
+    for (let x = 0; x < w; x++) {
+      let X = x, Y = y;
+      if (curve) { const u = (x - cxw) / cxw, v = (y - cyh) / cyh, rr = u * u + v * v; X = cxw + u * (1 + curve * rr) * cxw; Y = cyh + v * (1 + curve * rr) * cyh; }
+      const j = (y * w + x) * 4;
+      if (X < 0 || Y < 0 || X >= w || Y >= h) { out[j] = out[j + 1] = out[j + 2] = 6; out[j + 3] = 255; continue; }
+      let sx = X / pitch; const sy = Y / pitch;
+      if (jit) sx += jitRow[clamp(sy | 0, 0, lh - 1)];
+      const ix = Math.floor(sx), iy = sy | 0, fx = sx - ix, fy = sy - iy;
+      const base = [at(0, sx - conv, sy), at(1, sx, sy), at(2, sx + conv, sy + conv * 0.5)];
+      if (echo) for (let c = 0; c < 3; c++) base[c] = base[c] * (1 - echo) + at(c, sx - 2.5, sy) * echo;   // eco de la señal
+      const m = [0, 0, 0];
+      let sub = true;
+      if (D.layout === 'stripe') {
+        const gv = (D.gapV || 0) / 2, g = D.gap / 2, row = bar(fy, gv, 1 - gv);
+        for (let c = 0; c < 3; c++) m[c] = bar(fx * 3 - c, g, 1 - g) * row;
+      } else if (D.layout === 'pentile') {
+        const dg = Math.hypot((fx - 0.72) / 0.2, (fy - 0.5) / 0.26);
+        m[1] = 1 - smooth(1 - ae * 3, 1 + ae * 3, dg);
+        const dd = (Math.abs(fx - 0.27) + Math.abs(fy - 0.5)) / 0.36, rb = 1 - smooth(1 - ae * 3, 1 + ae * 3, dd);
+        // rojo y azul se comparten entre vecinos: su valor es la media de los dos píxeles que los usan
+        if (((ix + iy) & 1) === 0) m[0] = rb * 1.9; else m[2] = rb * 1.9;
+        if (m[0]) base[0] = (base[0] + at(0, sx - 1, sy)) / 2; if (m[2]) base[2] = (base[2] + at(2, sx - 1, sy)) / 2;
+      } else if (D.layout === 'crt') {
+        const l = base[0] * 0.3 + base[1] * 0.59 + base[2] * 0.11, sig = 0.2 + 0.2 * clamp(l, 0, 1.2);
+        const scan = Math.exp(-((fy - 0.5) * (fy - 0.5)) / (2 * sig * sig));
+        for (let c = 0; c < 3; c++) m[c] = bar(fx * 3 - c, D.gap / 2, 1 - D.gap / 2) * scan;
+      } else if (D.layout === 'led') {
+        // paquete SMD redondo con 3 chips (R arriba-izquierda, G arriba-derecha, B abajo); visera encima
+        const dx = fx - 0.5, dy = fy - 0.54, pk = disk(dx, dy, 0.37);
+        m[0] = disk(fx - 0.42, fy - 0.46, 0.085) + pk * 0.12; m[1] = disk(fx - 0.58, fy - 0.46, 0.085) + pk * 0.12; m[2] = disk(fx - 0.5, fy - 0.62, 0.085) + pk * 0.12;
+        const visor = smooth(0.18, 0.02, fy) * 0.08;   // la visera: un borde gris arriba de cada fila
+        base.push(visor, pk);
+      } else { sub = false; }        // tinta electrónica: sin subpíxeles a la vista
+      for (let c = 0; c < 3; c++) {
+        let v;
+        if (D.layout === 'led') {
+          // el chip de su color brilla fuerte; el difusor del paquete deja ver el color mezclado; entre LEDs, negro
+          const ledV = base[c] * (Math.min(1, m[c]) * 1.5 + base[4] * 0.95) * 1.25 + base[3];
+          v = lerp(base[c], ledV, Math.min(1, kk * 1.3));
+        } else if (sub) v = lerp(base[c], base[c] * (fl + (1 - fl) * Math.min(1.9, m[c] * gG)) * expoM, vis);
+        else v = base[c];
+        if (grain) v *= 1 + (hashi(x >> 1, y >> 1, 77) - 0.5) * grain;
+        out[j + c] = 255 * v;
+      }
+      out[j + 3] = 255;
+    }
+  }
+  // ---- 4) luz: bloom de lo brillante (fósforos, LEDs), halation del cristal del tubo y nitidez óptica
+  const tmp = new Float32Array(N), ch = [new Float32Array(N), new Float32Array(N), new Float32Array(N)];
+  for (let o = 0; o < N; o++) { ch[0][o] = out[o * 4]; ch[1][o] = out[o * 4 + 1]; ch[2][o] = out[o * 4 + 2]; }
+  const shot = st.luz !== 'ninguna' || ['movil', 'movil_antiguo', 'analogica'].indexOf(st.calidad) >= 0;
+  const optic = pitch * (D.layout === 'led' ? 0.05 : 0.08) * (shot ? 1.6 : 1);
+  if (def(D.glow, 0) > 0) {
+    const gk = D.glow * kk;
+    for (let c = 0; c < 3; c++) {
+      const g = new Float32Array(ch[c]); gaussBlur(g, w, h, pitch * (D.layout === 'led' ? 0.9 : 2.2), tmp);
+      const hal = D.layout === 'crt' ? new Float32Array(ch[c]) : null; if (hal) gaussBlur(hal, w, h, longS / 60, tmp);
+      if (optic > 0.45) gaussBlur(ch[c], w, h, optic, tmp);
+      for (let o = 0; o < N; o++) ch[c][o] += Math.max(0, g[o] - 70) * gk * 0.9 + (hal ? hal[o] * gk * 0.07 : 0);
+    }
+  } else if (optic > 0.45) for (let c = 0; c < 3; c++) gaussBlur(ch[c], w, h, optic, tmp);
+  // ---- 5) defectos del panel: fugas de luz, brillo IPS, mura, viñeta del tubo, nieve
+  const bseed = (r() * 1e5) | 0, bc = longS / 7, mc = longS / 5;
+  const bleedK = def(D.bleed, 0) * kk, ipsK = def(D.ipsGlow, 0) * kk, vig = def(D.vig, 0) * kk, mura = def(D.mura, 0) * kk;
+  const E = (bleedK || ipsK) ? lowField(w, h, 8, (x, y) => {
+    const u = x / w, v = y / h, de = Math.min(u, v, 1 - u, 1 - v);
+    let add = 0;
+    if (bleedK) add += bleedK * 90 * Math.exp(-de / 0.05) * smooth(0.35, 0.8, fbm2(x / bc, y / bc, bseed));
+    if (ipsK) { const dc = Math.min(Math.hypot(u, v), Math.hypot(1 - u, v), Math.hypot(u, 1 - v), Math.hypot(1 - u, 1 - v)); add += ipsK * 70 * Math.exp(-dc / 0.22); }
+    return add;
+  }) : null;
+  const M = mura ? lowField(w, h, 8, (x, y) => 1 + mura * ((fbm2(x / mc, y / mc, bseed + 5) - 0.5) * 2 + (vnoise(x / (mc * 0.25), y / (mc * 3), bseed + 9) - 0.5) * 0.6)) : null;
+  const snow = def(D.snow, 0) * kk;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const o = y * w + x, j = o * 4;
+    const add = E ? E(x, y) : 0;
+    let vf = M ? M(x, y) : 1;
+    if (vig) { const rx = (x - w / 2) / (w / 2), ry = (y - h / 2) / (h / 2); vf *= 1 - vig * Math.pow((rx * rx + ry * ry) / 2, 1.4); }
+    const sn = snow ? (hashi(x >> 1, y, 91) - 0.5) * snow * 2 : 0;
+    for (let c = 0; c < 3; c++) {
+      const v0 = ch[c][o], darkK = 1 - Math.min(1, v0 / 160);
+      out[j + c] = (v0 + add * darkK * (c === 2 ? 1.08 : c === 0 ? 0.95 : 1)) * vf + sn;
+    }
+  }
+  if (!withArt) return { rgba: new Uint8Array(out.buffer), S };
+  // ---- 6) vidrio delante, si se eligió
+  await applyOverlay(S, st, out, assets, prog);
+  // ---- 7) fotografiar la pantalla
+  if (shot) { await prog(0.85, 'Fotografiando la pantalla…'); screenShot(S, st, out, D, pitch, kk); }
+  const cal = ['movil', 'movil_antiguo', 'analogica'].indexOf(st.calidad) >= 0 ? st.calidad : 'perfecta';
+  if (cal !== 'perfecta') quality(S, st, out, cal, k);
+  else if (def(st.encuadre, 0) > 0) captureGeometry(S, st, out, {}, k);
+  await prog(1, 'Listo');
+  return { rgba: new Uint8Array(out.buffer) };
+}
+
+function screenShot(S, st, px, D, pitch, kk) {
+  const { w, h } = S, longS = Math.max(w, h), half = Math.hypot(w, h) / 2;
+  const r = rng((S.seed + (def(st.seedFoto, 0) | 0) * 7717) * 11 + 3);
+  const luz = st.luz || 'ninguna', gloss = D.gloss;
+  // moiré: la rejilla de la pantalla y la del sensor «baten». Dos familias de franjas (filas y columnas de la
+  // pantalla) casi perpendiculares, de colores en las pantallas con tira RGB, curvadas por el objetivo y la
+  // perspectiva, y más fuertes donde la cámara enfoca mejor. Cuanto más pequeño el píxel, más moiré.
+  const mA = def(D.moire, 0) * kk * 0.07 * (0.45 + 0.55 * smooth(10, 2.5, pitch));
+  const colored = D.layout === 'stripe' || D.layout === 'pentile' || D.layout === 'crt';
+  const fr = [];
+  for (let i = 0; i < 2; i++) {
+    const th = (i ? Math.PI / 2 : 0) + (r() - 0.5) * 0.5;
+    fr.push({ ca: Math.cos(th), sa: Math.sin(th), per: longS * lerp(0.01, 0.035, r()), x0: r() * w, y0: r() * h, bend: lerp(-2, 2, r()), a: i ? 0.7 : 1 });
+  }
+  const fseed = (r() * 1e5) | 0, fsc = longS / 3;
+  const MA = mA ? lowField(w, h, 8, (x, y) => mA * smooth(0.2, 0.75, fbm2(x / fsc, y / fsc, fseed))) : null;
+  // bandas del obturador (PWM / barrido): horizontales, con una más marcada
+  const bA = def(D.bands, 0) * kk * lerp(0.7, 1.25, r()), bPer = h / lerp(1.8, 7.5, r()), bPh = r() * 6.28;
+  const bTilt = (r() - 0.5) * 0.12, bSharp = lerp(2, 5, r()), bBig = lerp(0.3, 0.9, r()), bWob = lerp(0, 0.025, r()) * h, bWf = lerp(1, 3, r()) / w;
+  // reflejos en el cristal según la luz
+  const lamp = luz === 'lampara' || luz === 'foco', flash = luz === 'flash', me = luz === 'sombra', day = luz === 'dia' || luz === 'ventana';
+  const lx = lerp(0.2, 0.8, r()) * w, ly = lerp(0.15, 0.45, r()) * h;
+  const fx = (0.5 + (r() - 0.5) * 0.15) * w, fy = (0.45 + (r() - 0.5) * 0.15) * h;
+  const sc = longS / 6, ss = (r() * 1e5) | 0, sm = longS / 14;
+  const lightAt = (x, y) => {
+    let veil = 0.03 * kk, refl = 0;
+    if (lamp) { const d = Math.hypot(x - lx, y - ly) / half; refl += (gloss * 0.9 * Math.exp(-Math.pow(d / (0.08 + 0.25 * (1 - gloss)), 2)) + 0.25 * Math.exp(-d / 0.5)) * kk; veil += 0.08 * kk; }
+    if (flash) { const d = Math.hypot(x - fx, y - fy) / half; refl += (gloss * 1.4 * Math.exp(-Math.pow(d / (0.045 + 0.2 * (1 - gloss)), 2)) + 0.35 * Math.exp(-d / 0.3)) * kk; veil += 0.05 * kk; }
+    if (day) { const u = x / w; refl += 0.18 * kk * smooth(0.35, 0.0, u) * (0.6 + 0.4 * gloss); veil += 0.1 * kk; }
+    if (me) {
+      const u = (x - w * 0.5) / w, v = (y - h * 0.62) / h;
+      const head = Math.hypot(u / 0.14, (v + 0.12) / 0.18), body = Math.hypot(u / 0.38, (v - 0.32) / 0.3);
+      refl += (smooth(1.2, 0.8, head) + smooth(1.15, 0.85, body)) * 0.22 * kk; veil += 0.12 * kk;
+    }
+    const smudge = smooth(0.45, 0.8, fbm2(x / sm, y / sm * 0.6, ss)) * 0.8 + 0.2 * fbm2(x / sc, y / sc, ss + 1);
+    return [veil, refl * (0.85 + 0.3 * smudge)];
+  };
+  const FV = lowField(w, h, 6, (x, y) => lightAt(x, y)[0]), FR = lowField(w, h, 6, (x, y) => lightAt(x, y)[1]);
+  // pantalla que refleja (tinta electrónica): la luz de la habitación la ilumina como a un papel
+  const amb = D.reflective ? (lamp ? [1.08, 0.97, 0.8] : flash ? [0.98, 1.0, 1.04] : day ? [0.97, 1.0, 1.03] : [0.92, 0.92, 0.92]) : null;
+  const AF = D.reflective ? lowField(w, h, 8, (x, y) => {
+    if (flash) { const d = Math.hypot(x - fx, y - fy) / half; return lerp(1, 1.15 / Math.pow(1 + d * d / 0.5, 2), kk); }
+    if (lamp) { const d = Math.hypot(x - lx, y - ly) / half; return lerp(1, 1.12 / Math.pow(1 + d * d / 0.4, 1.4), kk); }
+    if (me) { const u = (x - w * 0.5) / w, v = (y - h * 0.9) / h; return 1 - 0.4 * kk * smooth(1.2, 0.6, Math.hypot(u / 0.3, v / 0.35)); }
+    return 1;
+  }) : null;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      // las bandas no son rectas del todo: algo inclinadas y onduladas, distintas en cada versión
+      const yb = y + x * bTilt + Math.sin(x * bWf * 6.283) * bWob;
+      const ph0 = 2 * Math.PI * yb / bPer + bPh;
+      const band = bA ? 1 - bA * Math.pow(0.5 + 0.5 * Math.cos(ph0), bSharp) - bA * bBig * Math.pow(0.5 + 0.5 * Math.cos(ph0 * 0.5), 12) : 1;
+      const j = (y * w + x) * 4;
+      const veil = FV(x, y), refl = FR(x, y), ma = MA ? MA(x, y) : 0;
+      let p0 = 0, p1 = 0;
+      if (ma) {
+        const nx = x / longS - 0.5, ny = y / longS - 0.5;
+        const f0 = fr[0], f1 = fr[1];
+        p0 = 2 * Math.PI * (((x - f0.x0) * f0.ca + (y - f0.y0) * f0.sa) / f0.per + f0.bend * (nx * nx + ny * ny) * 8);
+        p1 = 2 * Math.PI * (((x - f1.x0) * f1.ca + (y - f1.y0) * f1.sa) / f1.per + f1.bend * (nx * nx - ny * ny) * 8);
+      }
+      const af = AF ? AF(x, y) : 1;
+      for (let c = 0; c < 3; c++) {
+        let v = px[j + c] * band;
+        if (amb) v *= amb[c] * af;
+        if (ma) v *= 1 + ma * (Math.cos(p0 + (colored ? c * 2.094 : 0)) + fr[1].a * Math.cos(p1 + (colored ? c * 2.094 : 0)) * 0.6);
+        v += (255 - v) * Math.min(0.9, refl) + 255 * veil * (1 - v / 255) * 0.6;
+        px[j + c] = v;
+      }
+    }
+  }
+}
+
 // ================================================================ API: PAPEL DE FONDO
 async function renderPaper(opts) {
   const { w, h, ppm, state, assets } = opts;
   const prog = opts.onProgress || (async () => {});
   await catalogs(assets);
   const st = Object.assign({}, P.DEFAULT_STATE, state || {});
+  if (isScreen(st)) return renderScreen(opts, st, false);     // pantalla encendida en blanco, para trabajar encima
   const N = w * h;
   const S = { w, h, ppm, N, seed: (def(st.seed, 1) | 0) * 7919 + 13, k: clamp(def(st.intensity, 50), 0, 100) / 50 };
   // semillas por sección: el botón ⟳ de cada sección cambia sólo lo suyo
@@ -819,11 +1107,11 @@ const LIGHT = {
   ninguna: { lx: -0.5, ly: -0.7, rk: 0, fk: 0, tex: 1 },
   escaner: { lx: 0, ly: -1, rk: 0.22, fk: 0.05, tex: 0.6 },
   dia: { lx: 0.3, ly: -0.9, rk: 0.35, fk: 0.45, tex: 0.9 },
-  ventana: { lx: -0.95, ly: 0.3, rk: 1, fk: 1.1, tex: 1.12 },
-  foco: { lx: -0.2, ly: -0.6, rk: 0.4, fk: 0.55, tex: 0.95 },
+  ventana: { lx: -0.95, ly: 0.3, rk: 1.3, fk: 1.4, tex: 1.2 },
+  foco: { lx: -0.2, ly: -0.6, rk: 0.6, fk: 0.75, tex: 1.0 },
   flash: { lx: 0, ly: -0.3, rk: 0.1, fk: 0.25, tex: 0.78 },
   sombra: { lx: -0.3, ly: -0.9, rk: 0.35, fk: 0.55, tex: 0.92 },
-  lampara: { lx: 0.85, ly: -0.55, rk: 0.85, fk: 0.95, tex: 1.06 }
+  lampara: { lx: 0.85, ly: -0.55, rk: 1.1, fk: 1.2, tex: 1.12 }
 };
 function lightDir(id) { const L = LIGHT[id] || LIGHT.ninguna; const n = Math.hypot(L.lx, L.ly) || 1; return [L.lx / n, L.ly / n, L]; }
 
@@ -832,6 +1120,8 @@ async function renderFinal(opts) {
   const { w, h, ppm, assets, art, artComponents } = opts;
   const prog = opts.onProgress || (async () => {});
   const st0 = Object.assign({}, P.DEFAULT_STATE, opts.state || {});
+  await catalogs(assets);
+  if (isScreen(st0)) return renderScreen(opts, st0, true);
   const Lsel = LIGHT[st0.luz] || LIGHT.ninguna;
   const kk0 = clamp(clamp(def(st0.intensity, 50), 0, 100) / 50, 0, 2);
   const stF = Object.assign({}, st0, {
@@ -849,7 +1139,7 @@ async function renderFinal(opts) {
 
   // ---- 1) mapa de desplazamiento propio de este papel: el relieve del grano a su escala real
   await prog(0.48, 'Mapa de desplazamiento del papel…');
-  const scale = clamp(def(st.scale, 1), 0.1, 10);
+  const scale = clamp(def(st.scale, 1), 0.04, 10);
   const reliefK = clamp(def(paper.rough, 0.02) / 0.03, 0.2, 3) * def(paper.reliefAdj, 1);
   const Hs = new Float32Array(N), tmp = new Float32Array(N);
   const tk = 1 / (S.texK || 1);
@@ -1016,183 +1306,520 @@ async function renderFinal(opts) {
   for (let x = 0; x < w; x++) for (const y of [0, h - 1]) { const j = (y * w + x) * 4, jj = ((y === 0 ? 1 : h - 2) * w + clamp(x, 1, w - 2)) * 4; out[j] = out[jj]; out[j + 1] = out[jj + 1]; out[j + 2] = out[jj + 2]; out[j + 3] = 255; }
   for (let y = 0; y < h; y++) for (const x of [0, w - 1]) { const j = (y * w + x) * 4, jj = (y * w + (x === 0 ? 1 : w - 2)) * 4; out[j] = out[jj]; out[j + 1] = out[jj + 1]; out[j + 2] = out[jj + 2]; out[j + 3] = 255; }
   await prog(0.82, 'Fotografiando…');
+  await applyOverlay(S, st, out, assets, prog);
   photo(S, st, out, B, paper);
   await prog(1, 'Listo');
   return { rgba: new Uint8Array(out.buffer) };
 }
 
+// ================================================================ SOBREPONER (vidrio, cristal, plástico delante)
+// El vidrio está a una DISTANCIA del papel (slider): lo de detrás se ve desviado en proporción a la pendiente del
+// vidrio por esa distancia (refracción). Pegado al papel apenas deforma; al alejarlo, cada caña de un acanalado
+// comprime e invierte la imagen, cada gota de lluvia es una lentecita, y el esmerilado desenfoca cada vez más.
+// Encima, el vidrio devuelve luz (reflejos de la propia foto de la textura), tiñe un poco, y puede llevar malla
+// metálica (armado) y suciedad (huellas, grasa, polvo).
+async function applyOverlay(S, st, px, assets, prog) {
+  const fam = st.sobre || 'ninguno';
+  const cat = cache.overlays && cache.overlays[fam];
+  if (!cat || !cat.items || !cat.items.length) return;
+  const { w, h, ppm, N } = S;
+  const kk = clamp(S.k, 0, 2), k1 = Math.min(1, kk);
+  if (kk <= 0) return;
+  const n = cat.items.length, it = cat.items[(((def(st.sobreVar, 0) | 0) % n) + n) % n];
+  const RI = await loadImg(assets, 'overlays/' + it.r), NI = await loadImg(assets, 'overlays/' + it.n);
+  const MI = it.m ? await loadImg(assets, 'overlays/' + it.m) : null;
+  const tw = RI.width, th = RI.height;
+  const dist = clamp(def(st.sobreDist, 0.25), 0, 1) * 40;                       // mm entre vidrio y papel
+  const refl = clamp(def(st.sobreRefl, 1), 0, 3) * def(cat.refl, 0.35) * k1;
+  const dirt = cat.dirt ? clamp(def(st.sobreDirt, 0.25), 0, 1) * k1 : 0;
+  // transparencia: 1 = vidrio limpio; al bajarla el vidrio está gastado (velo lechoso, arañazos, rozaduras)
+  const wear = (1 - clamp(def(st.sobreTrans, 1), 0, 1)) * Math.min(1.3, kk);
+  const scale = clamp(def(st.sobreScale, 1), 0.25, 4);
+  const sxT = tw / (it.tileMm[0] * scale * ppm), syT = th / (it.tileMm[1] * scale * ppm);   // px de textura por px
+  const r = rng((S.seed + (def(st.sobreVar, 0) | 0) * 31) * 7 + 3);
+  const ox = r() * tw, oy = r() * th;
+  const wrap = (v, m) => { v %= m; return v < 0 ? v + m : v; };
+  const bil = (img, ch, u, v) => {
+    u = wrap(u, img.width); v = wrap(v, img.height);
+    const W = img.width, Hh = img.height, c = img.channels, d = img.data;
+    const x0 = u | 0, y0 = v | 0, x1 = x0 + 1 < W ? x0 + 1 : 0, y1 = y0 + 1 < Hh ? y0 + 1 : 0, fx = u - x0, fy = v - y0;
+    const a = d[(y0 * W + x0) * c + ch], b = d[(y0 * W + x1) * c + ch], e = d[(y1 * W + x0) * c + ch], f = d[(y1 * W + x1) * c + ch];
+    return ((a + (b - a) * fx) * (1 - fy) + (e + (f - e) * fx) * fy) / 255;
+  };
+  await prog(0.84, 'Vidrio delante…');
+  // ---- 1) refracción: lo de detrás, desviado (con una pizca de dispersión de color en el vidrio)
+  const D = dist * ppm * 0.55 * def(cat.refr, 0.6) * Math.sqrt(kk);
+  const disp = fam === 'plastico' ? 0 : 0.012;
+  if (D > 0.05) {
+    const src = new Uint8ClampedArray(px);
+    const samp = (sx, sy, c) => {
+      sx = sx < 0 ? 0 : sx > w - 1.001 ? w - 1.001 : sx; sy = sy < 0 ? 0 : sy > h - 1.001 ? h - 1.001 : sy;
+      const ix = sx | 0, iy = sy | 0, fx = sx - ix, fy = sy - iy, o = (iy * w + ix) * 4 + c;
+      return (src[o] * (1 - fx) + src[o + 4] * fx) * (1 - fy) + (src[o + w * 4] * (1 - fx) + src[o + w * 4 + 4] * fx) * fy;
+    };
+    for (let y = 0; y < h; y++) {
+      if ((y & 511) === 0) await prog(0.84 + 0.04 * y / h, 'Vidrio delante…');
+      const v = oy + y * syT;
+      for (let x = 0; x < w; x++) {
+        const u = ox + x * sxT;
+        const gx = (bil(NI, 0, u, v) * 255 - 128) / 126, gy = (bil(NI, 1, u, v) * 255 - 128) / 126;
+        const j = (y * w + x) * 4;
+        for (let c = 0; c < 3; c++) {
+          const dk = D * (1 + (c - 1) * disp);
+          px[j + c] = samp(x - gx * dk, y - gy * dk, c);
+        }
+      }
+    }
+  }
+  // ---- 2) difusión: el esmerilado (y un poco cualquier vidrio rugoso) desenfoca más cuanto más lejos está el papel
+  // el vidrio gastado también difunde: microarañazos que abren la luz (más cuanto más lejos está el papel)
+  const sig = (def(cat.frost, 0) + 0.45 * wear * wear) * (dist * ppm * 0.11 + 0.15 * ppm) * Math.sqrt(kk) + wear * wear * 0.3 * ppm;
+  if (sig > 0.5) {
+    const tmp = new Float32Array(N), ch = new Float32Array(N);
+    for (let c = 0; c < 3; c++) {
+      for (let o = 0; o < N; o++) ch[o] = px[o * 4 + c];
+      gaussBlur(ch, w, h, sig, tmp);
+      for (let o = 0; o < N; o++) px[o * 4 + c] = ch[o];
+    }
+  }
+  // ---- 3) suciedad sobre el vidrio: huellas de dedos, grasa y polvo (difunden luz: velo claro)
+  let haze = null, hw = 0, hh = 0;
+  const hf = 4;
+  if (dirt > 0 && cache.imperf) {
+    hw = Math.ceil(w / hf); hh = Math.ceil(h / hf); haze = new Float32Array(hw * hh);
+    const pmm = ppm / hf;
+    const stamp = async (cid, count, mmA, mmB, strength) => {
+      const C = cache.imperf[cid]; if (!C || !C.items) return;
+      for (let i = 0; i < count; i++) {
+        const itm = C.items[(r() * C.items.length) | 0], img = await loadImg(assets, 'imperf/' + itm.file);
+        const sizePx = lerp(mmA, mmB, r()) * pmm, sc = sizePx / Math.max(img.width, img.height);
+        const cx = r() * hw, cy = r() * hh, rot = r() * 6.283, ca = Math.cos(rot), sa = Math.sin(rot), st2 = strength * lerp(0.5, 1, r());
+        const ext = Math.ceil(sizePx * 0.75);
+        for (let yy = Math.max(0, (cy - ext) | 0); yy < Math.min(hh, cy + ext); yy++) for (let xx = Math.max(0, (cx - ext) | 0); xx < Math.min(hw, cx + ext); xx++) {
+          const dx = (xx - cx) / sc, dy = (yy - cy) / sc;
+          const u = dx * ca + dy * sa + img.width / 2, v = -dx * sa + dy * ca + img.height / 2;
+          if (u < 0 || v < 0 || u >= img.width - 1 || v >= img.height - 1) continue;
+          const o = ((v | 0) * img.width + (u | 0)) * img.channels;
+          const dd = 1 - (img.data[o] + img.data[o + (img.channels > 1 ? 1 : 0)] + img.data[o + (img.channels > 2 ? 2 : 0)]) / 765;
+          haze[yy * hw + xx] += dd * st2;
+        }
+      }
+    };
+    await stamp('huella_grasa', Math.round(2 + 6 * dirt), 16, 24, 1.6);      // dedos
+    await stamp('grasa', Math.round(1 + 2 * dirt), 40, 80, 0.5);            // limpiado a medias
+    for (let i = 0, nd = Math.round(400 * dirt * (w * h) / (2480 * 3508)); i < nd; i++) {   // motas de polvo
+      const xx = (r() * hw) | 0, yy = (r() * hh) | 0; haze[yy * hw + xx] += lerp(0.3, 1, r());
+    }
+    gaussBlur(haze, hw, hh, 0.8, new Float32Array(hw * hh));
+  }
+  // ---- 3b) desgaste: arañazos (líneas finas que dispersan la luz) y rozaduras (zonas mates a manchas)
+  let SC = null, scuff = null;
+  if (wear > 0.01) {
+    SC = new Float32Array(N);
+    const area = (w * h) / (2480 * 3508);
+    // grupos de arañazos paralelos (al limpiar o deslizar algo encima) y arañazos sueltos
+    const groups = Math.round((4 + 22 * wear) * Math.max(0.3, area)), loose = Math.round((30 + 420 * wear) * Math.max(0.3, area));
+    const line = (x0, y0, ang, len, v, curv) => {
+      const steps = Math.max(2, Math.round(len)); let x = x0, y = y0, a = ang;
+      for (let i = 0; i < steps; i++) {
+        const fade = Math.sin(Math.PI * i / steps);            // empiezan y acaban finos
+        const xi = x | 0, yi = y | 0;
+        if (xi >= 0 && yi >= 0 && xi < w && yi < h) { const o = yi * w + xi, vv = v * (0.4 + 0.6 * fade) * (0.6 + 0.4 * r()); if (vv > SC[o]) SC[o] = vv; }
+        a += curv; x += Math.cos(a); y += Math.sin(a);
+      }
+    };
+    for (let g = 0; g < groups; g++) {
+      const cx = r() * w, cy = r() * h, ang = r() * Math.PI, nl = 3 + ((r() * 12) | 0), spread = lerp(3, 18, r()) * ppm;
+      for (let i = 0; i < nl; i++) {
+        const off = (r() - 0.5) * spread, len = lerp(8, 70, Math.pow(r(), 1.5)) * ppm;
+        line(cx - Math.sin(ang) * off + (r() - 0.5) * 10 * ppm, cy + Math.cos(ang) * off + (r() - 0.5) * 10 * ppm, ang + (r() - 0.5) * 0.06, len, lerp(0.35, 1, r()), (r() - 0.5) * 0.0015);
+      }
+    }
+    for (let i = 0; i < loose; i++) line(r() * w, r() * h, r() * Math.PI * 2, lerp(1, 25, Math.pow(r(), 2)) * ppm, lerp(0.2, 0.8, r()), (r() - 0.5) * 0.01);
+    gaussBlur(SC, w, h, Math.max(0.45, 0.04 * ppm), new Float32Array(N));
+    let mx = 0; for (let o = 0; o < N; o += 7) if (SC[o] > mx) mx = SC[o];
+    if (mx > 0) for (let o = 0; o < N; o++) SC[o] = Math.min(1, SC[o] / (mx * 0.55));
+    const cs = 35 * ppm, ss = (S.seed * 13 + 77) | 0;
+    scuff = lowField(w, h, Math.max(4, Math.round(ppm * 2)), (x, y) => smooth(0.3, 0.75, fbm2(x / cs, y / cs, ss)));
+  }
+  // ---- 4) tinte del vidrio, malla, reflejos y velo
+  const tint = (cat.tint || [0.97, 0.975, 0.975]).map(t => 1 - (1 - t) * k1);
+  const mc = it.meshColor || [1, 1, 1];
+  const veil = 0.02 * k1 + 0.05 * def(cat.frost, 0) * k1;
+  for (let y = 0; y < h; y++) {
+    const v = oy + y * syT;
+    for (let x = 0; x < w; x++) {
+      const u = ox + x * sxT, j = (y * w + x) * 4;
+      let rr = bil(RI, 0, u, v);
+      rr = rr * refl;
+      const m = MI ? bil(MI, 0, u, v) * k1 : 0;
+      let hz = 0;
+      if (haze) { const hx = Math.min(hw - 1, (x / hf) | 0), hy = Math.min(hh - 1, (y / hf) | 0); hz = Math.min(1, haze[hy * hw + hx]) * dirt * 0.32; }
+      for (let c = 0; c < 3; c++) {
+        let val = px[j + c] * tint[c];
+        val += (200 - val) * veil;
+        if (m > 0.01) val = val * (1 - 0.86 * m) + 70 * mc[c] * m;            // alambre de acero (u óxido)
+        val += (255 - val) * Math.min(1, rr);                                   // reflejos (pantalla)
+        val += (235 - val) * hz;                                                // huellas y polvo
+        if (SC) {
+          const sf = scuff(x, y);
+          val += (226 - val) * Math.min(0.85, wear * (0.32 + 0.3 * sf));            // velo lechoso, desigual
+          val += (250 - val) * Math.min(0.9, SC[y * w + x] * (0.35 + 0.45 * wear)); // arañazos
+        }
+        px[j + c] = val;
+      }
+    }
+  }
+}
+
 // ================================================================ FOTOGRAFÍA
+// Luz de la toma. Cada luz tiene su forma real y, si se elige, SE NOTA:
+//  escáner  luz plana y fría, negros firmes, blancos casi a tope; sombra donde el papel se levanta del cristal
+//  día      luz suave de cielo, algo fría, cae poco a poco hacia una esquina, la foto queda algo apagada
+//  ventana  luz lateral fuerte: un lado claro, el otro en penumbra fría; sombra suave del marco de la ventana
+//  lámpara  bombilla cálida (tungsteno sin corregir: naranja), charco de luz en una esquina, el resto cae a oscuro
+//  foco     círculo de luz definido, fuera queda en penumbra
+//  flash    centro quemado (reflejo del flash en el papel), caída rápida hacia las esquinas, frío y contrastado
+//  sombra   el móvil y la mano tapan la luz: sombra blanda que entra desde abajo
+const LUZ = {
+  ninguna: {},
+  escaner: { expo: 1.03, white: 0.975, black: 0.025, tint: [0.99, 1.0, 1.02], lift: 0.32, contrast: 0.1, scanYellow: 1 },
+  dia: { expo: 0.84, white: 0.93, black: 0.05, tint: [0.965, 0.995, 1.055], grad: [0.85, -0.8, 0.26], vig: 0.3, contrast: -0.04 },
+  ventana: { expo: 0.86, white: 0.93, black: 0.05, tint: [1.02, 1.0, 0.97], side: 0.58, frame: 0.22, coolShadow: 0.1, vig: 0.25, contrast: 0.06 },
+  lampara: { expo: 0.9, white: 0.92, black: 0.06, tint: [1.16, 0.97, 0.66], pool: [0.92, 0.04, 0.62], poolK: 0.68, vig: 0.3, contrast: 0.05 },
+  foco: { expo: 0.98, white: 0.93, black: 0.05, tint: [1.07, 1.0, 0.88], spot: [0.5, 0.42, 0.36, 0.3], outside: 0.4, vig: 0.2, contrast: 0.08 },
+  flash: { expo: 1.0, white: 0.95, black: 0.05, tint: [0.97, 1.0, 1.05], hot: [0.5, 0.44], fall: 0.72, glare: 0.9, vig: 0.1, contrast: 0.05 },
+  sombra: { expo: 0.88, white: 0.93, black: 0.05, tint: [0.97, 1.0, 1.04], grad: [0.1, -0.9, 0.12], phone: 0.5, vig: 0.25, contrast: 0.02 }
+};
 function photo(S, st, px, B, paper) {
   const { w, h } = S;
-  const k = clamp(S.k, 0, 2);
+  const k = clamp(S.k, 0, 2), kl = Math.min(1.5, k);
   const luz = st.luz || 'ninguna', cal = st.calidad || 'perfecta';
-  const expo = Math.pow(2, clamp(def(st.exposure, 0), -1.5, 1.5) * 0.7);
-  const diag = Math.hypot(w, h);
+  const expo = Math.pow(2, clamp(def(st.exposure, 0), -1.5, 1.5) * 0.8);
+  const diag = Math.hypot(w, h), half = diag / 2;
+  const L = LUZ[luz] || {};
   if (luz !== 'ninguna' || expo !== 1) {
-    const L = {
-      ninguna: { fall: 0, tint: [1, 1, 1], vig: 0, glare: 0, white: 1, black: 0 },
-      escaner: { fall: 0, tint: [1.0, 1.003, 1.01], vig: 0, glare: 0, white: 0.985, black: 0.018, scanYellow: 1 },
-      dia: { sx: 0.5, sy: -0.6, fall: 0.07, tint: [0.995, 1.0, 1.012], vig: 0.06, glare: 0, white: 0.955, black: 0.03 },
-      ventana: { sx: -0.75, sy: 0.25, fall: 0.15, tint: [1.012, 1.0, 0.99], vig: 0.07, glare: 0.012, cool: 0.03, white: 0.95, black: 0.035 },
-      foco: { spot: 1, fall: 0.22, tint: [1.025, 1.0, 0.955], vig: 0.07, glare: 0.025, white: 0.955, black: 0.03 },
-      flash: { spot: 0.7, fall: 0.2, tint: [0.99, 1.0, 1.02], vig: 0.12, glare: 0.07, white: 0.96, black: 0.04 },
-      sombra: { sx: 0.1, sy: -0.8, fall: 0.06, tint: [0.995, 1.0, 1.01], vig: 0.07, glare: 0, shadow: 1, white: 0.95, black: 0.035 },
-      lampara: { sx: 0.8, sy: -0.75, fall: 0.2, tint: [1.05, 1.0, 0.885], vig: 0.1, glare: 0.03, white: 0.95, black: 0.035 }
-    }[luz] || {};
-    const fall = (L.fall || 0) * k, vig = (L.vig || 0) * k, glare = (L.glare || 0) * k;
-    const tint = (L.tint || [1, 1, 1]).map(v => 1 + (v - 1) * k);
-    // respuesta de la cámara: el blanco del papel nunca llega a 255 y el negro nunca a 0
-    const white = 1 - (1 - def(L.white, 1)) * Math.min(1, k), black = def(L.black, 0) * Math.min(1, k) * 255;
-    const cx = w / 2, cy = h / 2;
-    const sxp = cx + (L.sx || 0) * diag, syp = cy + (L.sy || 0) * diag, hgt = diag * 0.55;
-    let e0 = 1;
-    if (!L.spot && fall > 0) { const q = (cx - sxp) ** 2 + (cy - syp) ** 2 + hgt * hgt; e0 = hgt / (q * Math.sqrt(q)); }
-    const gl = B.gloss;
-    // escáner: la luz atraviesa dos veces el papel fino → se ve más amarillo
-    const sy = L.scanYellow ? clamp(def(paper.translucency, 0.25), 0, 1) * 0.035 * k : 0;
-    // sombra blanda del móvil / de la mano (desde abajo a la derecha)
-    const shK = L.shadow ? 0.2 * Math.min(1, k) : 0, shx = w * 0.62, shy = h * 1.08, sra = w * 0.38, srb = h * 0.3;
-    // la iluminación es suave: se calcula en una rejilla de 8 px y se interpola
-    const E = lowField(w, h, 8, (x, y) => {
+    const r = rng((S.seed + (def(st.seedFoto, 0) | 0) * 7717) * 5 + 9);
+    const jx = (r() - 0.5) * 0.12, jy = (r() - 0.5) * 0.1;
+    const lerpK = (v, base) => base + (v - base) * kl;
+    const tint = (L.tint || [1, 1, 1]).map(v => lerpK(v, 1));
+    const white = lerpK(def(L.white, 1), 1), black = lerpK(def(L.black, 0), 0) * 255;
+    const con = def(L.contrast, 0) * kl;
+    const ex0 = lerpK(def(L.expo, 1), 1) * expo;
+    const vig = def(L.vig, 0) * kl;
+    // lado del escáner donde el papel se separa del cristal (y la ventana / lámpara: de qué lado viene la luz)
+    // (la luz de ventana y lámpara viene del mismo lado que el relieve del grano: izquierda y arriba-derecha)
+    const side = (L.side || L.pool) ? 1 : (r() < 0.5 ? 1 : -1);
+    const E = lowField(w, h, 6, (x, y) => {
+      const u = x / w, v = y / h, rx = (x - w / 2) / half, ry = (y - h / 2) / half;
       let e = 1;
-      if (L.spot) { const rr = Math.hypot(x - cx, y - cy) / (diag * 0.5); e = 1 - fall * smooth(0.2 * L.spot, 1.3, rr); }
-      else if (fall > 0) { const q = (x - sxp) ** 2 + (y - syp) ** 2 + hgt * hgt; e = Math.pow(hgt / (q * Math.sqrt(q)) / e0, fall * 1.4) / (1 + fall * 0.15); }
-      const rx = (x - cx) / (diag / 2), ry = (y - cy) / (diag / 2);
+      if (L.lift) {                              // escáner: el papel se levanta en un canto → sombra degradada
+        const d = side > 0 ? u : 1 - u;
+        e *= 1 - L.lift * kl * Math.pow(1 - smooth(0, 0.09, d), 1.6);
+      }
+      if (L.grad) {                              // luz de cielo: degradado amplio hacia una esquina
+        const [gx, gy, gk] = L.grad, t = (rx * gx + ry * gy) / Math.hypot(gx, gy);
+        e *= 1 + gk * kl * t * 0.5;
+      }
+      if (L.side) {                              // ventana: un lado claro, el otro en penumbra
+        const t = side > 0 ? u : 1 - u;
+        e *= lerp(1.12, 1 - L.side * kl, smooth(-0.1, 1.15, t));
+      }
+      if (L.frame) {                             // sombra blanda del marco de la ventana (cruz de travesaños)
+        const fx = (side > 0 ? u : 1 - u) - (0.62 + jx), fy = v - (0.4 + jy) + 0.18 * (side > 0 ? u : 1 - u);
+        const bar = Math.max(Math.exp(-fx * fx / 0.0016), Math.exp(-fy * fy / 0.0012));
+        e *= 1 - L.frame * kl * bar;
+      }
+      if (L.pool) {                              // lámpara: charco de luz en una esquina
+        const px0 = side > 0 ? L.pool[0] : 1 - L.pool[0];
+        const dx = (u - px0) * w / half, dy = (v - L.pool[1]) * h / half, q = (dx * dx + dy * dy) / (L.pool[2] * L.pool[2]);
+        e *= lerp(1, 1.2 / Math.pow(1 + q, 1.4), L.poolK * kl);
+      }
+      if (L.spot) {                              // foco: círculo de luz definido
+        const [cx, cy, rxx, ryy] = L.spot, dx = (u - cx - jx) / rxx, dy = (v - cy - jy) / ryy, d = Math.sqrt(dx * dx + dy * dy);
+        e *= lerp(1.06, 1 - (1 - L.outside) * kl, smooth(0.78, 1.12, d));
+      }
+      if (L.hot) {                               // flash: ley del cuadrado inverso + cos⁴ (caída rápida a las esquinas)
+        const dx = (u - L.hot[0] - jx * 0.5) * w / half, dy = (v - L.hot[1] - jy * 0.5) * h / half;
+        e *= lerp(1, 1.18 / Math.pow(1 + (dx * dx + dy * dy) / (L.fall * L.fall), 2), kl);
+      }
+      if (L.phone) {                             // sombra del móvil y la mano, desde abajo
+        const cxp = 0.5 + jx * 2, dxp = (u - cxp) / 0.2, dyp = (v - 1.12) / 0.42;
+        const hand = Math.sqrt(((u - cxp - 0.2 * side) / 0.18) ** 2 + ((v - 1.0) / 0.25) ** 2);
+        const m = Math.max(smooth(1.25, 0.7, Math.sqrt(dxp ** 4 + dyp ** 2)), smooth(1.3, 0.6, hand) * 0.85);
+        e *= 1 - L.phone * kl * m;
+      }
       e *= 1 / Math.pow(1 + (rx * rx + ry * ry) * vig, 2);
-      if (shK) { const qx = (x - shx) / sra, qy = (y - shy) / srb; e *= 1 - shK * smooth(1.45, 0.75, Math.sqrt(qx * qx + qy * qy)); }
-      return e * expo;
+      return e * ex0;
     });
-    const gx0 = L.spot ? cx : cx - (L.sx || 0) * diag * 0.25, gy0 = L.spot ? cy : cy - (L.sy || 0) * diag * 0.25;
-    const G = glare > 0 ? lowField(w, h, 8, (x, y) => glare * Math.exp(-((x - gx0) ** 2 + (y - gy0) ** 2) / (diag * diag * 0.04))) : null;
+    // reflejo del flash: zona quemada (más donde el papel brilla: tóner, grasa, cera)
+    const gl = B.gloss;
+    const G = L.glare ? lowField(w, h, 6, (x, y) => {
+      const dx = (x / w - L.hot[0] - jx * 0.5) * w / half, dy = (y / h - L.hot[1] - jy * 0.5) * h / half;
+      return L.glare * kl * Math.exp(-(dx * dx + dy * dy) / 0.02);
+    }) : null;
+    const sy = L.scanYellow ? clamp(def(paper.translucency, 0.25), 0, 1) * 0.04 * k : 0;
+    const D = B.D, dinvP = 1 / (S.dstd || 0.01);
+    const cool = def(L.coolShadow, 0) * kl;
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
       const o = y * w + x, j = o * 4;
       const e = E(x, y);
       let g = 0;
-      if (G) g = G(x, y) * (1 + (gl ? gl[o] / 255 * 3 : 0));
-      else if (gl && gl[o] && luz !== 'escaner') g = gl[o] / 255 * 0.025 * k;
-      const cool = (L.cool || 0) * k * (1 - Math.min(1, e));
+      if (G) {
+        // reflejo del flash: no es un velo, es brillo especular que sólo devuelven las partes del relieve que miran a
+        // la cámara (crestas del grano, virutas, fibras) y lo que brilla (tóner, grasa, cera). La textura se sigue viendo.
+        const gv = G(x, y);
+        if (gv > 0.004) {
+          const hn = D ? D[o] * dinvP : 0;
+          const crest = smooth(-0.2, 1.8, hn);
+          g = gv * (0.06 + 0.55 * crest * crest + (gl ? gl[o] / 255 * 0.9 : 0));
+        }
+      }
+      else if (gl && gl[o] && luz !== 'escaner' && luz !== 'ninguna') g = gl[o] / 255 * 0.05 * kl;
+      const sh = cool * clamp(1 - e, 0, 1);
       for (let c = 0; c < 3; c++) {
         let v = px[j + c] * e * tint[c];
-        if (c === 2) v *= 1 + cool - sy; if (c === 0) v *= 1 - cool * 0.5;
-        v += (255 - v) * g;
-        v = black + v * white * (255 - black) / 255;
+        if (c === 2) v *= 1 + sh - sy; else if (c === 0) v *= 1 - sh * 0.6;
+        if (con) v = 128 + (v - 128) * (1 + con);
+        v += (255 - v) * Math.min(0.85, g);
+        v = black + clamp(v, 0, 255) * white * (255 - black) / 255;
         px[j + c] = v;
       }
     }
   }
-  if (cal === 'perfecta') return;
+  if (cal === 'perfecta') { if (def(st.encuadre, 0) > 0) captureGeometry(S, st, px, {}, k); return; }
   quality(S, st, px, cal, k);
 }
 
+// Calidad de la captura. Todo se mide respecto a una RESOLUCIÓN EFECTIVA (lado largo, px): por mucho que el
+// documento sea grande, una foto de móvil antiguo tiene el detalle de ~900 px.
+//   res        lado largo efectivo · motion: trepidación (fracción del lado largo) · focus: desenfoque extra
+//   denoise    el «acuarelado» de los móviles: borra la textura fina y deja los bordes
+//   sharpen    halos de enfoque digital · clarity: contraste local (HDR del móvil)
+//   noise/chroma  ruido de luminancia (más en las sombras) y manchas de color, al tamaño del píxel efectivo
+//   jpeg       bloques de 8×8 px efectivos · ca: aberración cromática · barrel: distorsión del objetivo
+//   halation   halo rojizo alrededor de las luces (película) · grain: grano a dos escalas
+const QUAL = {
+  escaner_pro: { res: 3200, sharpen: 0.45, noise: 0.8, contrast: 0.05, white: 0.03, dust: 0.4, rot: 0.4 },
+  escaner_oficina: { res: 1600, sharpen: 1.1, noise: 2.2, contrast: 0.2, white: 0.1, desat: 0.2, streak: 1, dust: 1.6, jpeg: 0.45, rot: 1.3 },
+  movil: { res: 1700, motion: 0.0022, sharpen: 1.25, denoise: 0.75, clarity: 0.35, noise: 6, chroma: 5, sat: 0.1, contrast: 0.06, jpeg: 0.45,
+    vig: 0.3, ca: 0.6, rot: 1.9, persp: 0.05, edge: 3.2, barrel: 0.018 },
+  movil_antiguo: { res: 900, motion: 0.004, focus: 0.45, sharpen: 0.8, denoise: 0.4, noise: 13, chroma: 12, jpeg: 1, ca: 2.2,
+    cast: [1.04, 1.05, 0.84], vig: 0.5, contrast: 0.14, white: 0.07, sat: -0.12, rot: 2.6, persp: 0.08, edge: 5, barrel: 0.04 },
+  fotocopia: { res: 1300, gray: 1, copy: 1, toner: 1, white: 0.12, noise: 3, streak: 2.5, dust: 3, border: 1, rot: 1.1 },
+  analogica: { res: 1500, focus: 0.5, grain: 1, halation: 0.75, fade: 0.09, cast: [1.05, 1.0, 0.88], vig: 0.45, sat: -0.14, contrast: 0.06,
+    diffusion: 0.18, dust: 1.2, hairs: 1, rot: 1.5, persp: 0.035, edge: 3.6, barrel: 0.022 }
+};
 function quality(S, st, px, cal, k) {
   const { w, h, N } = S;
-  const Q = {
-    escaner_pro: { sharpen: 0.25, noise: 0.5, contrast: 0.02, rot: 0.3 },
-    escaner_oficina: { blur: 0.55, sharpen: 0.45, noise: 1.0, contrast: 0.1, white: 0.05, desat: 0.1, streak: 1, dust: 1, rot: 0.7, edge: 0.6 },
-    movil: { sharpen: 0.55, noise: 2.6, chroma: 1.0, contrast: 0.05, sat: 0.06, vig: 0.06, rot: 0.9, persp: 0.014, edge: 1.4 },
-    movil_antiguo: { blur: 0.9, noise: 6, chroma: 3.5, contrast: 0.08, jpeg: 0.3, ca: 1.1, cast: [1.01, 1.0, 0.955], vig: 0.14, rot: 1.3, persp: 0.022, edge: 2.4 },
-    fotocopia: { gray: 1, blur: 0.65, contrast: 0.5, toner: 1, white: 0.1, noise: 1.8, dust: 1, rot: 0.6 },
-    analogica: { grain: 6, blur: 0.45, contrast: -0.05, lift: 0.05, cast: [1.025, 1.0, 0.95], vig: 0.2, sat: -0.07, rot: 0.8, persp: 0.012, edge: 1.8 }
-  }[cal];
+  const Q = QUAL[cal];
   if (!Q) return;
-  const scaleK = Math.max(1, Math.max(w, h) / 3000);
+  const kq = Math.min(1.6, k), longS = Math.max(w, h);
+  const r = rng((S.seed + (def(st.seedFoto, 0) | 0) * 7717) * 3 + 77);
+  // factor entre el documento y la resolución efectiva (cuanto mayor, más se pierde)
+  const f = Math.max(1, longS / lerp(longS, Q.res || longS, Math.min(1, kq)));
   const ch = [new Float32Array(N), new Float32Array(N), new Float32Array(N)];
   for (let o = 0; o < N; o++) { ch[0][o] = px[o * 4]; ch[1][o] = px[o * 4 + 1]; ch[2][o] = px[o * 4 + 2]; }
-  const tmp = new Float32Array(N);
-  if (Q.gray) { for (let o = 0; o < N; o++) { const l = ch[0][o] * 0.3 + ch[1][o] * 0.59 + ch[2][o] * 0.11; ch[0][o] = ch[1][o] = ch[2][o] = l; } }
-  if (Q.blur) for (let c = 0; c < 3; c++) gaussBlur(ch[c], w, h, Q.blur * scaleK * k, tmp);
-  if (Q.sharpen) {
-    const bl = new Float32Array(N);
-    for (let c = 0; c < 3; c++) { bl.set(ch[c]); gaussBlur(bl, w, h, 1.4 * scaleK, tmp); for (let o = 0; o < N; o++) ch[c][o] += (ch[c][o] - bl[o]) * Q.sharpen * k; }
+  const tmp = new Float32Array(N), bl = new Float32Array(N);
+  if (Q.gray) for (let o = 0; o < N; o++) { const l = ch[0][o] * 0.3 + ch[1][o] * 0.59 + ch[2][o] * 0.11; ch[0][o] = ch[1][o] = ch[2][o] = l; }
+  // 1) resolución efectiva + desenfoque del objetivo
+  const sigR = 0.55 * f + (Q.focus || 0) * f * kq;
+  if (sigR > 0.45) for (let c = 0; c < 3; c++) gaussBlur(ch[c], w, h, sigR, tmp);
+  // 2) trepidación: barrido en una dirección
+  if (Q.motion) {
+    const len = Q.motion * longS * kq * lerp(0.6, 1.2, r()), ang = (r() - 0.5) * 1.2 + (r() < 0.5 ? 0 : Math.PI / 2);
+    if (len > 1) {
+      const taps = Math.min(9, Math.max(3, Math.round(len))), dx = Math.cos(ang) * len / (taps - 1), dy = Math.sin(ang) * len / (taps - 1);
+      for (let c = 0; c < 3; c++) {
+        const a = ch[c]; tmp.set(a);
+        for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+          let s = 0;
+          for (let t = 0; t < taps; t++) {
+            const xx = clamp(Math.round(x + (t - (taps - 1) / 2) * dx), 0, w - 1), yy = clamp(Math.round(y + (t - (taps - 1) / 2) * dy), 0, h - 1);
+            s += tmp[yy * w + xx];
+          }
+          a[y * w + x] = s / taps;
+        }
+      }
+    }
   }
+  // 3) aberración cromática (rojo hacia fuera, azul hacia dentro; crece hacia los bordes)
   if (Q.ca) {
-    const cx = w / 2, cy = h / 2, R = Math.hypot(cx, cy);
+    const cx = w / 2, cy = h / 2, R = Math.hypot(cx, cy), s = Q.ca * kq * f;
     const r0 = new Float32Array(ch[0]), b0 = new Float32Array(ch[2]);
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      const dx = (x - cx) / R, dy = (y - cy) / R, s = Q.ca * k * scaleK;
+      const dx = (x - cx) / R, dy = (y - cy) / R;
       const xr = clamp(Math.round(x + dx * s), 0, w - 1), yr = clamp(Math.round(y + dy * s), 0, h - 1);
       const xb = clamp(Math.round(x - dx * s), 0, w - 1), yb = clamp(Math.round(y - dy * s), 0, h - 1);
       ch[0][y * w + x] = r0[yr * w + xr]; ch[2][y * w + x] = b0[yb * w + xb];
     }
   }
+  // 4) reducción de ruido del móvil: aplana la textura fina (papel «de acuarela»), conserva los bordes
+  if (Q.denoise) {
+    const am = Q.denoise * kq;
+    for (let c = 0; c < 3; c++) {
+      bl.set(ch[c]); gaussBlur(bl, w, h, 1.6 * f, tmp);
+      const a = ch[c];
+      for (let o = 0; o < N; o++) { const d = a[o] - bl[o]; a[o] = bl[o] + d * (1 - am * smooth(14, 3, Math.abs(d))); }
+    }
+  }
+  // 5) contraste local (HDR del móvil) y halos de enfoque
+  if (Q.clarity) {
+    const L = new Float32Array(N); for (let o = 0; o < N; o++) L[o] = ch[0][o] * 0.3 + ch[1][o] * 0.59 + ch[2][o] * 0.11;
+    gaussBlur(L, w, h, longS / 45, tmp);
+    const am = Q.clarity * kq;
+    for (let o = 0; o < N; o++) { const l = ch[0][o] * 0.3 + ch[1][o] * 0.59 + ch[2][o] * 0.11, d = (l - L[o]) * am; ch[0][o] += d; ch[1][o] += d; ch[2][o] += d; }
+  }
+  if (Q.sharpen) {
+    for (let c = 0; c < 3; c++) { bl.set(ch[c]); gaussBlur(bl, w, h, 1.3 * f, tmp); const a = ch[c]; for (let o = 0; o < N; o++) a[o] += (a[o] - bl[o]) * Q.sharpen * kq; }
+  }
+  // 6) difusión (película): las luces se abren un poco · halation: halo rojo-anaranjado alrededor de lo claro
+  if (Q.diffusion || Q.halation) {
+    const Hm = new Float32Array(N);
+    for (let o = 0; o < N; o++) { const l = ch[0][o] * 0.3 + ch[1][o] * 0.59 + ch[2][o] * 0.11; Hm[o] = Math.max(0, l - 175) / 80; }
+    gaussBlur(Hm, w, h, longS / 160, tmp);
+    const dk = (Q.diffusion || 0) * kq * 60, hk = (Q.halation || 0) * kq * 70;
+    for (let o = 0; o < N; o++) { const v = Hm[o]; if (v <= 0.001) continue; ch[0][o] += v * (dk + hk); ch[1][o] += v * (dk + hk * 0.35); ch[2][o] += v * dk * 0.8; }
+  }
+  // 7) JPEG: bloques de 8×8 píxeles efectivos que se aplanan donde hay poco detalle
   if (Q.jpeg) {
+    const bs = Math.max(8, Math.round(8 * f)), jk = Q.jpeg * kq;
     for (let c = 0; c < 3; c++) {
       const a = ch[c];
-      for (let by = 0; by < h; by += 8) for (let bx = 0; bx < w; bx += 8) {
+      for (let by = 0; by < h; by += bs) for (let bx = 0; bx < w; bx += bs) {
         let s = 0, s2 = 0, n = 0;
-        for (let y = by; y < Math.min(h, by + 8); y++) for (let x = bx; x < Math.min(w, bx + 8); x++) { const v = a[y * w + x]; s += v; s2 += v * v; n++; }
+        const ye = Math.min(h, by + bs), xe = Math.min(w, bx + bs);
+        for (let y = by; y < ye; y += 2) for (let x = bx; x < xe; x += 2) { const v = a[y * w + x]; s += v; s2 += v * v; n++; }
         const m = s / n, varr = s2 / n - m * m;
-        const t = Q.jpeg * k * clamp(1 - varr / 400, 0, 1);
-        if (t <= 0) continue;
-        for (let y = by; y < Math.min(h, by + 8); y++) for (let x = bx; x < Math.min(w, bx + 8); x++) { const o = y * w + x; a[o] = lerp(a[o], m, t); }
+        const t = jk * clamp(1 - varr / (c === 1 ? 260 : 600), 0, 1) * (c === 1 ? 0.75 : 1);   // el color se comprime más
+        if (t <= 0.01) continue;
+        for (let y = by; y < ye; y++) for (let x = bx; x < xe; x++) { const o = y * w + x; a[o] = lerp(a[o], m, t); }
       }
     }
   }
-  const nz = (Q.noise || 0) * k, chn = (Q.chroma || 0) * k, gr = (Q.grain || 0) * k;
-  let grainF = null;
-  if (gr > 0) { grainF = new Float32Array(N); for (let o = 0; o < N; o++) grainF[o] = hashi(o % w, (o / w) | 0, 5) - 0.5; gaussBlur(grainF, w, h, 0.7 * scaleK, tmp); }
-  const con = (Q.contrast || 0) * k, white = (Q.white || 0) * k, desat = (Q.desat || 0) * k, sat = (Q.sat || 0) * k, lift = (Q.lift || 0) * k;
-  const cast = (Q.cast || [1, 1, 1]).map(v => 1 + (v - 1) * k);
-  const vig = (Q.vig || 0) * k, diag = Math.hypot(w, h) / 2;
-  const toner = (Q.toner || 0) * k, streak = (Q.streak || 0) * k;
-  // motas de polvo del cristal (escáner / fotocopiadora)
-  const dust = [];
-  if (Q.dust) { const r = rng(S.seed + 999); const n = Math.round(14 * k); for (let i = 0; i < n; i++) dust.push([r() * w, r() * h, (0.6 + r() * 1.8) * scaleK, 0.2 + 0.5 * r()]); }
+  // 8) tono, color, ruido y grano (por píxel)
+  const nz = (Q.noise || 0) * kq, chn = (Q.chroma || 0) * kq, cellN = Math.max(1, f * 0.9);
+  const sNoise = (x, y, s) => {     // ruido al tamaño del píxel efectivo (manchitas, no puntos sueltos)
+    const gx = x / cellN, gy = y / cellN, ix = Math.floor(gx), iy = Math.floor(gy), fx = gx - ix, fy = gy - iy;
+    const a = hashi(ix, iy, s), b = hashi(ix + 1, iy, s), c = hashi(ix, iy + 1, s), d = hashi(ix + 1, iy + 1, s);
+    return (a + (b - a) * fx) * (1 - fy) + (c + (d - c) * fx) * fy - 0.5;
+  };
+  const gr = (Q.grain || 0) * kq, gC1 = Math.max(1, longS / 2600), gC2 = gC1 * 3.2;
+  const con = (Q.contrast || 0) * kq, white = (Q.white || 0) * kq, desat = (Q.desat || 0) * kq, sat = (Q.sat || 0) * kq, fade = (Q.fade || 0) * kq;
+  const cast = (Q.cast || [1, 1, 1]).map(v => 1 + (v - 1) * kq);
+  const vig = (Q.vig || 0) * kq, diag = Math.hypot(w, h) / 2;
+  const toner = (Q.toner || 0) * kq, streak = (Q.streak || 0) * kq, copy = (Q.copy || 0) * kq;
+  const sx0 = (r() * 1e5) | 0;
+  // fotocopia: rayas de tambor en posiciones fijas
+  const lines = []; if (streak) for (let i = 0; i < 3 + ((r() * 4) | 0); i++) lines.push([r() * w, lerp(0.4, 2, r()) * Math.max(1, longS / 2500), lerp(0.15, 0.6, r())]);
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
     const o = y * w + x, j = o * 4;
-    let r = ch[0][o], g = ch[1][o], b = ch[2][o];
-    const l = r * 0.2126 + g * 0.7152 + b * 0.0722;
-    if (desat || sat) { const s = 1 - desat + sat; r = l + (r - l) * s; g = l + (g - l) * s; b = l + (b - l) * s; }
-    r *= cast[0]; g *= cast[1]; b *= cast[2];
-    if (con) { r = 128 + (r - 128) * (1 + con); g = 128 + (g - 128) * (1 + con); b = 128 + (b - 128) * (1 + con); }
-    if (white) { const f = 1 / (1 - white); r *= f; g *= f; b *= f; }
-    if (lift) { r += lift * 255 * (1 - r / 255); g += lift * 255 * (1 - g / 255); b += lift * 255 * (1 - b / 255); }
-    if (vig) { const rr = ((x - w / 2) ** 2 + (y - h / 2) ** 2) / (diag * diag); const f = 1 - vig * rr; r *= f; g *= f; b *= f; }
-    if (nz) { const n = (hashi(x, y, 11) + hashi(x, y, 12) - 1) * nz * (0.5 + 1.2 * (1 - l / 255)); r += n; g += n; b += n; }
-    if (chn) { r += (hashi(x >> 1, y >> 1, 21) - 0.5) * chn; b += (hashi(x >> 1, y >> 1, 22) - 0.5) * chn; }
-    if (grainF) { const n = grainF[o] * gr * 4 * (0.6 + 0.8 * (1 - Math.abs(l - 128) / 128)); r += n; g += n; b += n; }
-    if (toner && hashi(x, y, 31) < 0.0006 * toner) { r *= 0.35; g *= 0.35; b *= 0.35; }
-    if (streak) { const s = (hashi(0, y >> 1, 41) - 0.5) * 3 * streak; r += s; g += s; b += s; }
-    px[j] = r; px[j + 1] = g; px[j + 2] = b;
+    let R = ch[0][o], G = ch[1][o], Bb = ch[2][o];
+    let l = R * 0.2126 + G * 0.7152 + Bb * 0.0722;
+    if (desat || sat) { const s = 1 - desat + sat; R = l + (R - l) * s; G = l + (G - l) * s; Bb = l + (Bb - l) * s; }
+    R *= cast[0]; G *= cast[1]; Bb *= cast[2];
+    if (con) { R = 128 + (R - 128) * (1 + con); G = 128 + (G - 128) * (1 + con); Bb = 128 + (Bb - 128) * (1 + con); }
+    if (copy) {
+      // fotocopiadora: los grises medios se van a blanco o a negro (curva muy dura) y el fondo queda moteado
+      const t = clamp(l / 255, 0, 1), c2 = 1 / (1 + Math.exp(-(t - 0.55) * (6 + 10 * copy)));
+      const v = lerp(t, c2, Math.min(1, copy)) * 255 - (sNoise(x * 0.25, y * 0.25, sx0 + 3) + 0.5) * 22 * copy * (t > 0.6 ? 1 : 0.3);
+      R = G = Bb = v;
+    }
+    if (white) { const ff = 1 / (1 - white); R *= ff; G *= ff; Bb *= ff; }
+    if (fade) { R = R * (1 - fade) + 255 * fade * 0.5 + 10 * fade; G = G * (1 - fade) + 255 * fade * 0.48 + 10 * fade; Bb = Bb * (1 - fade) + 255 * fade * 0.42 + 10 * fade; }
+    if (vig) { const rr = ((x - w / 2) ** 2 + (y - h / 2) ** 2) / (diag * diag); const vf = 1 - vig * rr * (0.6 + 0.4 * rr); R *= vf; G *= vf; Bb *= vf; }
+    l = R * 0.2126 + G * 0.7152 + Bb * 0.0722;
+    if (nz) { const n = sNoise(x, y, 11) * 2 * nz * (0.45 + 1.6 * Math.pow(1 - clamp(l / 255, 0, 1), 1.5)); R += n; G += n; Bb += n; }
+    if (chn) { const a = sNoise(x * 0.5, y * 0.5, 21) * chn * 2, b = sNoise(x * 0.5, y * 0.5, 22) * chn * 2; R += a; Bb += b; G -= (a + b) * 0.3; }
+    if (gr) {   // grano de película: dos escalas, más en los medios tonos
+      const mid = 0.5 + 1.2 * (1 - Math.abs(l - 128) / 128);
+      const n = ((hashi(x / gC1 | 0, y / gC1 | 0, 5) - 0.5) * 13 + sNoise(x / gC2 * cellN, y / gC2 * cellN, 6) * 18) * gr * mid;
+      R += n; G += n * 0.97; Bb += n * 1.05;
+    }
+    if (toner && hashi(x, y, 31) < 0.0012 * toner) { R *= 0.3; G *= 0.3; Bb *= 0.3; }
+    if (streak) {
+      let s = (hashi(0, y >> 1, 41) - 0.5) * 3 * streak;
+      for (const ln of lines) { const d = Math.abs(x - ln[0]); if (d < ln[1] * 2) s -= ln[2] * 120 * streak * Math.max(0, 1 - d / (ln[1] * 2)) * (0.6 + 0.4 * hashi(x, y >> 3, 43)); }
+      R += s; G += s; Bb += s;
+    }
+    px[j] = R; px[j + 1] = G; px[j + 2] = Bb;
   }
-  for (const d of dust) {
-    const R = Math.ceil(d[2] + 2);
-    for (let y = Math.max(0, (d[1] - R) | 0); y < Math.min(h, d[1] + R); y++) for (let x = Math.max(0, (d[0] - R) | 0); x < Math.min(w, d[0] + R); x++) {
-      const t = clamp(d[2] - Math.hypot(x - d[0], y - d[1]) + 0.5, 0, 1) * d[3] * Math.min(1, k); if (t <= 0) continue;
-      const j = (y * w + x) * 4; px[j] *= 1 - t * 0.6; px[j + 1] *= 1 - t * 0.6; px[j + 2] *= 1 - t * 0.6;
+  // 9) polvo del cristal / de la película y pelos
+  const area = (w * h) / (2480 * 3508), scaleK = Math.max(1, longS / 3000);
+  if (Q.dust) {
+    const n = Math.round(40 * Q.dust * kq * Math.max(0.4, area));
+    for (let i = 0; i < n; i++) {
+      const x0 = r() * w, y0 = r() * h, rad = lerp(0.6, 2.6, Math.pow(r(), 2)) * scaleK, op = lerp(0.25, 0.8, r()), dark = Q.gray || r() < 0.85;
+      const R2 = Math.ceil(rad + 2);
+      for (let y = Math.max(0, (y0 - R2) | 0); y < Math.min(h, y0 + R2); y++) for (let x = Math.max(0, (x0 - R2) | 0); x < Math.min(w, x0 + R2); x++) {
+        const t = clamp(rad - Math.hypot(x - x0, y - y0) + 0.5, 0, 1) * op; if (t <= 0) continue;
+        const j = (y * w + x) * 4; for (let c = 0; c < 3; c++) px[j + c] = dark ? px[j + c] * (1 - t * 0.75) : px[j + c] + (255 - px[j + c]) * t * 0.7;
+      }
+    }
+  }
+  if (Q.hairs) {
+    const n = Math.round(4 * Q.hairs * kq * Math.max(0.5, area));
+    for (let i = 0; i < n; i++) {
+      let x = r() * w, y = r() * h, a = r() * 6.28; const len = lerp(80, 400, r()) * scaleK, white2 = r() < 0.5;
+      for (let s = 0; s < len; s++) {
+        a += (r() - 0.5) * 0.08; x += Math.cos(a); y += Math.sin(a);
+        const xi = x | 0, yi = y | 0; if (xi < 0 || yi < 0 || xi >= w || yi >= h) break;
+        const j = (yi * w + xi) * 4; for (let c = 0; c < 3; c++) px[j + c] = white2 ? px[j + c] + (255 - px[j + c]) * 0.6 : px[j + c] * 0.35;
+      }
+    }
+  }
+  // fotocopia: borde oscuro del cristal y sombra del canto de la hoja
+  if (Q.border) {
+    const bw = Math.max(3, Math.round(longS * 0.006)) * kq;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const d = Math.min(x, y, w - 1 - x, h - 1 - y); if (d > bw * 3) continue;
+      const t = smooth(bw * 3, 0, d) * (0.5 + 0.5 * hashi(x >> 2, y >> 2, 51)), j = (y * w + x) * 4;
+      for (let c = 0; c < 3; c++) px[j + c] *= 1 - 0.75 * t;
     }
   }
   captureGeometry(S, st, px, Q, k);
 }
 
-// La toma nunca es perfecta: la hoja queda un poco girada, con algo de perspectiva (el móvil no está paralelo)
-// y los márgenes se desenfocan (profundidad de campo; más en el lado que queda más lejos). Se recorta lo justo
-// para que no aparezcan esquinas vacías.
+// La toma nunca es perfecta: la hoja queda girada, con perspectiva (el móvil no está paralelo), el objetivo curva
+// las rectas (barril) y los márgenes se desenfocan (profundidad de campo; más en el lado que queda más lejos).
+// Se recorta lo justo para que no aparezcan esquinas vacías.
 function captureGeometry(S, st, px, Q, k) {
   const { w, h, N } = S;
-  const kk = Math.min(1.5, k);
-  const rot = (Q.rot || 0) * kk, persp = (Q.persp || 0) * kk, edge = (Q.edge || 0) * kk * Math.max(w, h) / 2000;
-  if (rot <= 0 && persp <= 0 && edge <= 0) return;
+  const kk = Math.min(1.6, k);
+  // Encuadre (0 = de frente): cuanto más alto, la cámara está más girada e inclinada, descentrada y más cerca;
+  // sólo se recorta (nunca se inventa lo que queda fuera), así que al máximo lo del centro casi se sale del plano.
+  // curva suave: los primeros tramos tuercen poco, el final ya es una foto muy mala
+  const enc = clamp(def(st.encuadre, 0), 0, 1), ep = Math.pow(enc, 1.7), e2 = ep * ep;
+  const rot = (Q.rot || 0) * kk + 11 * ep, persp = (Q.persp || 0) * kk + 0.3 * ep,
+    barrel = (Q.barrel || 0) * kk + 0.04 * ep, edge = ((Q.edge || 0) * kk + 8 * Math.pow(enc, 1.2)) * Math.max(w, h) / 2000;
+  if (rot <= 0 && persp <= 0 && edge <= 0 && barrel <= 0) return;
   const r = rng((S.seed + (def(st.seedFoto, 0) | 0) * 7717) * 3 + 41);
-  const th = (r() < 0.5 ? -1 : 1) * rot * (0.55 + 0.45 * r()) * Math.PI / 180;
-  const pa = r() * Math.PI * 2, pxk = Math.cos(pa) * persp * (0.6 + 0.4 * r()), pyk = Math.sin(pa) * persp * (0.6 + 0.4 * r());
+  const th = (r() < 0.5 ? -1 : 1) * rot * (0.6 + 0.4 * r()) * Math.PI / 180;
+  const pa = r() * Math.PI * 2, pxk = Math.cos(pa) * persp * (0.7 + 0.3 * r()), pyk = Math.sin(pa) * persp * (0.7 + 0.3 * r());
   const ca = Math.cos(th), sa = Math.sin(th), asp = w / h;
-  // de la imagen (u,v ∈ [-1,1]) a la hoja: giro y perspectiva; zoom para cubrir sin esquinas vacías
   const map = (u, v, z, out) => {
+    const rb = 1 + barrel * (u * u + v * v);               // barril: lo de los bordes se ve más hacia dentro
+    u *= rb; v *= rb;
     const x = u * asp, y = v;
-    let xs = (x * ca - y * sa) / asp, ys = x * sa + y * ca;
+    const xs = (x * ca - y * sa) / asp, ys = x * sa + y * ca;
     const ww = 1 + pxk * xs + pyk * ys;
     out[0] = xs / ww * z; out[1] = ys / ww * z;
   };
   const t = [0, 0];
-  let m = 1;
-  for (const [u, v] of [[-1, -1], [1, -1], [-1, 1], [1, 1], [0, -1], [0, 1], [-1, 0], [1, 0]]) { map(u, v, 1, t); m = Math.max(m, Math.abs(t[0]), Math.abs(t[1])); }
-  const z = 0.998 / m;
-  const src = new Uint8ClampedArray(px);
-  if (rot > 0 || persp > 0) {
+  // descentrado (hacia dónde apunta la cámara) y acercamiento extra
+  const oa = r() * Math.PI * 2, offX = Math.cos(oa) * 0.3 * ep, offY = Math.sin(oa) * 0.3 * ep;
+  let z = 1;
+  for (let i = 0; i <= 16; i++) for (const [u, v] of [[-1 + i / 8, -1], [-1 + i / 8, 1], [-1, -1 + i / 8], [1, -1 + i / 8]]) {
+    map(u, v, 1, t);
+    if (Math.abs(t[0]) > 1e-6) z = Math.min(z, (1 - Math.abs(offX)) / Math.abs(t[0]));
+    if (Math.abs(t[1]) > 1e-6) z = Math.min(z, (1 - Math.abs(offY)) / Math.abs(t[1]));
+  }
+  z *= 0.998 * (1 - 0.2 * e2);
+  if (rot > 0 || persp > 0 || barrel > 0) {
+    const src = new Uint8ClampedArray(px);
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
       map((2 * x + 1) / w - 1, (2 * y + 1) / h - 1, z, t);
-      let sx = (t[0] + 1) * w / 2 - 0.5, sy = (t[1] + 1) * h / 2 - 0.5;
+      let sx = (t[0] + offX + 1) * w / 2 - 0.5, sy = (t[1] + offY + 1) * h / 2 - 0.5;
       sx = sx < 0 ? 0 : sx > w - 1.001 ? w - 1.001 : sx; sy = sy < 0 ? 0 : sy > h - 1.001 ? h - 1.001 : sy;
       const ix = sx | 0, iy = sy | 0, fx = sx - ix, fy = sy - iy, a = (iy * w + ix) * 4, b = a + 4, c = a + w * 4, d = c + 4;
       const j = (y * w + x) * 4;
@@ -1200,7 +1827,6 @@ function captureGeometry(S, st, px, Q, k) {
     }
   }
   if (edge > 0.3) {
-    // desenfoque progresivo hacia los márgenes (dos niveles mezclados), mayor en el lado más alejado
     const tmp = new Float32Array(N), b1 = [], b2 = [];
     for (let q = 0; q < 3; q++) {
       const a = new Float32Array(N); for (let o = 0; o < N; o++) a[o] = px[o * 4 + q];
@@ -1209,9 +1835,9 @@ function captureGeometry(S, st, px, Q, k) {
     const pn = Math.hypot(pxk, pyk) || 1;
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
       const u = (2 * x + 1) / w - 1, v = (2 * y + 1) / h - 1;
-      const far = persp > 0 ? (pxk * u + pyk * v) / pn * 0.35 : 0;
-      const rr = Math.sqrt(u * u * 0.8 + v * v * 0.8) + far;
-      const m2 = smooth(0.55, 1.25, rr);
+      const far = persp > 0 ? (pxk * u + pyk * v) / pn * 0.45 : 0;
+      // zona enfocada: más pequeña cuanto peor el encuadre, y desplazada hacia donde está más cerca
+      const m2 = smooth(0.4 - 0.32 * enc, 1.15 - 0.45 * enc, Math.sqrt(u * u * 0.8 + v * v * 0.8) + far * (1 + 1.5 * enc));
       if (m2 <= 0) continue;
       const o = y * w + x, j = o * 4;
       for (let q = 0; q < 3; q++) {
