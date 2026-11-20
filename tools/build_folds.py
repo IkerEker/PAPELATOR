@@ -15,7 +15,7 @@ import numpy as np
 import cv2
 from PIL import Image
 sys.path.insert(0, os.path.dirname(__file__))
-from common import ASSETS, REPO
+from common import ASSETS, REPO, fuente
 
 SRC = json.load(open(os.path.join(os.path.dirname(__file__), 'fold_sources.json')))
 GROUPS = {
@@ -62,7 +62,7 @@ if __name__ == '__main__':
     for gid, srcs in GROUPS.items():
         items = []
         for n, i in enumerate(srcs):
-            S = shading(os.path.join(REPO, SRC[str(i)]))
+            S = shading(fuente(SRC[str(i)]))
             dev = np.abs(S - 1)
             amp = float(np.percentile(dev, 99.95)) + 1e-4
             gain = 126 / amp

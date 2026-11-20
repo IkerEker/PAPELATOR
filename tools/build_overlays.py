@@ -20,9 +20,9 @@ import cv2
 from scipy import ndimage, signal
 from PIL import Image
 sys.path.insert(0, os.path.dirname(__file__))
-from common import ASSETS, REPO, save_png, make_tileable
+from common import ASSETS, REPO, save_png, make_tileable, fuente
 
-SRC = os.path.join(REPO, 'SOBREPONER')
+SRC = 'SOBREPONER/'      # nombre de siempre; se lee por id de la biblioteca (common.fuente)
 OUT = os.path.join(ASSETS, 'overlays')
 MAXD = 1024
 
@@ -146,7 +146,7 @@ def slopes(H, sig=1.2):
 
 
 def process(fam, n, fn):
-    L = lumf(os.path.join(SRC, fn))
+    L = lumf(fuente('SOBREPONER/' + fn))
     hh, ww = L.shape
     bright = L.mean() > 0.3
     R = reflections(L, bright)
@@ -175,7 +175,7 @@ def process(fam, n, fn):
         glass = cv2.inpaint((L * 255).astype(np.uint8), wire, 7, cv2.INPAINT_TELEA).astype(np.float64) / 255
         H = cv2.GaussianBlur(norm01(glass), (0, 0), 13) * 14
         # color del alambre (acero o, en el oxidado, óxido)
-        rgb = np.asarray(Image.open(os.path.join(SRC, fn)).convert('RGB'), np.float64) / 255
+        rgb = np.asarray(Image.open(fuente('SOBREPONER/' + fn)).convert('RGB'), np.float64) / 255
         on = (wire > 0) & (Mraw > 0.35)
         info['meshColor'] = [round(float(v), 3) for v in (rgb[on].mean(0) / max(rgb[on].mean(), 1e-3) if on.any() else np.ones(3))]
         O = 100

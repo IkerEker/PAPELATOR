@@ -24,10 +24,10 @@ import numpy as np
 from PIL import Image
 from scipy import ndimage
 sys.path.insert(0, os.path.dirname(__file__))
-from common import ASSETS, REPO
+from common import ASSETS, REPO, fuente
 import bordes_matte as BM
 
-SRC = os.path.join(REPO, 'BORDES')
+SRC = 'BORDES/'          # nombre de siempre; se lee por id de la biblioteca (common.fuente)
 TMP = os.environ.get('PAPELATOR_TMP', '/tmp/papelator_bordes')
 OUT = os.path.join(ASSETS, 'bordes')
 PPM = 10.0
@@ -79,7 +79,7 @@ def matted(fname):
     key = os.path.join(TMP, 'm_' + ''.join(c if c.isalnum() else '_' for c in fname) + '.npz')
     if os.path.exists(key):
         d = np.load(key); return d['F'], d['a']
-    rgb = np.asarray(Image.open(os.path.join(SRC, fname)).convert('RGB'), np.float32) / 255
+    rgb = np.asarray(Image.open(fuente('BORDES/' + fname)).convert('RGB'), np.float32) / 255
     F, a, _ = BM.matte(rgb)
     np.savez_compressed(key, F=F.astype(np.float16), a=a.astype(np.float16))
     return F, a

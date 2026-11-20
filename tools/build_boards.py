@@ -11,7 +11,7 @@ from PIL import Image
 from scipy import ndimage
 sys.path.insert(0, os.path.dirname(__file__))
 import build_papers as BP
-from common import ASSETS, REPO
+from common import ASSETS, REPO, fuente
 
 SCR = os.environ.get('PAPELATOR_TMP', '/tmp')
 N = 'NUEVAS_NUEVAS/'
@@ -74,7 +74,7 @@ if __name__ == '__main__':
             # ondas en vertical: se gira para que el paso de la onda quede en filas, como en los demás
             src = fname[4:]
             tmp = os.path.join(SCR, pid + '_rot.png')
-            Image.open(os.path.join(REPO, src)).convert('RGB').rotate(90, expand=True).save(tmp)
+            Image.open(fuente(src)).convert('RGB').rotate(90, expand=True).save(tmp)
             fname = tmp
         BP.T = ''
         BP.TRANSLUCENT[pid] = 0.0

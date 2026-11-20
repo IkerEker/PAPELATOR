@@ -9,9 +9,65 @@ Image.MAX_IMAGE_PIXELS = None
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ASSETS = os.path.join(REPO, 'plugin', 'assets')
 
+# ---------------------------------------------------------------- fuentes: SOLO desde la biblioteca común
+# Las fotos ya no viven en este repo. Cada una se lee por id (or:<md5>, tx:…, ab:…) en la Biblioteca de Iker
+# (variable TEXTURAS_ROOT = carpeta Biblioteca, con TEXTURAS/ dentro). `fuentes_id.json` traduce el nombre de
+# siempre (el que citan las listas de los scripts y los JSON del plugin) a su id; el índice da el archivo.
+# Los originales or: se comprueban por md5 la primera vez: si los bytes no son los de siempre, se para.
+_FUENTES = None
+_INDICE = None
+_COMPROBADOS = {}
+
+
+def _raiz():
+    r = os.environ.get('TEXTURAS_ROOT')
+    if not r:
+        raise SystemExit('Falta TEXTURAS_ROOT (carpeta Biblioteca con TEXTURAS/ dentro). Ver CLAUDE.md.')
+    return r
+
+
+def fuente_id(ref):
+    """Nombre de siempre (ruta antigua relativa al repo) o id → id de la biblioteca."""
+    global _FUENTES
+    if ref.split(':', 1)[0] in ('or', 'tx', 'ab', 'gen'):
+        return ref
+    if _FUENTES is None:
+        _FUENTES = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fuentes_id.json'), encoding='utf-8'))
+    clave = os.path.normpath(ref).replace(os.sep, '/')
+    if clave not in _FUENTES:
+        raise SystemExit(f'Fuente sin id en fuentes_id.json: {ref}')
+    return _FUENTES[clave]
+
+
+def fuente(ref):
+    """Ruta en disco de una fuente, leída de la biblioteca por id. Las rutas absolutas (temporales) pasan tal cual."""
+    global _INDICE
+    if os.path.isabs(ref):
+        return ref
+    i = fuente_id(ref)
+    raiz = _raiz()
+    if _INDICE is None:
+        idx = json.load(open(os.path.join(raiz, 'TEXTURAS', 'indice', 'indice.json'), encoding='utf-8'))
+        _INDICE = {a['id']: a for a in idx['assets']}
+    if i not in _INDICE:
+        raise SystemExit(f'{i} ({ref}) no está en el índice de la biblioteca')
+    p = os.path.join(raiz, _INDICE[i]['archivo'])
+    if not os.path.exists(p):
+        raise SystemExit(f'Falta en la biblioteca: {p} ({i}). Monta la biblioteca (TEXTURAS/tools/atlas/montar_biblioteca.py).')
+    if i.startswith('or:') and i not in _COMPROBADOS:
+        import hashlib
+        h = hashlib.md5()
+        with open(p, 'rb') as f:
+            for b in iter(lambda: f.read(1 << 20), b''):
+                h.update(b)
+        if h.hexdigest() != i[3:]:
+            raise SystemExit(f'md5 distinto en la biblioteca: {p} ({i})')
+        _COMPROBADOS[i] = True
+    return p
+
 
 def load(path, mode='RGB'):
-    return np.asarray(Image.open(os.path.join(REPO, path)).convert(mode), dtype=np.float32) / 255.0
+    return np.asarray(Image.open(fuente(path)).convert(mode), dtype=np.float32) / 255.0
 
 
 def save_png(arr, path, mode=None):

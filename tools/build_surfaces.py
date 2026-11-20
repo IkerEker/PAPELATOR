@@ -15,7 +15,7 @@ import numpy as np
 from PIL import Image
 sys.path.insert(0, os.path.dirname(__file__))
 import build_papers as BP
-from common import ASSETS, REPO, load, lum, gblur, autocorr_shift
+from common import ASSETS, REPO, load, lum, gblur, autocorr_shift, fuente
 
 SRC = 'NUEVAS SUPERFICIES/'
 SCR = os.environ.get('PAPELATOR_TMP', '/tmp')
@@ -65,7 +65,7 @@ O = BP.O
 
 def prepare(path, tid, n, pattern):
     """Recorta la foto a un número entero de piezas (si tiene aparejo) para que BP.process cosa en ese periodo."""
-    im = Image.open(os.path.join(REPO, path)).convert('RGB')
+    im = Image.open(fuente(path)).convert('RGB')
     if im.width > 1400: im = im.resize((1254, 1254), Image.LANCZOS)
     W, H = im.size
     if not pattern: return im, W
