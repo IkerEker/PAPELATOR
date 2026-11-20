@@ -16,8 +16,18 @@ Contexto largo: `CONTEXTO.md`. Ficha de texturas: `docs/PAPELATOR_TEXTURAS.md` y
   una versión GPU que no dé idéntico queda apagada hasta que Iker diga sí. Gráficas de Iker: 2 × RTX 4090 (24 GB c/u), 64 GB RAM.
 - El código, las herramientas y las pruebas se quedan en este repo; solo se quitan carpetas de material ya migradas.
 
+## Casa local (orden de Iker, 20-11-2026; texto: TEXTURAS/plugins/ORDEN_CARPETA_LOCAL.md)
+- El plugin vive en C:\Users\ikerg\Biblioteca\plugins\papelator\ (git local, sin GitHub). Única carpeta conectada: Biblioteca.
+- Copia de seguridad: git bundle --all en Biblioteca\plugins\_respaldos\ tras cada sesión (guardar 3).
+- Material SOLO por id desde Biblioteca\TEXTURAS (buscar.py, método de la ORDEN 1); nada repetido dentro del plugin.
+  Lo nuevo → «PEDIDO PARA LA BIBLIOTECA».
+- No tocar otros plugins, TEXTURAS, ACIDBITE, originales ni _fuentes. Borrar solo con permiso de Iker.
+- Prueba exacta antes y después de cada cambio. El plugin construido funciona solo, sin Claude ni internet.
+- Sin conversión de finales de línea (`.gitattributes: * -text`): los JSON del plugin tienen que conservar sus bytes.
+
 ## Prueba exacta de PAPELATOR
-1. `python3 tools/test/verificar_assets.py` → «822 PNG comprobados, 0 distintos» y los 6 JSON con su md5.
+1. `python3 tools/test/verificar_assets.py` → «822 PNG comprobados, 0 distintos» y los 6 JSON con su md5
+   (sin Python, en Windows: `tools\test\verificar_assets.ps1` → «828 archivos … 0 distintos»).
 2. `python3 tools/verificar_fuentes.py` → todas las fuentes se leen de la biblioteca con su md5 de siempre.
 3. Si algo se regenera o cambia el motor: `python3 tools/test/referencia/comprobar.py` → 60 de 60 renders idénticos.
 4. Velocidad: `tools/bench/` (LEEME.md). Banco en Photoshop: menú del panel ☰ › «Banco de pruebas (velocidad)…».

@@ -1,0 +1,2 @@
+# Sin conversión de finales de línea: los JSON y PNG del plugin tienen que conservar sus bytes (prueba exacta).
+* -text
