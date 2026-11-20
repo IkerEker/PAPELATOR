@@ -970,12 +970,29 @@ function attach(root, arg) {
 }
 try { if (typeof window !== 'undefined') window.addEventListener('resize', fitHeights); } catch (e) { /* sin evento */ }
 setInterval(fitHeights, 400);
+// =============================================================== banco de pruebas (menú del panel)
+async function runBanco() {
+  if (busy) { setStatus('Espera a que termine lo que está haciendo.', true); return; }
+  busy = true;
+  try {
+    await init();
+    const { bancoPS } = require('./src/banco_ps.js');
+    const t0 = Date.now();
+    const r = await bancoPS({ ps, uxp, imaging, engine, assetsBase: assets, createLayer, putFull, readComposite, setStatus, tick,
+      version: (() => { try { return require('./manifest.json').version; } catch (e) { return '?'; } })() });
+    setStatus('Banco de pruebas hecho (' + Math.round((Date.now() - t0) / 1000) + ' s)' + (r.donde ? ': ' + r.donde : '') + (r.out.errores.length ? ' · ' + r.out.errores.length + ' avisos' : ''), r.out.errores.length ? true : false);
+  } catch (e) { setStatus('Banco de pruebas: ' + ((e && e.message) || e), true); }
+  finally { busy = false; }
+}
 uxp.entrypoints.setup({
   panels: {
     papelator: { show(arg) {
       attach(appRoot, arg); showTab(ui.tab || 'simple');
       if (!builtSimple) { builtSimple = builtPro = true; init().then(() => { buildSimple(); buildPro(); updateThumbs(); }).catch(e => setStatus('No se pudieron cargar las texturas: ' + e.message, true)); }
-    } }
+    },
+    // menú del panel (☰): banco de pruebas de velocidad (no cambia nada del uso normal)
+    menuItems: [{ id: 'banco', label: 'Banco de pruebas (velocidad)…' }],
+    invokeMenu(id) { if (id === 'banco') runBanco(); } }
   }
 });
 try {
