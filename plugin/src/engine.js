@@ -59,11 +59,21 @@ function boxBlur(a, w, h, r, tmp) {
     for (let i = -r; i <= r; i++) acc += a[row + clamp(i, 0, w - 1)];
     for (let x = 0; x < w; x++) { tmp[row + x] = acc * inv; const xi = x + r + 1, xo = x - r; acc += a[row + (xi < w ? xi : w - 1)] - a[row + (xo > 0 ? xo : 0)]; }
   }
-  for (let x = 0; x < w; x++) {
-    let acc = 0;
-    for (let i = -r; i <= r; i++) acc += tmp[clamp(i, 0, h - 1) * w + x];
-    for (let y = 0; y < h; y++) { a[y * w + x] = acc * inv; const yi = y + r + 1, yo = y - r; acc += tmp[(yi < h ? yi : h - 1) * w + x] - tmp[(yo > 0 ? yo : 0) * w + x]; }
+  // pasada vertical por filas (no por columnas): las mismas sumas, en el mismo orden y en doble precisión que
+  // antes (un acumulador por columna), pero leyendo la memoria seguida → mismo resultado bit a bit, mucho más rápido
+  const acc = colAcc(w);
+  for (let i = -r; i <= r; i++) { const row = clamp(i, 0, h - 1) * w; for (let x = 0; x < w; x++) acc[x] += tmp[row + x]; }
+  for (let y = 0; y < h; y++) {
+    const row = y * w, ri = (y + r + 1 < h ? y + r + 1 : h - 1) * w, ro = (y - r > 0 ? y - r : 0) * w;
+    for (let x = 0; x < w; x++) { a[row + x] = acc[x] * inv; acc[x] += tmp[ri + x] - tmp[ro + x]; }
   }
+}
+let _colAcc = null;
+function colAcc(w) {
+  if (!_colAcc || _colAcc.length < w) _colAcc = new Float64Array(w);
+  const v = _colAcc.length === w ? _colAcc : _colAcc.subarray(0, w);
+  v.fill(0);
+  return v;
 }
 function gaussBlur(a, w, h, sigma, tmp) {
   if (sigma < 0.4) return;
@@ -209,10 +219,19 @@ async function genPaper(S, st, assets, B) {
 }
 
 // ================================================================ RUIDO 2D (sin búfer)
+// Las 4 esquinas de la celda se recuerdan (una celda por hueco, 8 huecos según la semilla): los píxeles vecinos caen
+// en la misma celda y no hace falta volver a calcular los 4 hash. Mismos números exactos que sin recordar.
+const VN_K = new Float64Array(8 * 3).fill(NaN), VN_V = new Float64Array(8 * 4);
 function vnoise(x, y, seed) {
   const ix = Math.floor(x), iy = Math.floor(y); let fx = x - ix, fy = y - iy;
   fx = fx * fx * (3 - 2 * fx); fy = fy * fy * (3 - 2 * fy);
-  const a = hashi(ix, iy, seed), b = hashi(ix + 1, iy, seed), c = hashi(ix, iy + 1, seed), d = hashi(ix + 1, iy + 1, seed);
+  const s = (seed & 7), k = s * 3, v = s * 4;
+  let a, b, c, d;
+  if (VN_K[k] === ix && VN_K[k + 1] === iy && VN_K[k + 2] === seed) { a = VN_V[v]; b = VN_V[v + 1]; c = VN_V[v + 2]; d = VN_V[v + 3]; }
+  else {
+    a = hashi(ix, iy, seed); b = hashi(ix + 1, iy, seed); c = hashi(ix, iy + 1, seed); d = hashi(ix + 1, iy + 1, seed);
+    VN_K[k] = ix; VN_K[k + 1] = iy; VN_K[k + 2] = seed; VN_V[v] = a; VN_V[v + 1] = b; VN_V[v + 2] = c; VN_V[v + 3] = d;
+  }
   return (a + (b - a) * fx) * (1 - fy) + (c + (d - c) * fx) * fy;
 }
 // campo suave evaluado en una rejilla gruesa (cada `step` px) e interpolado: el ruido de baja frecuencia no
